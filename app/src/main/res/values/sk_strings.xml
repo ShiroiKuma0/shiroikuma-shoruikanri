@@ -102,4 +102,19 @@
     <string name="sk_ui_grid_text_show">Show file name</string>
     <string name="sk_grid_style_title">Grid style (this folder)</string>
     <string name="sk_grid_style_reset">Reset to defaults</string>
+
+    <!-- Separators -->
+    <string name="sk_ui_subgroup_separators">Separators</string>
+    <string name="sk_ui_separator_thickness">Thickness</string>
+    <string name="sk_ui_separator_color">Color</string>
+    <string name="sk_ui_separator_color_format">%s color</string>
+    <string name="sk_separator_style_title">Separator (this folder, this view)</string>
+
+    <!-- Open with -->
+    <string name="sk_open_with_title_format">Open with (%s)</string>
+    <string name="sk_open_with_set_default">Always use for %s</string>
+    <string name="sk_open_with_open_as">Open as…</string>
+    <string name="sk_open_with_clear_default">Forget default</string>
+    <string name="sk_open_with_no_apps">No apps can open this type</string>
+    <string name="sk_open_with_default_suffix">" (default)"</string>
 </resources>

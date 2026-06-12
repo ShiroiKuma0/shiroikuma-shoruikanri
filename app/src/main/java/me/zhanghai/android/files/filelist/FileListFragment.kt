@@ -93,6 +93,10 @@ import me.zhanghai.android.files.provider.archive.isArchivePath
 import me.zhanghai.android.files.provider.linux.isLinuxPath
 import me.zhanghai.android.files.settings.Settings
 import me.zhanghai.android.files.skui.SkGridStyleSheet
+import me.zhanghai.android.files.skui.SkOpenWith
+import me.zhanghai.android.files.skui.SkOpenWithDialog
+import me.zhanghai.android.files.skui.SkSeparatorDecoration
+import me.zhanghai.android.files.skui.SkSeparators
 import me.zhanghai.android.files.skui.SkThemeSlot
 import me.zhanghai.android.files.skui.SkUi
 import me.zhanghai.android.files.skui.SkUiActivity
@@ -200,6 +204,9 @@ class FileListFragment : Fragment(), BreadcrumbLayout.Listener, FileListAdapter.
     // Owned and persisted by FileListActivity with the tab set.
     private var skTabViewType: FileViewType? = null
 
+    // 白い熊 fork: separator lines between files (global + per-folder, per view).
+    private val skSeparatorDecoration = SkSeparatorDecoration()
+
     private val effectiveViewType: FileViewType
         get() = skTabViewType ?: viewModel.viewType
 
@@ -303,6 +310,8 @@ class FileListFragment : Fragment(), BreadcrumbLayout.Listener, FileListAdapter.
         binding.recyclerView.layoutManager = layoutManager
         adapter = FileListAdapter(this)
         binding.recyclerView.adapter = adapter
+        // 白い熊 fork: configurable separator lines between files.
+        binding.recyclerView.addItemDecoration(skSeparatorDecoration)
         val fastScroller = ThemedFastScroller.create(binding.recyclerView)
         binding.recyclerView.setOnApplyWindowInsetsListener(
             ScrollingViewOnApplyWindowInsetsListener(binding.recyclerView, fastScroller)
@@ -529,7 +538,7 @@ class FileListFragment : Fragment(), BreadcrumbLayout.Listener, FileListAdapter.
         binding.skGridStyleButton.imageTintList =
             ColorStateList.valueOf(skColor(SkThemeSlot.TOOLBAR_ICONS))
         binding.skGridStyleButton.setOnClickListener { showSkGridStyleSheet() }
-        binding.skGridStyleButton.isVisible = effectiveViewType == FileViewType.GRID
+        binding.skGridStyleButton.isVisible = true
         refreshSkGridStyle()
         updateSkTabStrip()
     }
@@ -791,7 +800,7 @@ class FileListFragment : Fragment(), BreadcrumbLayout.Listener, FileListAdapter.
     private fun onCurrentPathChanged(path: Path) {
         updateOverlayToolbar()
         updateBottomToolbar()
-        // 白い熊 fork: the new folder may carry its own grid style.
+        // 白い熊 fork: the new folder may carry its own grid/separator style.
         refreshSkGridStyle()
         if (effectiveViewType == FileViewType.GRID) {
             updateSpanCount()
@@ -879,21 +888,29 @@ class FileListFragment : Fragment(), BreadcrumbLayout.Listener, FileListAdapter.
         updateSpanCount()
         adapter.viewType = effectiveViewType
         updateViewSortMenuItems()
-        binding.skGridStyleButton.isVisible = effectiveViewType == FileViewType.GRID
     }
 
     // 白い熊 fork: resolve the current folder's grid style (global defaults +
-    // per-folder override) for the adapter and the span count.
+    // per-folder override) for the adapter and the span count, plus the
+    // separator decoration for the current view.
     private fun refreshSkGridStyle() {
-        adapter.skGridStyle =
-            skEffectiveGridStyle(if (viewModel.hasTrail) viewModel.currentPath else null)
+        val path = if (viewModel.hasTrail) viewModel.currentPath else null
+        adapter.skGridStyle = skEffectiveGridStyle(path)
+        skSeparatorDecoration.style = if (effectiveViewType == FileViewType.GRID) {
+            null
+        } else {
+            SkSeparators.effective(path, effectiveViewType)
+        }
+        if (view != null) {
+            binding.recyclerView.invalidateItemDecorations()
+        }
     }
 
     private fun showSkGridStyleSheet() {
         if (!viewModel.hasTrail) {
             return
         }
-        SkGridStyleSheet(requireActivity(), viewModel.currentPath) {
+        SkGridStyleSheet(requireActivity(), viewModel.currentPath, effectiveViewType) {
             refreshSkGridStyle()
             updateSpanCount()
             adapter.notifyDataSetChanged()
@@ -1501,6 +1518,12 @@ class FileListFragment : Fragment(), BreadcrumbLayout.Listener, FileListAdapter.
     }
 
     private fun openApk(file: FileItem) {
+        // 白い熊 fork: a default remembered in our open-with dialog takes precedence
+        // over the install/view handling.
+        if (SkOpenWith.getDefault(file.mimeType) != null) {
+            openFileWithIntent(file, false)
+            return
+        }
         if (!file.isListable) {
             installApk(file)
             return
@@ -1541,23 +1564,33 @@ class FileListFragment : Fragment(), BreadcrumbLayout.Listener, FileListAdapter.
         if (path.isArchivePath) {
             FileJobService.open(path, mimeType, withChooser, requireContext())
         } else {
+            // 白い熊 fork: our own open-with dialog (app list + set-as-default +
+            // open-as-type) instead of the system chooser.
+            if (withChooser) {
+                SkOpenWithDialog(requireActivity(), path, mimeType)
+                return
+            }
+            // 白い熊 fork: a default remembered in our open-with dialog wins.
+            SkOpenWith.getDefault(mimeType)?.let { component ->
+                val intent = path.fileProviderUri.createViewIntent(mimeType)
+                    .addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
+                    .apply {
+                        extraPath = path
+                        maybeAddImageViewerActivityExtras(this, path, mimeType)
+                    }
+                    .setComponent(component)
+                if (intent.resolveActivity(requireContext().packageManager) != null) {
+                    startActivitySafe(intent)
+                    return
+                }
+                // The app is gone; forget the default and fall through.
+                SkOpenWith.clearDefault(mimeType)
+            }
             val intent = path.fileProviderUri.createViewIntent(mimeType)
                 .addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
                 .apply {
                     extraPath = path
                     maybeAddImageViewerActivityExtras(this, path, mimeType)
-                }
-                .let {
-                    if (withChooser) {
-                        it.withChooser(
-                            EditFileActivity::class.createIntent()
-                                .putArgs(EditFileActivity.Args(path, mimeType)),
-                            OpenFileAsDialogActivity::class.createIntent()
-                                .putArgs(OpenFileAsDialogFragment.Args(path))
-                        )
-                    } else {
-                        it
-                    }
                 }
             startActivitySafe(intent)
         }

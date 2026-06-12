@@ -102,4 +102,19 @@
     <string name="sk_ui_grid_text_show">ファイル名を表示</string>
     <string name="sk_grid_style_title">グリッドスタイル（このフォルダ）</string>
     <string name="sk_grid_style_reset">デフォルトに戻す</string>
+
+    <!-- Separators -->
+    <string name="sk_ui_subgroup_separators">区切り線</string>
+    <string name="sk_ui_separator_thickness">太さ</string>
+    <string name="sk_ui_separator_color">色</string>
+    <string name="sk_ui_separator_color_format">「%s」の色</string>
+    <string name="sk_separator_style_title">区切り線（このフォルダ・この表示）</string>
+
+    <!-- Open with -->
+    <string name="sk_open_with_title_format">アプリで開く（%s）</string>
+    <string name="sk_open_with_set_default">%s では常にこのアプリを使用</string>
+    <string name="sk_open_with_open_as">形式を指定して開く…</string>
+    <string name="sk_open_with_clear_default">デフォルトを解除</string>
+    <string name="sk_open_with_no_apps">この形式を開けるアプリがありません</string>
+    <string name="sk_open_with_default_suffix">"（デフォルト）"</string>
 </resources>
