@@ -89,4 +89,17 @@
     <string name="sk_ui_dp_format">%d dp</string>
     <string name="sk_ui_preview_file_name">白い熊相撲道.pdf</string>
     <string name="sk_ui_preview_file_description">2026-06-12 14:47, 1.2 MB</string>
+
+    <!-- Grid view -->
+    <string name="sk_ui_subgroup_grid">Grid view</string>
+    <string name="sk_ui_grid_text">Grid text</string>
+    <string name="sk_ui_grid_image_width">Image width</string>
+    <string name="sk_ui_grid_image_height">Image height</string>
+    <string name="sk_ui_grid_padding_h">Horizontal padding</string>
+    <string name="sk_ui_grid_padding_v">Vertical padding</string>
+    <string name="sk_ui_grid_text_gap">Text gap</string>
+    <string name="sk_ui_grid_text_overlay">Text over image</string>
+    <string name="sk_ui_grid_text_show">Show file name</string>
+    <string name="sk_grid_style_title">Grid style (this folder)</string>
+    <string name="sk_grid_style_reset">Reset to defaults</string>
 </resources>
