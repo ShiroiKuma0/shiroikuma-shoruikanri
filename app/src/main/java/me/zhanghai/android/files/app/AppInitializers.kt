@@ -43,9 +43,6 @@ val appInitializers = listOf(
 )
 
 private fun initializeFirebase() {
-//#ifdef NONFREE
-    me.zhanghai.android.files.nonfree.FirebaseInitializer.initialize()
-//#endif
 }
 
 private fun disableHiddenApiChecks() {
