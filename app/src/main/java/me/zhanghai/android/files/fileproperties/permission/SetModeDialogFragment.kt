@@ -10,7 +10,7 @@ import android.os.Bundle
 import androidx.appcompat.app.AppCompatDialogFragment
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
-import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import me.zhanghai.android.files.skui.SkMaterialAlertDialogBuilder
 import kotlinx.parcelize.Parcelize
 import me.zhanghai.android.files.R
 import me.zhanghai.android.files.compat.ListFormatterCompat
@@ -42,7 +42,7 @@ class SetModeDialogFragment : AppCompatDialogFragment() {
     private lateinit var specialAdapter: ModeBitListAdapter
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog =
-        MaterialAlertDialogBuilder(requireContext(), theme)
+        SkMaterialAlertDialogBuilder(requireContext(), theme)
             .setTitle(R.string.file_properties_permission_set_mode_title)
             .apply {
                 binding = SetModeDialogBinding.inflate(context.layoutInflater)

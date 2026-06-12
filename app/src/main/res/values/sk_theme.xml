@@ -20,6 +20,20 @@
         <item name="colorSurface">@color/sk_black</item>
         <item name="colorOnSurface">@color/sk_yellow</item>
         <item name="colorOnBackground">@color/sk_yellow</item>
+        <!-- The M3 surface-container roles too — dialogs and other elevated
+             surfaces read these instead of colorSurface under Material 3. -->
+        <item name="colorSurfaceContainerLowest">@color/sk_black</item>
+        <item name="colorSurfaceContainerLow">@color/sk_black</item>
+        <item name="colorSurfaceContainer">@color/sk_black</item>
+        <item name="colorSurfaceContainerHigh">@color/sk_black</item>
+        <item name="colorSurfaceContainerHighest">@color/sk_black</item>
+        <item name="colorSurfaceBright">@color/sk_black</item>
+        <item name="colorSurfaceDim">@color/sk_black</item>
+        <item name="colorSurfaceVariant">@color/sk_black</item>
+        <item name="colorOnSurfaceVariant">@color/sk_yellow_secondary</item>
+        <!-- Dialog list items (e.g. single-choice lists) follow the text color. -->
+        <item name="textColorAlertDialogListItem">@color/sk_text_primary</item>
+        <item name="android:textColorAlertDialogListItem">@color/sk_text_primary</item>
         <!-- Force the accents to pure #FFFF00 everywhere (the stock theme color
              would otherwise contribute material yellow #FFEB3B to ripples,
              buttons, switches and dialogs). -->
@@ -47,6 +61,14 @@
         <item name="android:popupMenuStyle">@style/Widget.Sk.PopupMenu</item>
         <item name="listPopupWindowStyle">@style/Widget.Sk.ListPopupWindow</item>
         <item name="actionOverflowMenuStyle">@style/Widget.Sk.PopupMenu.Overflow</item>
+        <!-- AppCompat-built dialogs (e.g. preference dialogs) get the bordered
+             background via their window; Material dialogs get it from
+             SkMaterialAlertDialogBuilder. -->
+        <item name="alertDialogTheme">@style/ThemeOverlay.Sk.AlertDialog</item>
+    </style>
+
+    <style name="ThemeOverlay.Sk.AlertDialog" parent="@style/ThemeOverlay.MaterialComponents.Dialog.Alert">
+        <item name="android:windowBackground">@drawable/sk_dialog_background</item>
     </style>
 
     <style name="Widget.Sk.PopupMenu" parent="@style/Widget.MaterialComponents.PopupMenu">

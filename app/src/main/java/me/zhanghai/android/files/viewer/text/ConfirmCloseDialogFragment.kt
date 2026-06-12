@@ -9,7 +9,7 @@ import android.app.Dialog
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatDialogFragment
 import androidx.fragment.app.Fragment
-import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import me.zhanghai.android.files.skui.SkMaterialAlertDialogBuilder
 import me.zhanghai.android.files.R
 import me.zhanghai.android.files.util.show
 
@@ -18,7 +18,7 @@ class ConfirmCloseDialogFragment : AppCompatDialogFragment() {
         get() = requireParentFragment() as Listener
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
-        return MaterialAlertDialogBuilder(requireContext(), theme)
+        return SkMaterialAlertDialogBuilder(requireContext(), theme)
             .setMessage(R.string.text_editor_close_message)
             .setPositiveButton(R.string.keep_editing, null)
             .setNegativeButton(R.string.discard) { _, _ -> listener.finish() }

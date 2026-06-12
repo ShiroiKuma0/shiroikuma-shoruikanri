@@ -10,7 +10,7 @@ import android.content.DialogInterface
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatDialogFragment
 import androidx.fragment.app.Fragment
-import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import me.zhanghai.android.files.skui.SkMaterialAlertDialogBuilder
 import me.zhanghai.android.files.R
 import me.zhanghai.android.files.util.show
 
@@ -19,7 +19,7 @@ class ShowRequestNotificationPermissionRationaleDialogFragment : AppCompatDialog
         get() = requireParentFragment() as Listener
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
-        return MaterialAlertDialogBuilder(requireContext(), theme)
+        return SkMaterialAlertDialogBuilder(requireContext(), theme)
             .setMessage(R.string.notification_permission_rationale_message)
             .setPositiveButton(android.R.string.ok) { _, _ ->
                 listener.onShowRequestNotificationPermissionRationaleResult(true)

@@ -10,7 +10,7 @@ import android.content.DialogInterface
 import android.os.Build
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatDialogFragment
-import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import me.zhanghai.android.files.skui.SkMaterialAlertDialogBuilder
 import me.zhanghai.android.files.R
 import me.zhanghai.android.files.file.asExternalStorageUri
 import me.zhanghai.android.files.provider.document.resolver.ExternalStorageProviderHacks
@@ -21,7 +21,7 @@ import me.zhanghai.android.files.util.startActivitySafe
 
 class AddStorageDialogFragment : AppCompatDialogFragment() {
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog =
-        MaterialAlertDialogBuilder(requireContext(), theme)
+        SkMaterialAlertDialogBuilder(requireContext(), theme)
             .setTitle(R.string.storage_add_storage_title)
             .apply {
                 val items = STORAGE_TYPES.map { getString(it.first) }.toTypedArray<CharSequence>()

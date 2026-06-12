@@ -14,7 +14,6 @@ import android.widget.GridLayout
 import android.widget.LinearLayout
 import android.widget.ScrollView
 import androidx.core.graphics.toColorInt
-import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import me.zhanghai.android.files.R
 
 private val SWATCH_COLORS =
@@ -69,7 +68,7 @@ class SkColorPickerDialog(
             addView(hexEdit)
         }
 
-        MaterialAlertDialogBuilder(activity)
+        SkMaterialAlertDialogBuilder(activity)
             .setView(ScrollView(activity).apply { addView(holder) })
             .setPositiveButton(android.R.string.ok) { _, _ ->
                 parseColor(hexEdit.text.toString())?.let { onResult(it) }

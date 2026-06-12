@@ -12,7 +12,7 @@ import android.view.WindowManager
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatDialogFragment
 import androidx.core.widget.doAfterTextChanged
-import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import me.zhanghai.android.files.skui.SkMaterialAlertDialogBuilder
 import com.google.android.material.textfield.TextInputEditText
 import kotlinx.parcelize.Parcelize
 import me.zhanghai.android.files.R
@@ -34,7 +34,7 @@ class EditExternalStorageShortcutDialogFragment : AppCompatDialogFragment() {
     private lateinit var binding: EditExternalStorageShortcutDialogBinding
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog =
-        MaterialAlertDialogBuilder(requireContext(), theme)
+        SkMaterialAlertDialogBuilder(requireContext(), theme)
             .setTitle(R.string.storage_edit_external_storage_shortcut_title)
             .apply {
                 binding = EditExternalStorageShortcutDialogBinding.inflate(context.layoutInflater)

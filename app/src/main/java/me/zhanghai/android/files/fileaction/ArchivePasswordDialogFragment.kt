@@ -17,7 +17,7 @@ import android.widget.LinearLayout
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatDialogFragment
 import androidx.core.widget.NestedScrollView
-import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import me.zhanghai.android.files.skui.SkMaterialAlertDialogBuilder
 import java8.nio.file.Path
 import kotlinx.parcelize.Parceler
 import kotlinx.parcelize.Parcelize
@@ -60,7 +60,7 @@ class ArchivePasswordDialogFragment : AppCompatDialogFragment() {
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         val context = requireContext()
-        return MaterialAlertDialogBuilder(requireContext(), theme)
+        return SkMaterialAlertDialogBuilder(requireContext(), theme)
             .setTitle(getTitle(context))
             .setMessage(getMessage(args.path.archiveFile.fileName, context))
             .apply {

@@ -9,7 +9,7 @@ import android.app.Dialog
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatDialogFragment
 import androidx.fragment.app.Fragment
-import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import me.zhanghai.android.files.skui.SkMaterialAlertDialogBuilder
 import kotlinx.parcelize.Parcelize
 import me.zhanghai.android.files.R
 import me.zhanghai.android.files.file.FileItem
@@ -26,7 +26,7 @@ class ConfirmReplaceFileDialogFragment : AppCompatDialogFragment() {
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         val file = args.file
-        return MaterialAlertDialogBuilder(requireContext(), theme)
+        return SkMaterialAlertDialogBuilder(requireContext(), theme)
             .setMessage(getString(R.string.file_replace_message_format, file.name))
             .setPositiveButton(android.R.string.ok) { _, _ -> listener.replaceFile(file) }
             .setNegativeButton(android.R.string.cancel, null)

@@ -14,7 +14,7 @@ import android.widget.EditText
 import androidx.annotation.StringRes
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatDialogFragment
-import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import me.zhanghai.android.files.skui.SkMaterialAlertDialogBuilder
 import com.google.android.material.textfield.TextInputLayout
 import me.zhanghai.android.files.databinding.NameDialogBinding
 import me.zhanghai.android.files.databinding.NameDialogNameIncludeBinding
@@ -31,7 +31,7 @@ abstract class NameDialogFragment : AppCompatDialogFragment() {
         get() = requireParentFragment() as Listener
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog =
-        MaterialAlertDialogBuilder(requireContext(), theme)
+        SkMaterialAlertDialogBuilder(requireContext(), theme)
             .setTitle(titleRes)
             .apply {
                 _binding = onInflateBinding(context.layoutInflater)

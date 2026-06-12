@@ -19,7 +19,7 @@ import androidx.annotation.LayoutRes
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatDialogFragment
 import androidx.preference.DialogPreference
-import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import me.zhanghai.android.files.skui.SkMaterialAlertDialogBuilder
 import kotlinx.parcelize.Parcelize
 import me.zhanghai.android.files.util.ParcelableState
 import me.zhanghai.android.files.util.getState
@@ -87,7 +87,7 @@ abstract class MaterialPreferenceDialogFragmentCompat : AppCompatDialogFragment(
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         whichButtonClicked = DialogInterface.BUTTON_NEGATIVE
-        val dialog = MaterialAlertDialogBuilder(requireContext(), theme)
+        val dialog = SkMaterialAlertDialogBuilder(requireContext(), theme)
             .setTitle(dialogTitle)
             .setIcon(dialogIcon)
             .setPositiveButton(positiveButtonText, this)

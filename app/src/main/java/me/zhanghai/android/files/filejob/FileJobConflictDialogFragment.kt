@@ -23,7 +23,7 @@ import androidx.core.widget.doAfterTextChanged
 import androidx.interpolator.view.animation.FastOutSlowInInterpolator
 import coil.dispose
 import coil.load
-import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import me.zhanghai.android.files.skui.SkMaterialAlertDialogBuilder
 import kotlinx.parcelize.Parceler
 import kotlinx.parcelize.Parcelize
 import kotlinx.parcelize.WriteWith
@@ -74,7 +74,7 @@ class FileJobConflictDialogFragment : AppCompatDialogFragment() {
         val message = getMessage(sourceFile, targetFile, args.type, requireContext())
         val isMerge = isMerge(sourceFile, targetFile)
         val positiveButtonRes = if (isMerge) R.string.merge else R.string.replace
-        return MaterialAlertDialogBuilder(requireContext(), theme)
+        return SkMaterialAlertDialogBuilder(requireContext(), theme)
             .setTitle(title)
             .setMessage(message)
             .apply {

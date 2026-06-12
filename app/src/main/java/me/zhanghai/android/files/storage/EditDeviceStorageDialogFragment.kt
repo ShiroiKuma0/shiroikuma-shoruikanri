@@ -10,7 +10,7 @@ import android.content.DialogInterface
 import android.os.Bundle
 import android.view.WindowManager
 import androidx.appcompat.app.AppCompatDialogFragment
-import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import me.zhanghai.android.files.skui.SkMaterialAlertDialogBuilder
 import kotlinx.parcelize.Parcelize
 import me.zhanghai.android.files.R
 import me.zhanghai.android.files.databinding.EditDeviceStorageDialogBinding
@@ -27,7 +27,7 @@ class EditDeviceStorageDialogFragment : AppCompatDialogFragment() {
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         val deviceStorage = args.deviceStorage
-        return MaterialAlertDialogBuilder(requireContext(), theme)
+        return SkMaterialAlertDialogBuilder(requireContext(), theme)
             .setTitle(R.string.storage_edit_device_storage_title)
             .apply {
                 binding = EditDeviceStorageDialogBinding.inflate(context.layoutInflater)
