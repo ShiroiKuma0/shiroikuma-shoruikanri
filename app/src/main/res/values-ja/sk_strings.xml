@@ -5,4 +5,88 @@
     <string name="sk_file_list_action_new_tab">新しいタブ</string>
     <string name="sk_file_list_close_tab">タブを閉じる</string>
     <string name="sk_file_item_action_open_in_new_tab">新しいタブで開く</string>
+
+    <!-- 白い熊 UI page -->
+    <string name="sk_ui_title">白い熊 書類管理 UI</string>
+    <string name="sk_ui_theme_enabled">白い熊テーマ（黒・黄）</string>
+
+    <string name="sk_ui_group_foundation">基盤</string>
+    <string name="sk_ui_group_toolbar">ツールバー</string>
+    <string name="sk_ui_group_breadcrumbs">パンくずリスト</string>
+    <string name="sk_ui_group_file_list">ファイル一覧</string>
+    <string name="sk_ui_group_drawer">ナビゲーションドロワー</string>
+    <string name="sk_ui_group_tabs">タブ</string>
+    <string name="sk_ui_group_bottom_bar">下部バー</string>
+    <string name="sk_ui_group_speed_dial">新規作成ボタン</string>
+
+    <string name="sk_ui_subgroup_text">テキスト</string>
+    <string name="sk_ui_subgroup_icons">アイコン</string>
+    <string name="sk_ui_subgroup_options">オプション</string>
+
+    <string name="sk_ui_background">背景</string>
+    <string name="sk_ui_accent">アクセント</string>
+    <string name="sk_ui_text">テキスト</string>
+    <string name="sk_ui_text_secondary">補助テキスト</string>
+    <string name="sk_ui_toolbar_background">ツールバーの背景</string>
+    <string name="sk_ui_toolbar_title">タイトル</string>
+    <string name="sk_ui_toolbar_subtitle">サブタイトル</string>
+    <string name="sk_ui_toolbar_icons">ツールバーのアイコン</string>
+    <string name="sk_ui_breadcrumb_selected">現在のディレクトリ</string>
+    <string name="sk_ui_breadcrumb_unselected">その他のディレクトリ</string>
+    <string name="sk_ui_breadcrumb_arrows">矢印</string>
+    <string name="sk_ui_file_name">ファイル名</string>
+    <string name="sk_ui_file_description">ファイル詳細</string>
+    <string name="sk_ui_file_icons">ファイルアイコン</string>
+    <string name="sk_ui_drawer_background">ドロワーの背景</string>
+    <string name="sk_ui_drawer_item">ドロワー項目</string>
+    <string name="sk_ui_drawer_icons">ドロワーのアイコン</string>
+    <string name="sk_ui_tab_background">タブバーの背景</string>
+    <string name="sk_ui_tab_selected">選択中のタブ</string>
+    <string name="sk_ui_tab_unselected">その他のタブ</string>
+    <string name="sk_ui_tab_buttons">タブのボタン</string>
+    <string name="sk_ui_bottom_bar_background">下部バーの背景</string>
+    <string name="sk_ui_bottom_bar_text">下部バーのテキスト</string>
+    <string name="sk_ui_bottom_bar_icons">下部バーのアイコン</string>
+    <string name="sk_ui_fab_background">ボタンの背景</string>
+    <string name="sk_ui_fab_icon">ボタンのアイコン</string>
+
+    <!-- Fonts -->
+    <string name="sk_font">フォント</string>
+    <string name="sk_font_weight">太さ</string>
+    <string name="sk_font_size">サイズ</string>
+    <string name="sk_font_size_default">デフォルト</string>
+    <string name="sk_font_size_sp_format">%d sp</string>
+    <string name="sk_font_system_default">システムデフォルト</string>
+    <string name="sk_font_monospace">等幅</string>
+    <string name="sk_font_add">フォントを追加…</string>
+    <string name="sk_font_invalid">使用できないフォントファイルです（.ttf / .otf）</string>
+    <string name="sk_font_sample_text">AaIiMmOoQqWw 012 白い熊相撲道 áÁčČďĎéÉěĚíÍňŇóÓřŘšŠťŤúÚůŮýÝžŽ</string>
+    <string name="sk_font_weight_default">デフォルト</string>
+    <string name="sk_font_weight_thin">極細（100）</string>
+    <string name="sk_font_weight_light">細字（300）</string>
+    <string name="sk_font_weight_regular">標準（400）</string>
+    <string name="sk_font_weight_medium">中字（500）</string>
+    <string name="sk_font_weight_semibold">中太（600）</string>
+    <string name="sk_font_weight_bold">太字（700）</string>
+    <string name="sk_font_weight_black">極太（900）</string>
+
+    <!-- Color picker -->
+    <string name="sk_color_hex_hint">#AARRGGBB</string>
+    <string name="sk_color_default">デフォルト</string>
+
+    <!-- Listing views -->
+    <string name="sk_view_title">表示</string>
+    <string name="sk_view_list">リスト</string>
+    <string name="sk_view_grid">グリッド</string>
+    <string name="sk_view_compact">コンパクト</string>
+    <string name="sk_view_column">カラム</string>
+    <string name="sk_view_detailed">詳細</string>
+    <string name="sk_view_wrapped">折り返し</string>
+
+    <!-- File list appearance -->
+    <string name="sk_ui_file_padding">ファイルの間隔</string>
+    <string name="sk_ui_file_icon_size">アイコンのサイズ</string>
+    <string name="sk_ui_dp_format">%d dp</string>
+    <string name="sk_ui_preview_file_name">白い熊相撲道.pdf</string>
+    <string name="sk_ui_preview_file_description">2026-06-12 14:47, 1.2 MB</string>
 </resources>

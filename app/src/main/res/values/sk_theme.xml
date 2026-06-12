@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!-- 白い熊 fork: the 白い熊 theme — black background, yellow text/icons/borders.
+     Applied as a theme overlay on every activity (see AppActivity) so that even
+     surfaces we don't style at runtime (dialogs, menus, preferences) follow the
+     look. The granular per-element styling on top of this lives in skui/. -->
+<resources>
+
+    <color name="sk_black">#FF000000</color>
+    <!-- Pure yellow, the default theme color of this fork (matches SkUi.PALETTE_YELLOW). -->
+    <color name="sk_yellow">#FFFFFF00</color>
+    <color name="sk_yellow_secondary">#B3FFFF00</color>
+    <color name="sk_yellow_tertiary">#80FFFF00</color>
+    <color name="sk_yellow_hint">#80FFFF00</color>
+    <color name="sk_yellow_divider">#33FFFF00</color>
+
+    <style name="ThemeOverlay.Sk" parent="">
+        <item name="android:windowBackground">@color/sk_black</item>
+        <item name="android:colorBackground">@color/sk_black</item>
+        <item name="colorSurface">@color/sk_black</item>
+        <item name="colorOnSurface">@color/sk_yellow</item>
+        <item name="colorOnBackground">@color/sk_yellow</item>
+        <!-- Force the accents to pure #FFFF00 everywhere (the stock theme color
+             would otherwise contribute material yellow #FFEB3B to ripples,
+             buttons, switches and dialogs). -->
+        <item name="colorPrimary">@color/sk_yellow</item>
+        <item name="colorPrimaryVariant">@color/sk_yellow</item>
+        <item name="colorSecondary">@color/sk_yellow</item>
+        <item name="colorSecondaryVariant">@color/sk_yellow</item>
+        <item name="colorAccent">@color/sk_yellow</item>
+        <item name="colorOnPrimary">@color/sk_black</item>
+        <item name="colorOnSecondary">@color/sk_black</item>
+        <item name="colorControlActivated">@color/sk_yellow</item>
+        <item name="android:textColorPrimary">@color/sk_text_primary</item>
+        <item name="android:textColorSecondary">@color/sk_text_secondary</item>
+        <item name="android:textColorTertiary">@color/sk_yellow_tertiary</item>
+        <item name="android:textColorHint">@color/sk_yellow_hint</item>
+        <item name="colorControlNormal">@color/sk_yellow</item>
+        <item name="android:listDivider">@drawable/sk_list_divider</item>
+        <item name="colorOutline">@color/sk_yellow</item>
+        <!-- No elevation overlay: in dark themes it tints elevated surfaces
+             (menus, dialogs) with colorOnSurface — i.e. see-through yellow. -->
+        <item name="elevationOverlayEnabled">false</item>
+        <!-- Popup menus: solid black with a yellow border. -->
+        <item name="popupMenuBackground">@drawable/sk_popup_background</item>
+        <item name="popupMenuStyle">@style/Widget.Sk.PopupMenu</item>
+        <item name="android:popupMenuStyle">@style/Widget.Sk.PopupMenu</item>
+        <item name="listPopupWindowStyle">@style/Widget.Sk.ListPopupWindow</item>
+        <item name="actionOverflowMenuStyle">@style/Widget.Sk.PopupMenu.Overflow</item>
+    </style>
+
+    <style name="Widget.Sk.PopupMenu" parent="@style/Widget.MaterialComponents.PopupMenu">
+        <item name="android:popupBackground">@drawable/sk_popup_background</item>
+    </style>
+
+    <style name="Widget.Sk.PopupMenu.Overflow" parent="@style/Widget.MaterialComponents.PopupMenu.Overflow">
+        <item name="android:popupBackground">@drawable/sk_popup_background</item>
+    </style>
+
+    <style name="Widget.Sk.ListPopupWindow" parent="@style/Widget.MaterialComponents.PopupMenu.ListPopupWindow">
+        <item name="android:popupBackground">@drawable/sk_popup_background</item>
+    </style>
+</resources>

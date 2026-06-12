@@ -9,6 +9,10 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
+    <me.zhanghai.android.files.skui.SkUiPreference
+        android:key="key_sk_ui"
+        android:title="@string/sk_ui_title" />
+
     <PreferenceCategory android:title="@string/settings_interface_title">
 
         <me.zhanghai.android.files.settings.LocalePreference

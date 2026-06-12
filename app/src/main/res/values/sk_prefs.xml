@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!-- 白い熊 fork: preference keys (do not translate). -->
+<resources>
+    <string name="sk_pref_key_open_tabs" translatable="false">key_sk_open_tabs</string>
+</resources>
