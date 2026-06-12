@@ -8,6 +8,11 @@ apply plugin: 'kotlin-parcelize'
 
 apply from: '../signing.gradle'
 
+// Fork versioning: VERSION_NAME / VERSION_CODE in gradle.properties track upstream,
+// BUILD_NUMBER is our increment (bumped by the buildApk task after every build).
+def forkVersionName = "${project.property('VERSION_NAME')}+${project.property('BUILD_NUMBER')}"
+def forkVersionCode = project.property('VERSION_CODE').toInteger() * 10000 +
+        project.property('BUILD_NUMBER').toInteger()
 
 android {
     namespace 'me.zhanghai.android.files'
@@ -15,13 +20,16 @@ android {
     compileSdk = 36
     ndkVersion '28.1.13356709'
     defaultConfig {
-        applicationId 'me.zhanghai.android.files'
+        applicationId project.property('APP_ID')
         minSdk 23
         // Not supporting foreground service timeout yet.
         //noinspection OldTargetApi
         targetSdk 34
-        versionCode 39
-        versionName '1.7.4'
+        versionCode forkVersionCode
+        versionName forkVersionName
+        ndk {
+            abiFilters 'arm64-v8a'
+        }
         resValue 'string', 'app_version', versionName + ' (' + versionCode + ')'
         buildConfigField 'String', 'FILE_PROVIDIER_AUTHORITY', 'APPLICATION_ID + ".file_provider"'
         resValue 'string', 'app_provider_authority', applicationId + '.app_provider'
@@ -193,4 +201,31 @@ dependencies {
     // Also a dependency of jCIFS-NG.
     implementation 'org.slf4j:slf4j-android:1.7.36'
 
+}
+
+// Fork build: signed release APK -> ~/tmp/shiroikuma-shoruikanri_<version>_arm64-v8a.apk,
+// then bump BUILD_NUMBER in gradle.properties for the next build.
+tasks.register('buildApk') {
+    description = 'Build the signed release APK, copy it to ~/tmp, and bump BUILD_NUMBER.'
+    dependsOn 'assembleRelease'
+    doLast {
+        def apkName = "shiroikuma-shoruikanri_${forkVersionName}_arm64-v8a.apk"
+        def outputDir = layout.buildDirectory.dir('outputs/apk/release').get().asFile
+        def apk = outputDir.listFiles()?.find { it.name.endsWith('.apk') }
+        if (apk == null) {
+            throw new GradleException("No APK found in ${outputDir}")
+        }
+        def targetDir = new File(System.getProperty('user.home'), 'tmp')
+        targetDir.mkdirs()
+        def targetFile = new File(targetDir, apkName)
+        java.nio.file.Files.copy(apk.toPath(), targetFile.toPath(),
+                java.nio.file.StandardCopyOption.REPLACE_EXISTING)
+        println("[1;36m>>> ${targetFile.absolutePath}[0m")
+        println("[1;36m>>> versionCode ${forkVersionCode}[0m")
+        def propsFile = rootProject.file('gradle.properties')
+        def current = project.property('BUILD_NUMBER').toInteger()
+        propsFile.text = propsFile.text.replace(
+                "BUILD_NUMBER=${current}", "BUILD_NUMBER=${current + 1}")
+        println("[1;36m>>> BUILD_NUMBER bumped to ${current + 1}[0m")
+    }
 }
