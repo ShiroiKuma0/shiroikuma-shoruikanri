@@ -7,5 +7,10 @@ package me.zhanghai.android.files.filelist
 
 enum class FileViewType {
     LIST,
-    GRID
+    GRID,
+    // 白い熊 fork: additional listing views.
+    COMPACT,
+    COLUMN,
+    DETAILED,
+    WRAPPED
 }

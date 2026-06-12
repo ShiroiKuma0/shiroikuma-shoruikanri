@@ -29,6 +29,9 @@ import me.zhanghai.android.files.compat.setTextAppearanceCompat
 import me.zhanghai.android.files.compat.use
 import me.zhanghai.android.files.databinding.NavigationDividerItemBinding
 import me.zhanghai.android.files.databinding.NavigationItemBinding
+import me.zhanghai.android.files.skui.SkThemeSlot
+import me.zhanghai.android.files.skui.applySkFontOnly
+import me.zhanghai.android.files.skui.skColor
 import me.zhanghai.android.files.ui.AutoMirrorDrawable
 import me.zhanghai.android.files.ui.SimpleAdapter
 import me.zhanghai.android.files.util.getColorStateListByAttr
@@ -227,11 +230,36 @@ class NavigationListAdapter(
                 val item = getItem(position)!!
                 val binding = (holder as ItemHolder).binding
                 binding.itemLayout.isChecked = item.isChecked(listener)
+                // 白い熊 fork: per-element drawer styling from the UI page.
+                val checkedStates = arrayOf(
+                    intArrayOf(android.R.attr.state_checked), intArrayOf()
+                )
+                binding.titleText.setTextColor(
+                    ColorStateList(
+                        checkedStates,
+                        intArrayOf(
+                            skColor(SkThemeSlot.ACCENT), skColor(SkThemeSlot.DRAWER_ITEM)
+                        )
+                    )
+                )
+                binding.titleText.applySkFontOnly(SkThemeSlot.DRAWER_ITEM)
+                binding.subtitleText.setTextColor(skColor(SkThemeSlot.TEXT_SECONDARY))
+                binding.iconImage.imageTintList =
+                    ColorStateList(
+                        checkedStates,
+                        intArrayOf(
+                            skColor(SkThemeSlot.ACCENT), skColor(SkThemeSlot.DRAWER_ICONS)
+                        )
+                    )
                 if (payloads.isNotEmpty()) {
                     return
                 }
                 binding.itemLayout.setOnClickListener { item.onClick(listener) }
-                binding.itemLayout.setOnLongClickListener { item.onLongClick(listener) }
+                // 白い熊 fork: draggable items (favorites) start a drag on long-press via the
+                // ItemTouchHelper instead; their edit dialog opens on release without movement.
+                binding.itemLayout.setOnLongClickListener {
+                    if (item.isDraggable) false else item.onLongClick(listener)
+                }
                 binding.iconImage.setImageDrawable(item.getIcon(binding.iconImage.context))
                 binding.titleText.text = item.getTitle(binding.titleText.context)
                 binding.subtitleText.text = item.getSubtitle(binding.subtitleText.context)

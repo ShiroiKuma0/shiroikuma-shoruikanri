@@ -30,6 +30,10 @@ abstract class NavigationItem {
 
     open fun onLongClick(listener: Listener): Boolean = false
 
+    // 白い熊 fork: favorites (bookmarks) can be drag-rearranged in the drawer.
+    open val isDraggable: Boolean
+        get() = false
+
     interface Listener {
         val currentPath: Path
         fun navigateTo(path: Path)

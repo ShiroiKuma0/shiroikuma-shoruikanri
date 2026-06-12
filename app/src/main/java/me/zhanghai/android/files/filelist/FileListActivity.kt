@@ -12,23 +12,20 @@ import android.os.Parcelable
 import android.view.KeyEvent
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.contract.ActivityResultContract
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
-import androidx.core.view.isVisible
-import androidx.core.view.updatePadding
 import androidx.fragment.app.commitNow
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.Observer
-import com.google.android.material.tabs.TabLayout
 import java8.nio.file.Path
 import kotlinx.parcelize.Parcelize
 import kotlinx.parcelize.WriteWith
 import me.zhanghai.android.files.R
 import me.zhanghai.android.files.app.AppActivity
-import me.zhanghai.android.files.databinding.SkFileListActivityBinding
-import me.zhanghai.android.files.databinding.SkFileListTabItemBinding
 import me.zhanghai.android.files.file.MimeType
+import me.zhanghai.android.files.navigation.BookmarkDirectories
+import me.zhanghai.android.files.navigation.BookmarkDirectory
 import me.zhanghai.android.files.navigation.NavigationRootMapLiveData
+import me.zhanghai.android.files.settings.ParcelValueSettingLiveData
+import me.zhanghai.android.files.settings.SettingLiveData
 import me.zhanghai.android.files.settings.Settings
 import me.zhanghai.android.files.util.ParcelableParceler
 import me.zhanghai.android.files.util.ParcelableState
@@ -37,16 +34,19 @@ import me.zhanghai.android.files.util.extraPath
 import me.zhanghai.android.files.util.getState
 import me.zhanghai.android.files.util.putArgs
 import me.zhanghai.android.files.util.putState
+import me.zhanghai.android.files.util.showToast
 import me.zhanghai.android.files.util.valueCompat
 
+/**
+ * 白い熊 fork: hosts one full FileListFragment per tab, switched via
+ * FragmentManager attach/detach. The activity owns the tab model; the
+ * folder-style tab bar itself is rendered by the attached fragment between
+ * its toolbar and breadcrumb bar (see SkFolderTabBar).
+ */
 class FileListActivity : AppActivity() {
-    private lateinit var binding: SkFileListActivityBinding
-
     private val tabs = mutableListOf<TabInfo>()
     private var selectedTabIndex = -1
     private var nextTabId = 1
-    // Suppresses TabLayout selection callbacks while we mutate its tabs ourselves.
-    private var isUpdatingTabViews = false
 
     private var observedCurrentPathLiveData: LiveData<Path>? = null
     private val currentPathObserver = Observer<Path> { onCurrentTabPathChanged(it) }
@@ -69,71 +69,46 @@ class FileListActivity : AppActivity() {
     private val currentFragment: FileListFragment?
         get() = tabs.getOrNull(selectedTabIndex)?.let { findTabFragment(it.id) }
 
+    // The items the attached fragment's SkFolderTabBar renders.
+    val skTabItems: List<SkTabItem>
+        get() =
+            if (isInPickMode) {
+                emptyList()
+            } else {
+                tabs.mapIndexed { index, tabInfo ->
+                    SkTabItem(tabInfo.id, getTabTitle(tabInfo.path), index == selectedTabIndex)
+                }
+            }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        binding = SkFileListActivityBinding.inflate(layoutInflater)
-        setContentView(binding.root)
-        ViewCompat.setOnApplyWindowInsetsListener(binding.root) { _, insets ->
-            val systemBarInsets = insets.getInsets(
-                WindowInsetsCompat.Type.systemBars() or WindowInsetsCompat.Type.displayCutout()
-            )
-            binding.tabBarLayout.updatePadding(
-                left = systemBarInsets.left, right = systemBarInsets.right,
-                bottom = systemBarInsets.bottom
-            )
-            insets
-        }
-        // When the tab bar is visible it sits between the fragment and the bottom of the window
-        // and takes over the bottom system bar inset, so don't let the fragment apply it again.
-        ViewCompat.setOnApplyWindowInsetsListener(binding.tabFragmentContainer) { _, insets ->
-            if (binding.tabBarLayout.isVisible) {
-                val bottomInset = insets.getInsets(
-                    WindowInsetsCompat.Type.systemBars() or WindowInsetsCompat.Type.displayCutout()
-                ).bottom
-                insets.inset(0, 0, 0, bottomInset)
-            } else {
-                insets
-            }
-        }
-        binding.tabLayout.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
-            override fun onTabSelected(tab: TabLayout.Tab) {
-                if (isUpdatingTabViews) {
-                    return
-                }
-                selectTab(tab.position)
-            }
-
-            override fun onTabUnselected(tab: TabLayout.Tab) {}
-
-            override fun onTabReselected(tab: TabLayout.Tab) {}
-        })
-        binding.addTabButton.setOnClickListener {
-            openInNewTab(
-                tabs.getOrNull(selectedTabIndex)?.path
-                    ?: Settings.FILE_LIST_DEFAULT_DIRECTORY.valueCompat
-            )
-        }
+        setContentView(R.layout.sk_file_list_activity)
         onBackPressedDispatcher.addCallback(this, closeTabOnBackPressedCallback)
 
         if (savedInstanceState == null) {
-            addTab(FileListFragment.Args(intent), null)
+            // Restore the persisted tab set on a cold start (survives reboots and app
+            // updates); an explicit intent (e.g. a VIEW of a directory) opens on top of it.
+            val persistedState = if (!isInPickMode) openTabsSetting.value else null
+            if (persistedState != null && persistedState.tabs.isNotEmpty()) {
+                restoreTabs(persistedState)
+                if (intent.action != Intent.ACTION_MAIN) {
+                    addTab(FileListFragment.Args(intent), null)
+                }
+            } else {
+                addTab(FileListFragment.Args(intent), null)
+            }
         } else {
             val state = savedInstanceState.getState<State>()
             nextTabId = state.nextTabId
-            isUpdatingTabViews = true
             for (tabState in state.tabs) {
-                val tabInfo = TabInfo(tabState.id, tabState.path)
-                tabs += tabInfo
-                binding.tabLayout.addTab(createTabView(tabInfo), false)
+                tabs += TabInfo(tabState.id, tabState.path)
             }
             selectedTabIndex = state.selectedTabIndex
-            binding.tabLayout.getTabAt(selectedTabIndex)?.select()
-            isUpdatingTabViews = false
             // The tab fragments themselves are restored by the fragment manager, with only the
-            // selected one attached.
+            // selected one attached; it rebinds the tab bar itself when its view is recreated.
             currentFragment?.let { observeCurrentPath(it) }
-            updateTabBar()
+            updateTabState()
         }
     }
 
@@ -159,6 +134,49 @@ class FileListActivity : AppActivity() {
         addTab(FileListFragment.Args(createViewIntent(path)), path)
     }
 
+    // The tab bar's "+" button: duplicate the current location into a new tab.
+    fun openCurrentPathInNewTab() {
+        openInNewTab(
+            tabs.getOrNull(selectedTabIndex)?.path
+                ?: Settings.FILE_LIST_DEFAULT_DIRECTORY.valueCompat
+        )
+    }
+
+    fun selectTabById(id: Int) {
+        selectTab(tabs.indexOfFirst { it.id == id })
+    }
+
+    fun closeTabById(id: Int) {
+        closeTab(tabs.indexOfFirst { it.id == id })
+    }
+
+    // Drag-rearranging the folder tabs.
+    fun moveTabById(id: Int, toIndex: Int) {
+        val fromIndex = tabs.indexOfFirst { it.id == id }
+        if (fromIndex == -1 || toIndex !in tabs.indices || fromIndex == toIndex) {
+            return
+        }
+        val selectedId = tabs.getOrNull(selectedTabIndex)?.id
+        tabs.add(toIndex, tabs.removeAt(fromIndex))
+        selectedTabIndex = tabs.indexOfFirst { it.id == selectedId }
+        updateTabState()
+    }
+
+    // A long-press on a folder tab adds it to the favorites in the drawer.
+    fun addTabToFavorites(id: Int) {
+        val path = tabs.firstOrNull { it.id == id }?.path ?: return
+        BookmarkDirectories.add(BookmarkDirectory(null, path))
+        showToast(R.string.file_add_bookmark_success)
+    }
+
+    // Horizontal swipes in the folder body, wrapping around at both ends.
+    fun selectAdjacentTab(direction: Int) {
+        if (tabs.size < 2) {
+            return
+        }
+        selectTab((selectedTabIndex + direction + tabs.size) % tabs.size)
+    }
+
     private fun addTab(args: FileListFragment.Args, path: Path?) {
         val tabInfo = TabInfo(nextTabId++, path)
         val fragment = FileListFragment().putArgs(args)
@@ -170,11 +188,8 @@ class FileListActivity : AppActivity() {
         }
         tabs += tabInfo
         selectedTabIndex = tabs.lastIndex
-        isUpdatingTabViews = true
-        binding.tabLayout.addTab(createTabView(tabInfo), true)
-        isUpdatingTabViews = false
         observeCurrentPath(fragment)
-        updateTabBar()
+        updateTabState()
     }
 
     private fun selectTab(index: Int) {
@@ -189,14 +204,8 @@ class FileListActivity : AppActivity() {
             oldFragment?.let { detach(it) }
             attach(fragment)
         }
-        isUpdatingTabViews = true
-        binding.tabLayout.getTabAt(index)?.select()
-        isUpdatingTabViews = false
         observeCurrentPath(fragment)
-    }
-
-    private fun closeTab(tabInfo: TabInfo) {
-        closeTab(tabs.indexOf(tabInfo))
+        updateTabState()
     }
 
     private fun closeTab(index: Int) {
@@ -212,31 +221,49 @@ class FileListActivity : AppActivity() {
         if (index < selectedTabIndex) {
             selectedTabIndex--
         }
-        isUpdatingTabViews = true
-        binding.tabLayout.removeTabAt(index)
-        isUpdatingTabViews = false
         fragment?.let { supportFragmentManager.commitNow { remove(it) } }
         if (wasSelected) {
             selectedTabIndex = -1
             selectTab(index.coerceAtMost(tabs.lastIndex))
+        } else {
+            updateTabState()
         }
-        updateTabBar()
     }
 
-    private fun createTabView(tabInfo: TabInfo): TabLayout.Tab {
-        val tab = binding.tabLayout.newTab()
-        val itemBinding = SkFileListTabItemBinding.inflate(layoutInflater)
-        itemBinding.nameText.text = getTabTitle(tabInfo.path)
-        itemBinding.closeButton.setOnClickListener { closeTab(tabInfo) }
-        tab.customView = itemBinding.root
-        return tab
+    private fun restoreTabs(state: State) {
+        nextTabId = state.nextTabId
+        val selectedIndex = state.selectedTabIndex.coerceIn(0, state.tabs.lastIndex)
+        supportFragmentManager.commitNow {
+            state.tabs.forEachIndexed { index, tabState ->
+                val path = tabState.path ?: Settings.FILE_LIST_DEFAULT_DIRECTORY.valueCompat
+                val fragment = FileListFragment()
+                    .putArgs(FileListFragment.Args(createViewIntent(path)))
+                add(R.id.tabFragmentContainer, fragment, getTabFragmentTag(tabState.id))
+                if (index != selectedIndex) {
+                    detach(fragment)
+                }
+                tabs += TabInfo(tabState.id, tabState.path)
+            }
+        }
+        selectedTabIndex = selectedIndex
+        currentFragment?.let { observeCurrentPath(it) }
+        updateTabState()
+    }
+
+    private fun persistTabs() {
+        if (isInPickMode) {
+            return
+        }
+        openTabsSetting.putValue(
+            State(tabs.map { TabState(it.id, it.path) }, selectedTabIndex, nextTabId)
+        )
     }
 
     private fun onCurrentTabPathChanged(path: Path) {
         val tabInfo = tabs.getOrNull(selectedTabIndex) ?: return
         tabInfo.path = path
-        val customView = binding.tabLayout.getTabAt(selectedTabIndex)?.customView ?: return
-        SkFileListTabItemBinding.bind(customView).nameText.text = getTabTitle(path)
+        notifyTabStrip()
+        persistTabs()
     }
 
     private fun getTabTitle(path: Path?): String {
@@ -255,13 +282,16 @@ class FileListActivity : AppActivity() {
         observedCurrentPathLiveData = null
     }
 
-    private fun updateTabBar() {
-        val isTabBarVisible = tabs.size > 1
-        if (binding.tabBarLayout.isVisible != isTabBarVisible) {
-            binding.tabBarLayout.isVisible = isTabBarVisible
-            ViewCompat.requestApplyInsets(binding.root)
-        }
+    private fun updateTabState() {
         closeTabOnBackPressedCallback.isEnabled = tabs.size > 1
+        notifyTabStrip()
+        persistTabs()
+    }
+
+    private fun notifyTabStrip() {
+        currentFragment
+            ?.takeIf { it.isAdded && !it.isDetached }
+            ?.updateSkTabStrip()
     }
 
     private fun findTabFragment(id: Int): FileListFragment? =
@@ -289,6 +319,11 @@ class FileListActivity : AppActivity() {
             FileListActivity::class.createIntent()
                 .setAction(Intent.ACTION_VIEW)
                 .apply { extraPath = path }
+
+        // 白い熊 fork: the open-tab set persists across restarts, reboots and app
+        // updates (decode failures after an update just fall back to a fresh tab).
+        private val openTabsSetting: SettingLiveData<State?> =
+            ParcelValueSettingLiveData(R.string.sk_pref_key_open_tabs, null)
     }
 
     class OpenFileContract : ActivityResultContract<List<MimeType>, Path?>() {

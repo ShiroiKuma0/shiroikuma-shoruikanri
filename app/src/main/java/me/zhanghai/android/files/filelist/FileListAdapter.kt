@@ -5,14 +5,19 @@
 
 package me.zhanghai.android.files.filelist
 
+import android.content.Context
+import android.content.res.ColorStateList
 import android.text.TextUtils
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageButton
 import android.widget.ImageView
+import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.appcompat.widget.PopupMenu
 import androidx.core.view.isVisible
+import androidx.core.view.updateLayoutParams
+import androidx.core.view.updatePadding
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import coil.dispose
@@ -32,8 +37,14 @@ import me.zhanghai.android.files.file.formatShort
 import me.zhanghai.android.files.file.iconRes
 import me.zhanghai.android.files.file.isApk
 import me.zhanghai.android.files.provider.archive.isArchivePath
+import me.zhanghai.android.files.provider.common.PosixFileAttributes
 import me.zhanghai.android.files.provider.common.isEncrypted
+import me.zhanghai.android.files.provider.common.toModeString
 import me.zhanghai.android.files.settings.Settings
+import me.zhanghai.android.files.skui.SkThemeSlot
+import me.zhanghai.android.files.skui.SkUi
+import me.zhanghai.android.files.skui.applySkSlot
+import me.zhanghai.android.files.skui.skColor
 import me.zhanghai.android.files.ui.AnimatedListAdapter
 import me.zhanghai.android.files.ui.CheckableForegroundLinearLayout
 import me.zhanghai.android.files.ui.CheckableItemBackground
@@ -174,9 +185,32 @@ class FileListAdapter(
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val viewType = FileViewType.entries[viewType]
         val inflater = parent.context.layoutInflater
+        // 白い熊 fork: the additional listing views reuse the list item layout with
+        // structural tweaks below.
         val holder = when (viewType) {
-            FileViewType.LIST -> ViewHolder(FileItemListBinding.inflate(inflater, parent, false))
             FileViewType.GRID -> ViewHolder(FileItemGridBinding.inflate(inflater, parent, false))
+            else -> ViewHolder(FileItemListBinding.inflate(inflater, parent, false))
+        }
+        val density = parent.resources.displayMetrics.density
+        when (viewType) {
+            FileViewType.COLUMN -> {
+                // File name and datetime on the same line, datetime right-aligned.
+                val textLayout = holder.nameText.parent as LinearLayout
+                textLayout.orientation = LinearLayout.HORIZONTAL
+                holder.nameText.updateLayoutParams<LinearLayout.LayoutParams> {
+                    width = 0
+                    weight = 1f
+                }
+                holder.descriptionText?.updateLayoutParams<LinearLayout.LayoutParams> {
+                    marginStart = (8 * density).toInt()
+                }
+            }
+            FileViewType.WRAPPED -> {
+                // The file name may wrap to a second line.
+                holder.nameText.setSingleLine(false)
+                holder.nameText.maxLines = 2
+            }
+            else -> {}
         }
         return holder.apply {
             itemLayout.apply {
@@ -231,6 +265,35 @@ class FileListAdapter(
                 ellipsize = nameEllipsize
                 isSelected = nameEllipsize == TextUtils.TruncateAt.MARQUEE
             }
+        }
+        // 白い熊 fork: per-element file list styling from the UI page.
+        holder.nameText.applySkSlot(SkThemeSlot.FILE_NAME)
+        holder.descriptionText?.applySkSlot(SkThemeSlot.FILE_DESCRIPTION)
+        holder.iconImage.imageTintList = ColorStateList.valueOf(skColor(SkThemeSlot.FILE_ICONS))
+        // 白い熊 fork: configurable icon size and inter-file padding; the additional
+        // views always ellipsize the file name with trailing dots.
+        if (viewType != FileViewType.GRID) {
+            val density = holder.itemView.resources.displayMetrics.density
+            val iconSizePx = (SkUi.fileIconSizeDp * density).toInt()
+            holder.iconImage.updateLayoutParams {
+                width = iconSizePx
+                height = iconSizePx
+            }
+            holder.thumbnailImage.updateLayoutParams {
+                width = iconSizePx + (16 * density).toInt()
+                height = iconSizePx + (16 * density).toInt()
+            }
+            (holder.iconLayout as? ViewGroup)?.updateLayoutParams {
+                width = iconSizePx + (24 * density).toInt()
+                height = iconSizePx + (24 * density).toInt()
+            }
+            val paddingPx = (SkUi.filePaddingDp * density).toInt()
+            holder.itemLayout.updateLayoutParams { height = ViewGroup.LayoutParams.WRAP_CONTENT }
+            holder.itemLayout.updatePadding(top = paddingPx, bottom = paddingPx)
+        }
+        if (viewType != FileViewType.LIST && viewType != FileViewType.GRID) {
+            holder.nameText.ellipsize = TextUtils.TruncateAt.END
+            holder.nameText.isSelected = false
         }
         if (payloads.isNotEmpty()) {
             return
@@ -318,16 +381,8 @@ class FileListAdapter(
             }
         }
         holder.nameText.text = file.name
-        holder.descriptionText?.text = if (isDirectory) {
-            null
-        } else {
-            val context = holder.descriptionText!!.context
-            val lastModificationTime = attributes.lastModifiedTime().toInstant()
-                .formatShort(context)
-            val size = attributes.fileSize.formatHumanReadable(context)
-            val descriptionSeparator = context.getString(R.string.file_item_description_separator)
-            listOf(lastModificationTime, size).joinToString(descriptionSeparator)
-        }
+        // 白い熊 fork: the description line depends on the listing view.
+        holder.descriptionText?.text = getDescriptionText(file, holder.itemView.context)
         val isArchivePath = path.isArchivePath
         menu.findItem(R.id.action_copy)
             .setTitle(if (isArchivePath) R.string.file_item_action_extract else R.string.copy)
@@ -392,6 +447,41 @@ class FileListAdapter(
                 }
                 else -> false
             }
+        }
+    }
+
+    // 白い熊 fork: per-view description content.
+    private fun getDescriptionText(file: FileItem, context: Context): String? {
+        val attributes = file.attributes
+        val isDirectory = attributes.isDirectory
+        val separator = context.getString(R.string.file_item_description_separator)
+        val lastModificationTime = attributes.lastModifiedTime().toInstant().formatShort(context)
+        return when (viewType) {
+            FileViewType.LIST, FileViewType.GRID ->
+                if (isDirectory) {
+                    null
+                } else {
+                    listOf(lastModificationTime, attributes.fileSize.formatHumanReadable(context))
+                        .joinToString(separator)
+                }
+            FileViewType.COMPACT -> null
+            FileViewType.COLUMN -> lastModificationTime
+            FileViewType.DETAILED -> {
+                val parts = mutableListOf<String>()
+                if (!isDirectory) {
+                    parts += attributes.fileSize.formatInBytes(context)
+                }
+                parts += lastModificationTime
+                (attributes as? PosixFileAttributes)?.mode()?.let { parts += it.toModeString() }
+                parts.joinToString(separator)
+            }
+            FileViewType.WRAPPED ->
+                if (isDirectory) {
+                    lastModificationTime
+                } else {
+                    listOf(lastModificationTime, attributes.fileSize.formatHumanReadable(context))
+                        .joinToString(separator)
+                }
         }
     }
 

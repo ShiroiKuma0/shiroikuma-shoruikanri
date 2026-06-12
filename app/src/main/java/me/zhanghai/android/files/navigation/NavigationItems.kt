@@ -39,6 +39,12 @@ import me.zhanghai.android.files.util.valueCompat
 val navigationItems: List<NavigationItem?>
     get() =
         mutableListOf<NavigationItem?>().apply {
+            // 白い熊 fork: favorites (bookmarks) live on top of the drawer.
+            val bookmarkDirectoryItems = bookmarkDirectoryItems
+            if (bookmarkDirectoryItems.isNotEmpty()) {
+                addAll(bookmarkDirectoryItems)
+                add(null)
+            }
             addAll(storageItems)
             if (Environment::class.supportsExternalStorageManager()) {
                 // Starting with R, we can get read/write access to non-primary storage volumes with
@@ -52,11 +58,6 @@ val navigationItems: List<NavigationItem?>
             if (standardDirectoryItems.isNotEmpty()) {
                 add(null)
                 addAll(standardDirectoryItems)
-            }
-            val bookmarkDirectoryItems = bookmarkDirectoryItems
-            if (bookmarkDirectoryItems.isNotEmpty()) {
-                add(null)
-                addAll(bookmarkDirectoryItems)
             }
             add(null)
             addAll(menuItems)
@@ -351,6 +352,11 @@ private class BookmarkDirectoryItem(
         )
         return true
     }
+
+    // 白い熊 fork: favorites are drag-rearrangeable in the drawer; the edit
+    // dialog opens from a long-press released without movement instead.
+    override val isDraggable: Boolean
+        get() = true
 }
 
 private val menuItems: List<NavigationItem>
