@@ -24,6 +24,7 @@ import androidx.core.view.isVisible
 import me.zhanghai.android.files.R
 import me.zhanghai.android.files.app.AppActivity
 import me.zhanghai.android.files.databinding.SkUiActivityBinding
+import me.zhanghai.android.files.filelist.FileViewType
 import me.zhanghai.android.files.settings.Settings
 import me.zhanghai.android.files.util.showToast
 import me.zhanghai.android.files.util.valueCompat
@@ -151,6 +152,23 @@ class SkUiActivity : AppActivity() {
             SkUi.isGridTextVisible = it
             updateGridPreview()
         }
+        addSubgroup(R.string.sk_ui_subgroup_separators)
+        listOf(
+            FileViewType.LIST to R.string.sk_view_list,
+            FileViewType.COMPACT to R.string.sk_view_compact,
+            FileViewType.COLUMN to R.string.sk_view_column,
+            FileViewType.DETAILED to R.string.sk_view_detailed,
+            FileViewType.WRAPPED to R.string.sk_view_wrapped
+        ).forEach { (separatorViewType, nameRes) ->
+            addSliderRowText(
+                getString(nameRes), 0, 8,
+                SkSeparators.getGlobalThickness(separatorViewType), stepPx * 2
+            ) { SkSeparators.setGlobalThickness(separatorViewType, it) }
+            addCustomColorRow(
+                getString(R.string.sk_ui_separator_color_format, getString(nameRes)),
+                SkSeparators.getGlobalColor(separatorViewType), stepPx * 2
+            ) { SkSeparators.setGlobalColor(separatorViewType, it) }
+        }
         addSubgroup(R.string.sk_ui_subgroup_options)
         addSliderRow(
             R.string.sk_ui_file_padding, 0, 24, SkUi.filePaddingDp, stepPx * 2
@@ -274,9 +292,11 @@ class SkUiActivity : AppActivity() {
             setBackgroundResource(android.R.drawable.list_selector_background)
         }
 
-    private fun makeLabel(@StringRes labelRes: Int): TextView =
+    private fun makeLabel(@StringRes labelRes: Int): TextView = makeLabelText(getString(labelRes))
+
+    private fun makeLabelText(labelText: String): TextView =
         TextView(this).apply {
-            text = getString(labelRes)
+            text = labelText
             textSize = 16f
             setTextColor(skColor(SkThemeSlot.TEXT))
             layoutParams = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f)
@@ -299,6 +319,26 @@ class SkUiActivity : AppActivity() {
         row.setOnClickListener {
             SkColorPickerDialog(this, skColor(slot)) { color ->
                 if (color != null) setSkColor(slot, color) else resetSkColor(slot)
+                buildRows()
+            }
+        }
+        binding.holder.addView(row)
+    }
+
+    // A color row for non-slot values (e.g. the per-view separator colors);
+    // a null pick result reverts to the default.
+    private fun addCustomColorRow(
+        labelText: String,
+        color: Int,
+        indent: Int,
+        onResult: (Int?) -> Unit
+    ) {
+        val row = makeRow(indent)
+        row.addView(makeLabelText(labelText))
+        row.addView(makeSwatch(color))
+        row.setOnClickListener {
+            SkColorPickerDialog(this, color) { newColor ->
+                onResult(newColor)
                 buildRows()
             }
         }
@@ -455,9 +495,18 @@ class SkUiActivity : AppActivity() {
         value: Int,
         indent: Int,
         onChange: (Int) -> Unit
+    ) = addSliderRowText(getString(labelRes), min, max, value, indent, onChange)
+
+    private fun addSliderRowText(
+        labelText: String,
+        min: Int,
+        max: Int,
+        value: Int,
+        indent: Int,
+        onChange: (Int) -> Unit
     ) {
         val row = makeRow(indent)
-        val label = makeLabel(labelRes)
+        val label = makeLabelText(labelText)
         label.layoutParams = LinearLayout.LayoutParams(
             LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT
         )

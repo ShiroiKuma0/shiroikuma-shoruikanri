@@ -1,14 +1,17 @@
 /*
- * 白い熊 fork (skui): the per-folder grid style sheet, opened from the button
- * at the right of the address line. A bottom sheet with live controls — the
- * list stays visible above it and restyles as you slide. Values are stored as
- * a per-folder override, so the folder opens with them in any tab; "Reset"
- * reverts the folder to the global defaults from the UI page.
+ * 白い熊 fork (skui): the per-folder style sheet, opened from the button at
+ * the right of the address line. A bottom sheet with live controls — the list
+ * stays visible above it and restyles as you slide. In grid view it edits the
+ * folder's grid style; in the other views it edits the folder's separator
+ * line for that view. Values are stored as per-folder overrides, so the
+ * folder opens with them in any tab; "Reset" reverts to the global defaults
+ * from the UI page.
  */
 
 package me.zhanghai.android.files.skui
 
 import android.app.Activity
+import android.graphics.drawable.GradientDrawable
 import android.view.Gravity
 import android.view.View
 import android.widget.LinearLayout
@@ -20,10 +23,12 @@ import androidx.appcompat.widget.SwitchCompat
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import java8.nio.file.Path
 import me.zhanghai.android.files.R
+import me.zhanghai.android.files.filelist.FileViewType
 
 class SkGridStyleSheet(
     private val activity: Activity,
     private val path: Path,
+    private val viewType: FileViewType,
     private val onChanged: () -> Unit
 ) {
     private val density = activity.resources.displayMetrics.density
@@ -45,7 +50,13 @@ class SkGridStyleSheet(
 
         holder.addView(
             TextView(activity).apply {
-                text = activity.getString(R.string.sk_grid_style_title)
+                text = activity.getString(
+                    if (viewType == FileViewType.GRID) {
+                        R.string.sk_grid_style_title
+                    } else {
+                        R.string.sk_separator_style_title
+                    }
+                )
                 textSize = 16f
                 setTypeface(typeface, android.graphics.Typeface.BOLD)
                 setTextColor(skColor(SkThemeSlot.ACCENT))
@@ -53,6 +64,38 @@ class SkGridStyleSheet(
             }
         )
 
+        if (viewType == FileViewType.GRID) {
+            addGridControls(holder, dialog)
+        } else {
+            addSeparatorControls(holder, dialog)
+        }
+
+        dialog.setContentView(holder)
+        // Let our bordered background show instead of the sheet's own.
+        (holder.parent as? View)?.setBackgroundColor(android.graphics.Color.TRANSPARENT)
+        dialog.show()
+    }
+
+    // Non-grid views: the separator line under each file, for this folder + view.
+    private fun addSeparatorControls(holder: LinearLayout, dialog: BottomSheetDialog) {
+        addSlider(
+            holder, R.string.sk_ui_separator_thickness, 0, 8,
+            SkSeparators.effectiveFolderThickness(path, viewType)
+        ) { value ->
+            SkSeparators.setFolderThickness(path, viewType, value)
+            onChanged()
+        }
+        addColorRow(
+            holder, R.string.sk_ui_separator_color,
+            SkSeparators.effectiveFolderColor(path, viewType)
+        ) { color ->
+            SkSeparators.setFolderColor(path, viewType, color)
+            onChanged()
+        }
+        addResetRow(holder, dialog) { SkSeparators.clearFolder(path, viewType) }
+    }
+
+    private fun addGridControls(holder: LinearLayout, dialog: BottomSheetDialog) {
         val effective = skEffectiveGridStyle(path)
 
         addSlider(holder, R.string.sk_font_size, 0, 40, effective.textSizeSp, isSp = true) { value ->
@@ -61,7 +104,9 @@ class SkGridStyleSheet(
         addSlider(holder, R.string.sk_ui_grid_image_width, 48, 320, effective.imageWidthDp) { value ->
             update { it.copy(imageWidthDp = value) }
         }
-        addSlider(holder, R.string.sk_ui_grid_image_height, 48, 320, effective.imageHeightDp) { value ->
+        addSlider(
+            holder, R.string.sk_ui_grid_image_height, 48, 320, effective.imageHeightDp
+        ) { value ->
             update { it.copy(imageHeightDp = value) }
         }
         addSlider(holder, R.string.sk_ui_grid_padding_h, 0, 32, effective.paddingHDp) { value ->
@@ -79,7 +124,10 @@ class SkGridStyleSheet(
         addSwitch(holder, R.string.sk_ui_grid_text_show, effective.isTextVisible) { checked ->
             update { it.copy(textVisible = if (checked) 1 else 0) }
         }
+        addResetRow(holder, dialog) { SkGridStyles.set(path, null) }
+    }
 
+    private fun addResetRow(holder: LinearLayout, dialog: BottomSheetDialog, onReset: () -> Unit) {
         holder.addView(
             TextView(activity).apply {
                 text = activity.getString(R.string.sk_grid_style_reset)
@@ -88,17 +136,51 @@ class SkGridStyleSheet(
                 gravity = Gravity.END
                 setPadding(dp(8), dp(12), dp(8), dp(4))
                 setOnClickListener {
-                    SkGridStyles.set(path, null)
+                    onReset()
                     onChanged()
                     dialog.dismiss()
                 }
             }
         )
+    }
 
-        dialog.setContentView(holder)
-        // Let our bordered background show instead of the sheet's own.
-        (holder.parent as? View)?.setBackgroundColor(android.graphics.Color.TRANSPARENT)
-        dialog.show()
+    private fun addColorRow(
+        holder: LinearLayout,
+        @StringRes labelRes: Int,
+        color: Int,
+        onResult: (Int?) -> Unit
+    ) {
+        val row = LinearLayout(activity).apply {
+            orientation = LinearLayout.HORIZONTAL
+            gravity = Gravity.CENTER_VERTICAL
+            setPadding(0, dp(6), 0, dp(6))
+        }
+        row.addView(
+            TextView(activity).apply {
+                text = activity.getString(labelRes)
+                textSize = 14f
+                setTextColor(skColor(SkThemeSlot.TEXT))
+                layoutParams =
+                    LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f)
+            }
+        )
+        val swatch = View(activity).apply {
+            background = GradientDrawable().apply {
+                shape = GradientDrawable.OVAL
+                setColor(color)
+                setStroke(dp(1), 0x66888888)
+            }
+            layoutParams = LinearLayout.LayoutParams(dp(28), dp(28))
+        }
+        row.addView(swatch)
+        row.setOnClickListener {
+            SkColorPickerDialog(activity, color) { newColor ->
+                onResult(newColor)
+                (swatch.background as? GradientDrawable)
+                    ?.setColor(newColor ?: SkSeparators.DEFAULT_COLOR)
+            }
+        }
+        holder.addView(row)
     }
 
     private fun addSlider(

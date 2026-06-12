@@ -27,6 +27,8 @@ import me.zhanghai.android.files.R
 import me.zhanghai.android.files.databinding.ImageViewerFragmentBinding
 import me.zhanghai.android.files.file.fileProviderUri
 import me.zhanghai.android.files.provider.common.delete
+import me.zhanghai.android.files.skui.SkThemeSlot
+import me.zhanghai.android.files.skui.applySkChrome
 import me.zhanghai.android.files.ui.DepthPageTransformer
 import me.zhanghai.android.files.util.ParcelableArgs
 import me.zhanghai.android.files.util.ParcelableListParceler
@@ -86,6 +88,13 @@ class ImageViewerFragment : Fragment(), ConfirmDeleteDialogFragment.Listener {
         val activity = activity as AppCompatActivity
         activity.setSupportActionBar(binding.toolbar)
         activity.supportActionBar!!.setDisplayHomeAsUpEnabled(true)
+        // 白い熊 fork: yellow toolbar chrome (back arrow, title, menu icons).
+        binding.toolbar.post {
+            binding.toolbar.applySkChrome(
+                SkThemeSlot.TOOLBAR_BACKGROUND, SkThemeSlot.TOOLBAR_TITLE,
+                SkThemeSlot.TOOLBAR_SUBTITLE, SkThemeSlot.TOOLBAR_ICONS
+            )
+        }
         // Our app bar will draw the status bar background.
         activity.window.statusBarColor = Color.TRANSPARENT
         binding.appBarLayout.applySystemWindowInsetsToPadding(left = true, top = true, right = true)
