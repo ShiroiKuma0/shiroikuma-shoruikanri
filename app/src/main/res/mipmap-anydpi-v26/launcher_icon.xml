@@ -5,8 +5,9 @@
   ~ All Rights Reserved.
   -->
 
+<!-- 白い熊 fork: black/yellow traced launcher icon (see the _sk drawables). -->
 <adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">
-    <background android:drawable="@color/color_primary_light" />
-    <foreground android:drawable="@mipmap/launcher_icon_foreground" />
-    <monochrome android:drawable="@drawable/launcher_icon_monochrome" />
+    <background android:drawable="@android:color/black" />
+    <foreground android:drawable="@drawable/launcher_icon_foreground_sk" />
+    <monochrome android:drawable="@drawable/launcher_icon_monochrome_sk" />
 </adaptive-icon>
