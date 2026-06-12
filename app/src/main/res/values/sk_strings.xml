@@ -5,4 +5,88 @@
     <string name="sk_file_list_action_new_tab">New tab</string>
     <string name="sk_file_list_close_tab">Close tab</string>
     <string name="sk_file_item_action_open_in_new_tab">Open in new tab</string>
+
+    <!-- 白い熊 UI page -->
+    <string name="sk_ui_title">白い熊 書類管理 UI</string>
+    <string name="sk_ui_theme_enabled">白い熊 theme (black / yellow)</string>
+
+    <string name="sk_ui_group_foundation">Foundation</string>
+    <string name="sk_ui_group_toolbar">Toolbar</string>
+    <string name="sk_ui_group_breadcrumbs">Breadcrumbs</string>
+    <string name="sk_ui_group_file_list">File list</string>
+    <string name="sk_ui_group_drawer">Navigation drawer</string>
+    <string name="sk_ui_group_tabs">Tabs</string>
+    <string name="sk_ui_group_bottom_bar">Bottom bar</string>
+    <string name="sk_ui_group_speed_dial">New-item button</string>
+
+    <string name="sk_ui_subgroup_text">Text</string>
+    <string name="sk_ui_subgroup_icons">Icons</string>
+    <string name="sk_ui_subgroup_options">Options</string>
+
+    <string name="sk_ui_background">Background</string>
+    <string name="sk_ui_accent">Accent</string>
+    <string name="sk_ui_text">Text</string>
+    <string name="sk_ui_text_secondary">Secondary text</string>
+    <string name="sk_ui_toolbar_background">Toolbar background</string>
+    <string name="sk_ui_toolbar_title">Title</string>
+    <string name="sk_ui_toolbar_subtitle">Subtitle</string>
+    <string name="sk_ui_toolbar_icons">Toolbar icons</string>
+    <string name="sk_ui_breadcrumb_selected">Current directory</string>
+    <string name="sk_ui_breadcrumb_unselected">Other directories</string>
+    <string name="sk_ui_breadcrumb_arrows">Arrows</string>
+    <string name="sk_ui_file_name">File name</string>
+    <string name="sk_ui_file_description">File details</string>
+    <string name="sk_ui_file_icons">File icons</string>
+    <string name="sk_ui_drawer_background">Drawer background</string>
+    <string name="sk_ui_drawer_item">Drawer items</string>
+    <string name="sk_ui_drawer_icons">Drawer icons</string>
+    <string name="sk_ui_tab_background">Tab bar background</string>
+    <string name="sk_ui_tab_selected">Selected tab</string>
+    <string name="sk_ui_tab_unselected">Other tabs</string>
+    <string name="sk_ui_tab_buttons">Tab buttons</string>
+    <string name="sk_ui_bottom_bar_background">Bottom bar background</string>
+    <string name="sk_ui_bottom_bar_text">Bottom bar text</string>
+    <string name="sk_ui_bottom_bar_icons">Bottom bar icons</string>
+    <string name="sk_ui_fab_background">Button background</string>
+    <string name="sk_ui_fab_icon">Button icon</string>
+
+    <!-- Fonts -->
+    <string name="sk_font">Font</string>
+    <string name="sk_font_weight">Weight</string>
+    <string name="sk_font_size">Size</string>
+    <string name="sk_font_size_default">Default</string>
+    <string name="sk_font_size_sp_format">%d sp</string>
+    <string name="sk_font_system_default">System default</string>
+    <string name="sk_font_monospace">Monospace</string>
+    <string name="sk_font_add">Add font…</string>
+    <string name="sk_font_invalid">Not a usable font file (.ttf / .otf)</string>
+    <string name="sk_font_sample_text">AaIiMmOoQqWw 012 白い熊相撲道 áÁčČďĎéÉěĚíÍňŇóÓřŘšŠťŤúÚůŮýÝžŽ</string>
+    <string name="sk_font_weight_default">Default</string>
+    <string name="sk_font_weight_thin">Thin (100)</string>
+    <string name="sk_font_weight_light">Light (300)</string>
+    <string name="sk_font_weight_regular">Regular (400)</string>
+    <string name="sk_font_weight_medium">Medium (500)</string>
+    <string name="sk_font_weight_semibold">Semibold (600)</string>
+    <string name="sk_font_weight_bold">Bold (700)</string>
+    <string name="sk_font_weight_black">Black (900)</string>
+
+    <!-- Color picker -->
+    <string name="sk_color_hex_hint">#AARRGGBB</string>
+    <string name="sk_color_default">Default</string>
+
+    <!-- Listing views -->
+    <string name="sk_view_title">View</string>
+    <string name="sk_view_list">List</string>
+    <string name="sk_view_grid">Grid</string>
+    <string name="sk_view_compact">Compact</string>
+    <string name="sk_view_column">Column</string>
+    <string name="sk_view_detailed">Detailed</string>
+    <string name="sk_view_wrapped">Wrapped</string>
+
+    <!-- File list appearance -->
+    <string name="sk_ui_file_padding">File padding</string>
+    <string name="sk_ui_file_icon_size">Icon size</string>
+    <string name="sk_ui_dp_format">%d dp</string>
+    <string name="sk_ui_preview_file_name">白い熊相撲道.pdf</string>
+    <string name="sk_ui_preview_file_description">2026-06-12 14:47, 1.2 MB</string>
 </resources>

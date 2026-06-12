@@ -16,6 +16,7 @@ import me.zhanghai.android.files.ftpserver.ftpServerServiceNotificationTemplate
 import me.zhanghai.android.files.hiddenapi.HiddenApi
 import me.zhanghai.android.files.provider.FileSystemProviders
 import me.zhanghai.android.files.settings.Settings
+import me.zhanghai.android.files.skui.SkUi
 import me.zhanghai.android.files.storage.FtpServerAuthenticator
 import me.zhanghai.android.files.storage.SftpServerAuthenticator
 import me.zhanghai.android.files.storage.SmbServerAuthenticator
@@ -38,6 +39,7 @@ val appInitializers = listOf(
     ::upgradeApp,
     ::initializeLiveDataObjects,
     ::initializeCustomTheme,
+    ::initializeSkUi,
     ::initializeNightMode,
     ::createNotificationChannels
 )
@@ -81,6 +83,11 @@ private fun initializeLiveDataObjects() {
 
 private fun initializeCustomTheme() {
     CustomThemeHelper.initialize(application)
+}
+
+// 白い熊 fork: one-time migrations of the persisted skui slot colors.
+private fun initializeSkUi() {
+    SkUi.migrateToPureYellow()
 }
 
 private fun initializeNightMode() {
