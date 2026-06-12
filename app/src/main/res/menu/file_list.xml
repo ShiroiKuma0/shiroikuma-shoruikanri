@@ -68,6 +68,42 @@
     </item>
 
     <item
+        android:id="@+id/action_sk_view"
+        android:icon="@drawable/sk_view_grid_icon_control_normal_24dp"
+        android:orderInCategory="100"
+        android:title="@string/sk_view_title"
+        app:showAsAction="always">
+        <menu>
+            <group android:checkableBehavior="single">
+                <item
+                    android:id="@+id/action_sk_view_list"
+                    android:checkable="true"
+                    android:title="@string/sk_view_list" />
+                <item
+                    android:id="@+id/action_sk_view_grid"
+                    android:checkable="true"
+                    android:title="@string/sk_view_grid" />
+                <item
+                    android:id="@+id/action_sk_view_compact"
+                    android:checkable="true"
+                    android:title="@string/sk_view_compact" />
+                <item
+                    android:id="@+id/action_sk_view_column"
+                    android:checkable="true"
+                    android:title="@string/sk_view_column" />
+                <item
+                    android:id="@+id/action_sk_view_detailed"
+                    android:checkable="true"
+                    android:title="@string/sk_view_detailed" />
+                <item
+                    android:id="@+id/action_sk_view_wrapped"
+                    android:checkable="true"
+                    android:title="@string/sk_view_wrapped" />
+            </group>
+        </menu>
+    </item>
+
+    <item
         android:id="@+id/action_new_tab"
         android:orderInCategory="100"
         android:title="@string/sk_file_list_action_new_tab"

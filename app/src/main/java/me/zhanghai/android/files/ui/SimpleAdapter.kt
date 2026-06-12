@@ -50,6 +50,11 @@ abstract class SimpleAdapter<T, VH : RecyclerView.ViewHolder> : RecyclerView.Ada
         return item
     }
 
+    fun move(fromPosition: Int, toPosition: Int) {
+        _list.add(toPosition, _list.removeAt(fromPosition))
+        notifyItemMoved(fromPosition, toPosition)
+    }
+
     fun clear() {
         val oldSize = _list.size
         _list.clear()

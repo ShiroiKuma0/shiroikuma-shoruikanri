@@ -16,7 +16,7 @@
         android:layout_height="wrap_content"
         android:background="?colorAppBarSurface"
         android:theme="?actionBarTheme"
-        app:liftOnScroll="true"
+        app:liftOnScroll="false"
         app:liftOnScrollTargetViewId="@id/recyclerView">
 
         <FrameLayout
@@ -46,6 +46,13 @@
                 app:navigationIcon="@drawable/close_icon_control_normal_24dp"
                 app:popupTheme="?actionBarPopupTheme" />
         </FrameLayout>
+
+        <!-- 白い熊 fork: folder-style tab bar between the toolbar and the breadcrumbs. -->
+        <me.zhanghai.android.files.filelist.SkFolderTabBar
+            android:id="@+id/skTabBar"
+            android:layout_width="match_parent"
+            android:layout_height="44dp"
+            android:visibility="gone" />
 
         <me.zhanghai.android.files.filelist.BreadcrumbLayout
             android:id="@+id/breadcrumbLayout"

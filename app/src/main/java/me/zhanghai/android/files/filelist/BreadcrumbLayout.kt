@@ -18,7 +18,9 @@ import androidx.core.view.isVisible
 import java8.nio.file.Path
 import me.zhanghai.android.files.R
 import me.zhanghai.android.files.databinding.BreadcrumbItemBinding
-import me.zhanghai.android.files.util.getColorByAttr
+import me.zhanghai.android.files.skui.SkThemeSlot
+import me.zhanghai.android.files.skui.applySkFontOnly
+import me.zhanghai.android.files.skui.skColor
 import me.zhanghai.android.files.util.getDimensionPixelSize
 import me.zhanghai.android.files.util.getResourceIdByAttr
 import me.zhanghai.android.files.util.layoutInflater
@@ -26,16 +28,19 @@ import me.zhanghai.android.files.util.withTheme
 
 class BreadcrumbLayout : HorizontalScrollView {
     private val tabLayoutHeight = context.getDimensionPixelSize(R.dimen.tab_layout_height)
-    // Using a color state list resource somehow results in red color in dark mode on API 21.
-    // Run `git revert 5bb2fd1` once we no longer support API 21.
-    private val itemColor =
-        ColorStateList(
-            arrayOf(intArrayOf(android.R.attr.state_activated), intArrayOf()),
-            intArrayOf(
-                context.getColorByAttr(android.R.attr.textColorPrimary),
-                context.getColorByAttr(android.R.attr.textColorSecondary)
+
+    // 白い熊 fork: breadcrumb colors and fonts come from the skui slots.
+    private val itemColor: ColorStateList
+        get() =
+            ColorStateList(
+                arrayOf(intArrayOf(android.R.attr.state_activated), intArrayOf()),
+                intArrayOf(
+                    skColor(SkThemeSlot.BREADCRUMB_SELECTED),
+                    skColor(SkThemeSlot.BREADCRUMB_UNSELECTED)
+                )
             )
-        )
+    private val arrowColor: ColorStateList
+        get() = ColorStateList.valueOf(skColor(SkThemeSlot.BREADCRUMB_ARROWS))
     private val popupContext = context.withTheme(
         context.getResourceIdByAttr(androidx.appcompat.R.attr.actionBarPopupTheme)
     )
@@ -166,9 +171,22 @@ class BreadcrumbLayout : HorizontalScrollView {
                 true
             }
             binding.text.setTextColor(itemColor)
-            binding.arrowImage.imageTintList = itemColor
+            binding.arrowImage.imageTintList = arrowColor
+            binding.text.applySkFontOnly(SkThemeSlot.BREADCRUMB_SELECTED)
             binding.root.tag = binding to menu
             itemsLayout.addView(binding.root, 0)
+        }
+    }
+
+    // 白い熊 fork: re-apply skui styling after the UI page changed something.
+    fun applySkStyle() {
+        for (index in 0..<itemsLayout.childCount) {
+            @Suppress("UNCHECKED_CAST")
+            val tag = itemsLayout.getChildAt(index).tag as Pair<BreadcrumbItemBinding, PopupMenu>
+            val binding = tag.first
+            binding.text.setTextColor(itemColor)
+            binding.arrowImage.imageTintList = arrowColor
+            binding.text.applySkFontOnly(SkThemeSlot.BREADCRUMB_SELECTED)
         }
     }
 

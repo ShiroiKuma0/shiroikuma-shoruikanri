@@ -10,6 +10,8 @@ import android.content.ClipData
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.content.res.ColorStateList
+import android.graphics.drawable.ColorDrawable
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -18,8 +20,10 @@ import android.os.Handler
 import android.os.Looper
 import android.os.Parcelable
 import android.text.TextUtils
+import android.view.GestureDetector
 import android.view.KeyCharacterMap
 import android.view.KeyEvent
+import android.view.MotionEvent
 import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuInflater
@@ -27,6 +31,7 @@ import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import android.widget.EditText
+import android.widget.ImageButton
 import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.activity.OnBackPressedCallback
@@ -40,6 +45,7 @@ import androidx.core.content.pm.ShortcutInfoCompat
 import androidx.core.content.pm.ShortcutManagerCompat
 import androidx.core.graphics.drawable.IconCompat
 import androidx.core.view.GravityCompat
+import androidx.core.view.children
 import androidx.core.view.isVisible
 import androidx.core.view.updatePaddingRelative
 import androidx.drawerlayout.widget.DrawerLayout
@@ -84,6 +90,11 @@ import me.zhanghai.android.files.provider.archive.createArchiveRootPath
 import me.zhanghai.android.files.provider.archive.isArchivePath
 import me.zhanghai.android.files.provider.linux.isLinuxPath
 import me.zhanghai.android.files.settings.Settings
+import me.zhanghai.android.files.skui.SkThemeSlot
+import me.zhanghai.android.files.skui.SkUi
+import me.zhanghai.android.files.skui.SkUiActivity
+import me.zhanghai.android.files.skui.applySkChrome
+import me.zhanghai.android.files.skui.skColor
 import me.zhanghai.android.files.terminal.Terminal
 import me.zhanghai.android.files.ui.AppBarLayoutExpandHackListener
 import me.zhanghai.android.files.ui.CoordinatorAppBarLayout
@@ -133,6 +144,7 @@ import me.zhanghai.android.files.util.valueCompat
 import me.zhanghai.android.files.util.viewModels
 import me.zhanghai.android.files.util.withChooser
 import me.zhanghai.android.files.viewer.image.ImageViewerActivity
+import kotlin.math.abs
 import kotlin.math.roundToInt
 
 class FileListFragment : Fragment(), BreadcrumbLayout.Listener, FileListAdapter.Listener,
@@ -176,6 +188,9 @@ class FileListFragment : Fragment(), BreadcrumbLayout.Listener, FileListAdapter.
     // The last visited path, saved in the instance state so that each tab can restore its
     // location after process death (the view model trail itself isn't saved yet).
     private var savedPath: Path? = null
+
+    // 白い熊 fork: the SkUi.generation our styling was last applied for.
+    private var appliedSkUiGeneration = -1L
 
     private lateinit var binding: Binding
 
@@ -242,6 +257,16 @@ class FileListFragment : Fragment(), BreadcrumbLayout.Listener, FileListAdapter.
         val activity = requireActivity() as AppCompatActivity
         activity.setTitle(R.string.file_list_title)
         activity.setSupportActionBar(binding.toolbar)
+        // 白い熊 fork: long-press on the drawer (hamburger) icon opens the 白い熊 UI page.
+        binding.toolbar.post {
+            val navigationIcon = binding.toolbar.navigationIcon
+            binding.toolbar.children
+                .firstOrNull { it is ImageButton && it.drawable === navigationIcon }
+                ?.setOnLongClickListener {
+                    startActivity(SkUiActivity::class.createIntent())
+                    true
+                }
+        }
         overlayActionMode = OverlayToolbarActionMode(binding.overlayToolbar)
         bottomActionMode = PersistentBarLayoutToolbarActionMode(
             binding.persistentBarLayout, binding.bottomBarLayout, binding.bottomToolbar
@@ -269,6 +294,37 @@ class FileListFragment : Fragment(), BreadcrumbLayout.Listener, FileListAdapter.
         binding.recyclerView.setOnApplyWindowInsetsListener(
             ScrollingViewOnApplyWindowInsetsListener(binding.recyclerView, fastScroller)
         )
+        // 白い熊 fork: horizontal swipes in the folder body switch to the adjacent tab,
+        // wrapping around at both ends.
+        binding.recyclerView.addOnItemTouchListener(object :
+            RecyclerView.SimpleOnItemTouchListener() {
+            private val gestureDetector = GestureDetector(
+                requireContext(),
+                object : GestureDetector.SimpleOnGestureListener() {
+                    override fun onFling(
+                        e1: MotionEvent?,
+                        e2: MotionEvent,
+                        velocityX: Float,
+                        velocityY: Float
+                    ): Boolean {
+                        e1 ?: return false
+                        val deltaX = e2.x - e1.x
+                        val minDistance = 64 * resources.displayMetrics.density
+                        if (abs(velocityX) > 2 * abs(velocityY) && abs(deltaX) > minDistance) {
+                            (activity as? FileListActivity)
+                                ?.selectAdjacentTab(if (deltaX < 0) 1 else -1)
+                            return true
+                        }
+                        return false
+                    }
+                }
+            )
+
+            override fun onInterceptTouchEvent(rv: RecyclerView, e: MotionEvent): Boolean {
+                gestureDetector.onTouchEvent(e)
+                return false
+            }
+        })
         binding.speedDialView.inflate(R.menu.file_list_speed_dial)
         binding.speedDialView.setOnActionSelectedListener {
             when (it.id) {
@@ -298,6 +354,27 @@ class FileListFragment : Fragment(), BreadcrumbLayout.Listener, FileListAdapter.
         addOnBackPressedCallback(SpeedDialViewOnBackPressedCallback(binding.speedDialView))
         binding.drawerLayout?.let {
             addOnBackPressedCallback(DrawerLayoutOnBackPressedCallback(it))
+        }
+        // 白い熊 fork: no swipe-to-open for the drawer (it conflicts with the tab-switch
+        // swipe); the drawer opens only from the top-left icon. While open, it unlocks so
+        // that the scrim tap and swipe-to-close still work.
+        binding.drawerLayout?.let { drawerLayout ->
+            drawerLayout.setDrawerLockMode(
+                DrawerLayout.LOCK_MODE_LOCKED_CLOSED, GravityCompat.START
+            )
+            drawerLayout.addDrawerListener(object : DrawerLayout.SimpleDrawerListener() {
+                override fun onDrawerOpened(drawerView: View) {
+                    drawerLayout.setDrawerLockMode(
+                        DrawerLayout.LOCK_MODE_UNLOCKED, GravityCompat.START
+                    )
+                }
+
+                override fun onDrawerClosed(drawerView: View) {
+                    drawerLayout.setDrawerLockMode(
+                        DrawerLayout.LOCK_MODE_LOCKED_CLOSED, GravityCompat.START
+                    )
+                }
+            })
         }
 
         if (!viewModel.hasTrail) {
@@ -394,6 +471,58 @@ class FileListFragment : Fragment(), BreadcrumbLayout.Listener, FileListAdapter.
         Settings.FILE_LIST_SHOW_HIDDEN_FILES.observe(viewLifecycleOwner) {
             onShowHiddenFilesChanged(it)
         }
+
+        applySkUi()
+    }
+
+    // 白い熊 fork: apply the skui slot colors and fonts to this screen's chrome.
+    private fun applySkUi() {
+        appliedSkUiGeneration = SkUi.generation
+        requireActivity().window.setBackgroundDrawable(
+            ColorDrawable(skColor(SkThemeSlot.BACKGROUND))
+        )
+        binding.appBarLayout.setBackgroundColor(skColor(SkThemeSlot.TOOLBAR_BACKGROUND))
+        binding.toolbar.applySkChrome(
+            SkThemeSlot.TOOLBAR_BACKGROUND, SkThemeSlot.TOOLBAR_TITLE,
+            SkThemeSlot.TOOLBAR_SUBTITLE, SkThemeSlot.TOOLBAR_ICONS
+        )
+        binding.overlayToolbar.applySkChrome(
+            SkThemeSlot.TOOLBAR_BACKGROUND, SkThemeSlot.TOOLBAR_TITLE, null,
+            SkThemeSlot.TOOLBAR_ICONS
+        )
+        binding.breadcrumbLayout.applySkStyle()
+        binding.bottomBarLayout.setBackgroundColor(skColor(SkThemeSlot.BOTTOM_BAR_BACKGROUND))
+        binding.bottomToolbar.applySkChrome(
+            SkThemeSlot.BOTTOM_BAR_BACKGROUND, SkThemeSlot.BOTTOM_BAR_TEXT, null,
+            SkThemeSlot.BOTTOM_BAR_ICONS
+        )
+        binding.speedDialView.mainFab.apply {
+            backgroundTintList = ColorStateList.valueOf(skColor(SkThemeSlot.FAB_BACKGROUND))
+            imageTintList = ColorStateList.valueOf(skColor(SkThemeSlot.FAB_ICON))
+        }
+        view?.findViewById<View>(R.id.navigationFragment)
+            ?.setBackgroundColor(skColor(SkThemeSlot.DRAWER_BACKGROUND))
+        updateSkTabStrip()
+    }
+
+    // 白い熊 fork: (re)bind the folder-style tab bar between the toolbar and breadcrumbs.
+    fun updateSkTabStrip() {
+        if (!this::binding.isInitialized) {
+            return
+        }
+        val activity = activity as? FileListActivity
+        val items = activity?.skTabItems ?: emptyList()
+        binding.skTabBar.isVisible = items.size > 1
+        if (activity != null && items.size > 1) {
+            binding.skTabBar.setTabs(
+                items,
+                onSelect = { activity.selectTabById(it) },
+                onClose = { activity.closeTabById(it) },
+                onNew = { activity.openCurrentPathInNewTab() },
+                onReorder = { id, toIndex -> activity.moveTabById(id, toIndex) },
+                onFavorite = { activity.addTabToFavorites(it) }
+            )
+        }
     }
 
     override fun onResume() {
@@ -404,6 +533,12 @@ class FileListFragment : Fragment(), BreadcrumbLayout.Listener, FileListAdapter.
         }
         if (!viewModel.isStorageAccessRequested) {
             ensureNotificationPermission()
+        }
+        // 白い熊 fork: re-apply skui styling after the UI page changed something.
+        if (appliedSkUiGeneration != SkUi.generation) {
+            applySkUi()
+            adapter.notifyDataSetChanged()
+            navigationFragment.refreshSkStyle()
         }
     }
 
@@ -481,12 +616,28 @@ class FileListFragment : Fragment(), BreadcrumbLayout.Listener, FileListAdapter.
                 }
                 true
             }
-            R.id.action_view_list -> {
+            R.id.action_view_list, R.id.action_sk_view_list -> {
                 viewModel.viewType = FileViewType.LIST
                 true
             }
-            R.id.action_view_grid -> {
+            R.id.action_view_grid, R.id.action_sk_view_grid -> {
                 viewModel.viewType = FileViewType.GRID
+                true
+            }
+            R.id.action_sk_view_compact -> {
+                viewModel.viewType = FileViewType.COMPACT
+                true
+            }
+            R.id.action_sk_view_column -> {
+                viewModel.viewType = FileViewType.COLUMN
+                true
+            }
+            R.id.action_sk_view_detailed -> {
+                viewModel.viewType = FileViewType.DETAILED
+                true
+            }
+            R.id.action_sk_view_wrapped -> {
+                viewModel.viewType = FileViewType.WRAPPED
                 true
             }
             R.id.action_sort_by_name -> {
@@ -686,7 +837,9 @@ class FileListFragment : Fragment(), BreadcrumbLayout.Listener, FileListAdapter.
 
     private fun updateSpanCount() {
         layoutManager.spanCount = when (viewModel.viewType) {
-            FileViewType.LIST -> 1
+            FileViewType.LIST, FileViewType.COMPACT, FileViewType.COLUMN,
+            FileViewType.DETAILED -> 1
+            FileViewType.WRAPPED -> 2
             FileViewType.GRID -> {
                 var widthDp = resources.configuration.screenWidthDp
                 val persistentDrawerLayout = binding.persistentDrawerLayout
@@ -714,15 +867,22 @@ class FileListFragment : Fragment(), BreadcrumbLayout.Listener, FileListAdapter.
         }
         val searchViewExpanded = viewModel.isSearchViewExpanded
         menuBinding.viewSortItem.isVisible = !searchViewExpanded
+        menuBinding.skViewItem.isVisible = !searchViewExpanded
         if (searchViewExpanded) {
             return
         }
         val viewType = viewModel.viewType
-        val checkedViewTypeItem = when (viewType) {
-            FileViewType.LIST -> menuBinding.viewListItem
-            FileViewType.GRID -> menuBinding.viewGridItem
+        menuBinding.viewListItem.isChecked = viewType == FileViewType.LIST
+        menuBinding.viewGridItem.isChecked = viewType == FileViewType.GRID
+        val checkedSkViewItem = when (viewType) {
+            FileViewType.LIST -> menuBinding.skViewListItem
+            FileViewType.GRID -> menuBinding.skViewGridItem
+            FileViewType.COMPACT -> menuBinding.skViewCompactItem
+            FileViewType.COLUMN -> menuBinding.skViewColumnItem
+            FileViewType.DETAILED -> menuBinding.skViewDetailedItem
+            FileViewType.WRAPPED -> menuBinding.skViewWrappedItem
         }
-        checkedViewTypeItem.isChecked = true
+        checkedSkViewItem.isChecked = true
         val sortOptions = viewModel.sortOptions
         val checkedSortByItem = when (sortOptions.by) {
             By.NAME -> menuBinding.sortByNameItem
@@ -1711,6 +1871,7 @@ class FileListFragment : Fragment(), BreadcrumbLayout.Listener, FileListAdapter.
         val appBarLayout: CoordinatorAppBarLayout,
         val toolbar: Toolbar,
         val overlayToolbar: Toolbar,
+        val skTabBar: SkFolderTabBar,
         val breadcrumbLayout: BreadcrumbLayout,
         val contentLayout: ViewGroup,
         val progress: ProgressBar,
@@ -1740,6 +1901,7 @@ class FileListFragment : Fragment(), BreadcrumbLayout.Listener, FileListAdapter.
                     bindingRoot, includeBinding.drawerLayout, includeBinding.persistentDrawerLayout,
                     includeBinding.persistentBarLayout, appBarBinding.appBarLayout,
                     appBarBinding.toolbar, appBarBinding.overlayToolbar,
+                    appBarBinding.skTabBar,
                     appBarBinding.breadcrumbLayout, contentBinding.contentLayout,
                     contentBinding.progress, contentBinding.errorText, contentBinding.emptyView,
                     contentBinding.swipeRefreshLayout, contentBinding.recyclerView,
@@ -1763,6 +1925,13 @@ class FileListFragment : Fragment(), BreadcrumbLayout.Listener, FileListAdapter.
         val sortOrderAscendingItem: MenuItem,
         val sortDirectoriesFirstItem: MenuItem,
         val viewSortPathSpecificItem: MenuItem,
+        val skViewItem: MenuItem,
+        val skViewListItem: MenuItem,
+        val skViewGridItem: MenuItem,
+        val skViewCompactItem: MenuItem,
+        val skViewColumnItem: MenuItem,
+        val skViewDetailedItem: MenuItem,
+        val skViewWrappedItem: MenuItem,
         val newTabItem: MenuItem,
         val selectAllItem: MenuItem,
         val showHiddenFilesItem: MenuItem
@@ -1780,6 +1949,13 @@ class FileListFragment : Fragment(), BreadcrumbLayout.Listener, FileListAdapter.
                     menu.findItem(R.id.action_sort_order_ascending),
                     menu.findItem(R.id.action_sort_directories_first),
                     menu.findItem(R.id.action_view_sort_path_specific),
+                    menu.findItem(R.id.action_sk_view),
+                    menu.findItem(R.id.action_sk_view_list),
+                    menu.findItem(R.id.action_sk_view_grid),
+                    menu.findItem(R.id.action_sk_view_compact),
+                    menu.findItem(R.id.action_sk_view_column),
+                    menu.findItem(R.id.action_sk_view_detailed),
+                    menu.findItem(R.id.action_sk_view_wrapped),
                     menu.findItem(R.id.action_new_tab),
                     menu.findItem(R.id.action_select_all),
                     menu.findItem(R.id.action_show_hidden_files)
