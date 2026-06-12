@@ -32,7 +32,7 @@ customizations on top of upstream and rebuild as upstream releases new versions.
 | NONFREE strip | Firebase Analytics/Crashlytics removed (FOSS build) | `app/build.gradle`, `AppInitializers.kt`, `AboutFragment.kt`; `google-services.json` + `nonfree/` deleted |
 | Installed app ID | `shiroikuma.shoruikanri` | `gradle.properties` → `APP_ID`, applied in `app/build.gradle` |
 | Code namespace | `me.zhanghai.android.files` (unchanged from upstream) | `app/build.gradle` |
-| App launcher label | `白い熊 書類管理` | `sk_launcher_name` in `values/strings.xml`, referenced by the manifest `android:label` (in-app `app_name` stays "Material Files") |
+| App label | `白い熊 書類管理` everywhere | `sk_launcher_name` (manifest `android:label`) **and** `app_name` in `values/strings.xml` (locale overrides of `app_name` deleted — re-delete after upstream rebases) |
 | Fork versioning | `VERSION_NAME` / `VERSION_CODE` / `BUILD_NUMBER` | `gradle.properties` + fork logic in `app/build.gradle` |
 | ABI | arm64-v8a only (`ndk.abiFilters`) | `app/build.gradle` |
 | Signing | `shiroikuma-shoruikanri.jks` via gitignored `signing.properties` (upstream's own `signing.gradle` mechanism) | `~/.android-keystores/shiroikuma-shoruikanri.jks`, alias `shoruikanri` |

@@ -7,7 +7,6 @@
 
 <resources>
 
-    <string name="app_name">Material Files</string>
 
     <string name="close">Tanca</string>
     <string name="copy">Copia</string>

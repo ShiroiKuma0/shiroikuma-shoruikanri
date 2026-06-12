@@ -7,7 +7,6 @@
 
 <resources>
 
-    <string name="app_name">Material Files</string>
 
     <string name="close">Schließen</string>
     <string name="copy">Kopieren</string>

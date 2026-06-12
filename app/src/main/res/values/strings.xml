@@ -10,7 +10,7 @@
     <string name="sk_launcher_name" translatable="false">白い熊 書類管理</string>
 
 
-    <string name="app_name">Material Files</string>
+    <string name="app_name" translatable="false">白い熊 書類管理</string>
 
     <string name="close">Close</string>
     <string name="copy">Copy</string>
