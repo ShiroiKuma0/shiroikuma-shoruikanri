@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!-- Fork-added strings (白い熊 書類管理), kept in a separate file to ease upstream rebases. -->
+<resources>
+    <string name="sk_file_list_action_new_tab">New tab</string>
+    <string name="sk_file_list_close_tab">Close tab</string>
+    <string name="sk_file_item_action_open_in_new_tab">Open in new tab</string>
+</resources>

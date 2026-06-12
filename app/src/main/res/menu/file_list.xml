@@ -68,6 +68,12 @@
     </item>
 
     <item
+        android:id="@+id/action_new_tab"
+        android:orderInCategory="100"
+        android:title="@string/sk_file_list_action_new_tab"
+        app:showAsAction="never" />
+
+    <item
         android:id="@+id/action_new_task"
         android:orderInCategory="100"
         android:title="@string/file_list_action_new_task"
