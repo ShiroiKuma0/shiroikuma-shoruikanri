@@ -6,6 +6,9 @@
   -->
 
 <resources>
+    <!-- 白い熊 fork: launcher label only; in-app name stays app_name. -->
+    <string name="sk_launcher_name" translatable="false">白い熊 書類管理</string>
+
 
     <string name="app_name">Material Files</string>
 
