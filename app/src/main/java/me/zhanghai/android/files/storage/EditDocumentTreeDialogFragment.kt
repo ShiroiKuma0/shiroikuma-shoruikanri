@@ -11,7 +11,7 @@ import android.os.Bundle
 import android.view.WindowManager
 import androidx.appcompat.app.AppCompatDialogFragment
 import androidx.core.view.isVisible
-import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import me.zhanghai.android.files.skui.SkMaterialAlertDialogBuilder
 import kotlinx.parcelize.Parcelize
 import me.zhanghai.android.files.R
 import me.zhanghai.android.files.databinding.EditDocumentTreeDialogBinding
@@ -27,7 +27,7 @@ class EditDocumentTreeDialogFragment : AppCompatDialogFragment() {
     private lateinit var binding: EditDocumentTreeDialogBinding
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog =
-        MaterialAlertDialogBuilder(requireContext(), theme)
+        SkMaterialAlertDialogBuilder(requireContext(), theme)
             .setTitle(R.string.storage_edit_document_tree_title)
             .apply {
                 binding = EditDocumentTreeDialogBinding.inflate(context.layoutInflater)

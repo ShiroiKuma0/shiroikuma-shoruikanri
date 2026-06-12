@@ -12,7 +12,6 @@ import android.widget.LinearLayout
 import android.widget.ScrollView
 import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
-import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import me.zhanghai.android.files.R
 
 class SkFontPickerDialog(
@@ -61,7 +60,7 @@ class SkFontPickerDialog(
             onAddFont()
         }
 
-        dialog = MaterialAlertDialogBuilder(activity)
+        dialog = SkMaterialAlertDialogBuilder(activity)
             .setTitle(R.string.sk_font)
             .setView(ScrollView(activity).apply { addView(holder) })
             .setNegativeButton(android.R.string.cancel, null)

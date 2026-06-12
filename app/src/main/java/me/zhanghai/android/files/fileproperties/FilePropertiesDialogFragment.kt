@@ -13,7 +13,7 @@ import android.view.ViewGroup
 import android.view.WindowManager
 import androidx.appcompat.app.AppCompatDialogFragment
 import androidx.fragment.app.Fragment
-import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import me.zhanghai.android.files.skui.SkMaterialAlertDialogBuilder
 import kotlinx.parcelize.Parcelize
 import me.zhanghai.android.files.R
 import me.zhanghai.android.files.databinding.FilePropertiesDialogBinding
@@ -42,7 +42,7 @@ class FilePropertiesDialogFragment : AppCompatDialogFragment() {
     private lateinit var binding: FilePropertiesDialogBinding
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog =
-        MaterialAlertDialogBuilder(requireContext(), theme)
+        SkMaterialAlertDialogBuilder(requireContext(), theme)
             .setTitle(getString(R.string.file_properties_title_format, args.file.name))
             .apply {
                 binding = FilePropertiesDialogBinding.inflate(context.layoutInflater)

@@ -10,7 +10,7 @@ import android.content.DialogInterface
 import android.os.Bundle
 import android.view.WindowManager
 import androidx.appcompat.app.AppCompatDialogFragment
-import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import me.zhanghai.android.files.skui.SkMaterialAlertDialogBuilder
 import java8.nio.file.Path
 import kotlinx.parcelize.Parcelize
 import kotlinx.parcelize.WriteWith
@@ -46,7 +46,7 @@ class EditBookmarkDirectoryDialogFragment : AppCompatDialogFragment() {
     }
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog =
-        MaterialAlertDialogBuilder(requireContext(), theme)
+        SkMaterialAlertDialogBuilder(requireContext(), theme)
             .setTitle(R.string.navigation_edit_bookmark_directory_title)
             .apply {
                 binding = EditBookmarkDirectoryDialogBinding.inflate(context.layoutInflater)

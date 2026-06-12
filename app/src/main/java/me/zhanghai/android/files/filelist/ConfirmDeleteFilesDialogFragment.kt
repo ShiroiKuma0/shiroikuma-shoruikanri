@@ -9,7 +9,7 @@ import android.app.Dialog
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatDialogFragment
 import androidx.fragment.app.Fragment
-import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import me.zhanghai.android.files.skui.SkMaterialAlertDialogBuilder
 import kotlinx.parcelize.Parcelize
 import me.zhanghai.android.files.R
 import me.zhanghai.android.files.util.ParcelableArgs
@@ -44,7 +44,7 @@ class ConfirmDeleteFilesDialogFragment : AppCompatDialogFragment() {
             }
             getQuantityString(messageRes, files.size, files.size)
         }
-        return MaterialAlertDialogBuilder(requireContext(), theme)
+        return SkMaterialAlertDialogBuilder(requireContext(), theme)
             .setMessage(message)
             .setPositiveButton(android.R.string.ok) { _, _ -> listener.deleteFiles(files) }
             .setNegativeButton(android.R.string.cancel, null)

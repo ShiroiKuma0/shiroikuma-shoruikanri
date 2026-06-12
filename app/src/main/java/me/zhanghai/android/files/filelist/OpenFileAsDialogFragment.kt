@@ -10,7 +10,7 @@ import android.content.DialogInterface
 import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatDialogFragment
-import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import me.zhanghai.android.files.skui.SkMaterialAlertDialogBuilder
 import java8.nio.file.Path
 import kotlinx.parcelize.Parcelize
 import kotlinx.parcelize.WriteWith
@@ -31,7 +31,7 @@ class OpenFileAsDialogFragment : AppCompatDialogFragment() {
     private val args by args<Args>()
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog =
-        MaterialAlertDialogBuilder(requireContext(), theme)
+        SkMaterialAlertDialogBuilder(requireContext(), theme)
             .setTitle(getString(R.string.file_open_as_title_format, args.path.name))
             .apply {
                 val items = FILE_TYPES.map { getString(it.first) }.toTypedArray<CharSequence>()

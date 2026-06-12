@@ -13,7 +13,7 @@ import androidx.core.view.isVisible
 import androidx.core.widget.doAfterTextChanged
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import me.zhanghai.android.files.skui.SkMaterialAlertDialogBuilder
 import java8.nio.file.Path
 import kotlinx.parcelize.Parcelize
 import me.zhanghai.android.files.databinding.SetPrincipalDialogBinding
@@ -45,7 +45,7 @@ abstract class SetPrincipalDialogFragment : AppCompatDialogFragment() {
     private var pendingScrollToId: Int? = null
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog =
-        MaterialAlertDialogBuilder(requireContext(), theme)
+        SkMaterialAlertDialogBuilder(requireContext(), theme)
             .setTitle(titleRes)
             .apply {
                 val selectionLiveData = viewModel.selectionLiveData
