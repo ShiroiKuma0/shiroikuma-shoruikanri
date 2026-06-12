@@ -54,6 +54,7 @@ enum class SkThemeSlot(
     FILE_NAME("sk_file_name", SkThemeGroup.FILE_LIST, R.string.sk_ui_file_name, hasFont = true),
     FILE_DESCRIPTION("sk_file_description", SkThemeGroup.FILE_LIST, R.string.sk_ui_file_description, hasFont = true),
     FILE_ICONS("sk_file_icons", SkThemeGroup.FILE_LIST, R.string.sk_ui_file_icons),
+    GRID_TEXT("sk_grid_text", SkThemeGroup.FILE_LIST, R.string.sk_ui_grid_text, hasFont = true),
 
     // Navigation drawer
     DRAWER_BACKGROUND("sk_drawer_background", SkThemeGroup.DRAWER, R.string.sk_ui_drawer_background),
@@ -107,6 +108,7 @@ private fun skDefault(slot: SkThemeSlot): Int = when (slot) {
     SkThemeSlot.FILE_NAME -> skColor(SkThemeSlot.TEXT)
     SkThemeSlot.FILE_DESCRIPTION -> skColor(SkThemeSlot.TEXT_SECONDARY)
     SkThemeSlot.FILE_ICONS -> skColor(SkThemeSlot.ACCENT)
+    SkThemeSlot.GRID_TEXT -> skColor(SkThemeSlot.TEXT)
 
     // Navigation drawer
     SkThemeSlot.DRAWER_BACKGROUND -> skColor(SkThemeSlot.BACKGROUND)

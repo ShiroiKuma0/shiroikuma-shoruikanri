@@ -91,11 +91,13 @@ import me.zhanghai.android.files.provider.archive.createArchiveRootPath
 import me.zhanghai.android.files.provider.archive.isArchivePath
 import me.zhanghai.android.files.provider.linux.isLinuxPath
 import me.zhanghai.android.files.settings.Settings
+import me.zhanghai.android.files.skui.SkGridStyleSheet
 import me.zhanghai.android.files.skui.SkThemeSlot
 import me.zhanghai.android.files.skui.SkUi
 import me.zhanghai.android.files.skui.SkUiActivity
 import me.zhanghai.android.files.skui.applySkChrome
 import me.zhanghai.android.files.skui.skColor
+import me.zhanghai.android.files.skui.skEffectiveGridStyle
 import me.zhanghai.android.files.terminal.Terminal
 import me.zhanghai.android.files.ui.AppBarLayoutExpandHackListener
 import me.zhanghai.android.files.ui.CoordinatorAppBarLayout
@@ -523,6 +525,11 @@ class FileListFragment : Fragment(), BreadcrumbLayout.Listener, FileListAdapter.
         }
         view?.findViewById<View>(R.id.navigationFragment)
             ?.setBackgroundColor(skColor(SkThemeSlot.DRAWER_BACKGROUND))
+        binding.skGridStyleButton.imageTintList =
+            ColorStateList.valueOf(skColor(SkThemeSlot.TOOLBAR_ICONS))
+        binding.skGridStyleButton.setOnClickListener { showSkGridStyleSheet() }
+        binding.skGridStyleButton.isVisible = effectiveViewType == FileViewType.GRID
+        refreshSkGridStyle()
         updateSkTabStrip()
     }
 
@@ -783,6 +790,11 @@ class FileListFragment : Fragment(), BreadcrumbLayout.Listener, FileListAdapter.
     private fun onCurrentPathChanged(path: Path) {
         updateOverlayToolbar()
         updateBottomToolbar()
+        // 白い熊 fork: the new folder may carry its own grid style.
+        refreshSkGridStyle()
+        if (effectiveViewType == FileViewType.GRID) {
+            updateSpanCount()
+        }
     }
 
     private fun onSearchViewExpandedChanged(expanded: Boolean) {
@@ -862,9 +874,29 @@ class FileListFragment : Fragment(), BreadcrumbLayout.Listener, FileListAdapter.
     }
 
     private fun applyEffectiveViewType() {
+        refreshSkGridStyle()
         updateSpanCount()
         adapter.viewType = effectiveViewType
         updateViewSortMenuItems()
+        binding.skGridStyleButton.isVisible = effectiveViewType == FileViewType.GRID
+    }
+
+    // 白い熊 fork: resolve the current folder's grid style (global defaults +
+    // per-folder override) for the adapter and the span count.
+    private fun refreshSkGridStyle() {
+        adapter.skGridStyle =
+            skEffectiveGridStyle(if (viewModel.hasTrail) viewModel.currentPath else null)
+    }
+
+    private fun showSkGridStyleSheet() {
+        if (!viewModel.hasTrail) {
+            return
+        }
+        SkGridStyleSheet(requireActivity(), viewModel.currentPath) {
+            refreshSkGridStyle()
+            updateSpanCount()
+            adapter.notifyDataSetChanged()
+        }
     }
 
     private fun updateSpanCount() {
@@ -879,7 +911,14 @@ class FileListFragment : Fragment(), BreadcrumbLayout.Listener, FileListAdapter.
                     persistentDrawerLayout.isDrawerOpen(GravityCompat.START)) {
                     widthDp -= getDimensionDp(R.dimen.navigation_max_width).roundToInt()
                 }
-                (widthDp / 180).coerceAtLeast(2)
+                // 白い熊 fork: the column count follows the configured image width + padding.
+                val style = adapter.skGridStyle
+                if (style != null) {
+                    val cellWidthDp = (style.imageWidthDp + 2 * style.paddingHDp).coerceAtLeast(48)
+                    (widthDp / cellWidthDp).coerceAtLeast(1)
+                } else {
+                    (widthDp / 180).coerceAtLeast(2)
+                }
             }
         }
     }
@@ -1905,6 +1944,7 @@ class FileListFragment : Fragment(), BreadcrumbLayout.Listener, FileListAdapter.
         val overlayToolbar: Toolbar,
         val skTabBar: SkFolderTabBar,
         val breadcrumbLayout: BreadcrumbLayout,
+        val skGridStyleButton: ImageButton,
         val contentLayout: ViewGroup,
         val progress: ProgressBar,
         val errorText: TextView,
@@ -1934,7 +1974,8 @@ class FileListFragment : Fragment(), BreadcrumbLayout.Listener, FileListAdapter.
                     includeBinding.persistentBarLayout, appBarBinding.appBarLayout,
                     appBarBinding.toolbar, appBarBinding.overlayToolbar,
                     appBarBinding.skTabBar,
-                    appBarBinding.breadcrumbLayout, contentBinding.contentLayout,
+                    appBarBinding.breadcrumbLayout,
+                    appBarBinding.skGridStyleButton, contentBinding.contentLayout,
                     contentBinding.progress, contentBinding.errorText, contentBinding.emptyView,
                     contentBinding.swipeRefreshLayout, contentBinding.recyclerView,
                     bottomBarBinding.bottomBarLayout, bottomBarBinding.bottomToolbar,

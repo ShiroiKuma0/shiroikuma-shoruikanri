@@ -20,7 +20,7 @@ import android.widget.TextView
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.StringRes
 import androidx.appcompat.widget.SwitchCompat
-import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import androidx.core.view.isVisible
 import me.zhanghai.android.files.R
 import me.zhanghai.android.files.app.AppActivity
 import me.zhanghai.android.files.databinding.SkUiActivityBinding
@@ -106,6 +106,51 @@ class SkUiActivity : AppActivity() {
             SkUi.fileIconSizeDp = it
             updateFileListPreview()
         }
+        addSubgroup(R.string.sk_ui_subgroup_grid)
+        val updateGridPreview = addGridPreview(stepPx * 2)
+        addTextRow(SkThemeSlot.GRID_TEXT, stepPx * 2)
+        addSliderRow(
+            R.string.sk_ui_grid_image_width, 48, 320, SkUi.gridImageWidthDp, stepPx * 2
+        ) {
+            SkUi.gridImageWidthDp = it
+            updateGridPreview()
+        }
+        addSliderRow(
+            R.string.sk_ui_grid_image_height, 48, 320, SkUi.gridImageHeightDp, stepPx * 2
+        ) {
+            SkUi.gridImageHeightDp = it
+            updateGridPreview()
+        }
+        addSliderRow(
+            R.string.sk_ui_grid_padding_h, 0, 32, SkUi.gridPaddingHDp, stepPx * 2
+        ) {
+            SkUi.gridPaddingHDp = it
+            updateGridPreview()
+        }
+        addSliderRow(
+            R.string.sk_ui_grid_padding_v, 0, 32, SkUi.gridPaddingVDp, stepPx * 2
+        ) {
+            SkUi.gridPaddingVDp = it
+            updateGridPreview()
+        }
+        addSliderRow(
+            R.string.sk_ui_grid_text_gap, 0, 24, SkUi.gridTextGapDp, stepPx * 2
+        ) {
+            SkUi.gridTextGapDp = it
+            updateGridPreview()
+        }
+        addSwitchRow(
+            R.string.sk_ui_grid_text_overlay, SkUi.isGridTextOverlay, stepPx * 2
+        ) {
+            SkUi.isGridTextOverlay = it
+            updateGridPreview()
+        }
+        addSwitchRow(
+            R.string.sk_ui_grid_text_show, SkUi.isGridTextVisible, stepPx * 2
+        ) {
+            SkUi.isGridTextVisible = it
+            updateGridPreview()
+        }
         addSubgroup(R.string.sk_ui_subgroup_options)
         addSliderRow(
             R.string.sk_ui_file_padding, 0, 24, SkUi.filePaddingDp, stepPx * 2
@@ -124,7 +169,7 @@ class SkUiActivity : AppActivity() {
             stepPx * 2
         ) { valueView ->
             val entries = resources.getStringArray(R.array.settings_file_name_ellipsize_entries)
-            MaterialAlertDialogBuilder(this)
+            SkMaterialAlertDialogBuilder(this)
                 .setTitle(R.string.settings_file_name_ellipsize_title)
                 .setSingleChoiceItems(
                     entries, Settings.FILE_NAME_ELLIPSIZE.valueCompat.ordinal
@@ -347,7 +392,7 @@ class SkUiActivity : AppActivity() {
             val entries = SkFontWeight.entries
             val labels = entries.map { getString(it.labelRes) }.toTypedArray()
             val checked = entries.indexOf(SkFontWeight.fromValue(SkUi.getFontWeight(slot.key)))
-            MaterialAlertDialogBuilder(this)
+            SkMaterialAlertDialogBuilder(this)
                 .setTitle(R.string.sk_font_weight)
                 .setSingleChoiceItems(labels, checked) { dialog, which ->
                     SkUi.setFontWeight(slot.key, entries[which].value)
@@ -480,6 +525,55 @@ class SkUiActivity : AppActivity() {
             )
             nameView.applySkSlot(SkThemeSlot.FILE_NAME)
             descriptionView.applySkSlot(SkThemeSlot.FILE_DESCRIPTION)
+        }
+        update()
+        return update
+    }
+
+    // A live preview of a grid cell: image box size, paddings, text gap/overlay
+    // and the grid text itself.
+    private fun addGridPreview(indent: Int): () -> Unit {
+        val cell = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            setPaddingRelative(dp(16) + indent, dp(4), dp(16), dp(4))
+        }
+        val imageBox = View(this)
+        val nameView = TextView(this).apply {
+            text = getString(R.string.sk_ui_preview_file_name)
+            gravity = Gravity.CENTER
+        }
+        cell.addView(imageBox)
+        cell.addView(nameView)
+        binding.holder.addView(cell)
+
+        val update = {
+            val paddingHPx = dp(SkUi.gridPaddingHDp)
+            val paddingVPx = dp(SkUi.gridPaddingVDp)
+            imageBox.layoutParams = LinearLayout.LayoutParams(
+                dp(SkUi.gridImageWidthDp), dp(SkUi.gridImageHeightDp)
+            ).apply {
+                leftMargin = paddingHPx
+                rightMargin = paddingHPx
+                topMargin = paddingVPx
+            }
+            imageBox.background = GradientDrawable().apply {
+                setColor(0x22FFFF00)
+                setStroke(dp(1), skColor(SkThemeSlot.ACCENT))
+                cornerRadius = dp(4).toFloat()
+            }
+            nameView.isVisible = SkUi.isGridTextVisible
+            nameView.applySkSlot(SkThemeSlot.GRID_TEXT)
+            nameView.layoutParams = LinearLayout.LayoutParams(
+                dp(SkUi.gridImageWidthDp) + 2 * paddingHPx,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+            ).apply {
+                bottomMargin = paddingVPx
+                topMargin = if (SkUi.isGridTextOverlay) {
+                    -dp(28)
+                } else {
+                    dp(SkUi.gridTextGapDp)
+                }
+            }
         }
         update()
         return update

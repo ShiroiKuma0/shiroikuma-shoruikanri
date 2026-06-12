@@ -33,6 +33,18 @@ object SkUi {
     const val DEFAULT_FILE_ICON_SIZE_DP = 24
     const val DEFAULT_FILE_PADDING_DP = 0
 
+    // Grid view global defaults (approximating the stock ~180dp cells).
+    private const val KEY_GRID_IMAGE_WIDTH = "sk_grid_image_width"
+    private const val KEY_GRID_IMAGE_HEIGHT = "sk_grid_image_height"
+    private const val KEY_GRID_PADDING_H = "sk_grid_padding_h"
+    private const val KEY_GRID_PADDING_V = "sk_grid_padding_v"
+    private const val KEY_GRID_TEXT_GAP = "sk_grid_text_gap"
+    private const val KEY_GRID_TEXT_OVERLAY = "sk_grid_text_overlay"
+    private const val KEY_GRID_TEXT_VISIBLE = "sk_grid_text_visible"
+    const val DEFAULT_GRID_IMAGE_WIDTH_DP = 160
+    const val DEFAULT_GRID_IMAGE_HEIGHT_DP = 90
+    const val DEFAULT_GRID_PADDING_DP = 16
+
     private val prefs: SharedPreferences by lazy {
         application.getSharedPreferences("sk_ui", Context.MODE_PRIVATE)
     }
@@ -44,6 +56,12 @@ object SkUi {
 
     private fun touch() {
         ++generation
+    }
+
+    // For sibling stores (e.g. SkGridStyles) that participate in the same
+    // generation-based refresh.
+    fun notifyChanged() {
+        touch()
     }
 
     // The 白い熊 black/yellow theme overlay (black background, yellow
@@ -85,6 +103,58 @@ object SkUi {
         get() = prefs.getInt(KEY_FILE_PADDING, DEFAULT_FILE_PADDING_DP)
         set(value) {
             prefs.edit().putInt(KEY_FILE_PADDING, value).apply()
+            touch()
+        }
+
+    var gridImageWidthDp: Int
+        get() = prefs.getInt(KEY_GRID_IMAGE_WIDTH, DEFAULT_GRID_IMAGE_WIDTH_DP)
+        set(value) {
+            prefs.edit().putInt(KEY_GRID_IMAGE_WIDTH, value).apply()
+            touch()
+        }
+
+    var gridImageHeightDp: Int
+        get() = prefs.getInt(KEY_GRID_IMAGE_HEIGHT, DEFAULT_GRID_IMAGE_HEIGHT_DP)
+        set(value) {
+            prefs.edit().putInt(KEY_GRID_IMAGE_HEIGHT, value).apply()
+            touch()
+        }
+
+    var gridPaddingHDp: Int
+        get() = prefs.getInt(KEY_GRID_PADDING_H, DEFAULT_GRID_PADDING_DP)
+        set(value) {
+            prefs.edit().putInt(KEY_GRID_PADDING_H, value).apply()
+            touch()
+        }
+
+    var gridPaddingVDp: Int
+        get() = prefs.getInt(KEY_GRID_PADDING_V, DEFAULT_GRID_PADDING_DP)
+        set(value) {
+            prefs.edit().putInt(KEY_GRID_PADDING_V, value).apply()
+            touch()
+        }
+
+    // The gap between the image and the file name line.
+    var gridTextGapDp: Int
+        get() = prefs.getInt(KEY_GRID_TEXT_GAP, 0)
+        set(value) {
+            prefs.edit().putInt(KEY_GRID_TEXT_GAP, value).apply()
+            touch()
+        }
+
+    // Draw the file name over the bottom of the image (seamless photo display).
+    var isGridTextOverlay: Boolean
+        get() = prefs.getBoolean(KEY_GRID_TEXT_OVERLAY, false)
+        set(value) {
+            prefs.edit().putBoolean(KEY_GRID_TEXT_OVERLAY, value).apply()
+            touch()
+        }
+
+    // Show the file name line at all.
+    var isGridTextVisible: Boolean
+        get() = prefs.getBoolean(KEY_GRID_TEXT_VISIBLE, true)
+        set(value) {
+            prefs.edit().putBoolean(KEY_GRID_TEXT_VISIBLE, value).apply()
             touch()
         }
 

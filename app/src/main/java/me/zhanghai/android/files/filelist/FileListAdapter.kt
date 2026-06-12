@@ -8,6 +8,7 @@ package me.zhanghai.android.files.filelist
 import android.content.Context
 import android.content.res.ColorStateList
 import android.text.TextUtils
+import android.util.TypedValue
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageButton
@@ -41,11 +42,13 @@ import me.zhanghai.android.files.provider.common.PosixFileAttributes
 import me.zhanghai.android.files.provider.common.isEncrypted
 import me.zhanghai.android.files.provider.common.toModeString
 import me.zhanghai.android.files.settings.Settings
+import me.zhanghai.android.files.skui.SkGridEffective
 import me.zhanghai.android.files.skui.SkThemeSlot
 import me.zhanghai.android.files.skui.SkUi
 import me.zhanghai.android.files.skui.applySkSlot
 import me.zhanghai.android.files.skui.skColor
 import me.zhanghai.android.files.ui.AnimatedListAdapter
+import me.zhanghai.android.files.ui.AspectRatioFrameLayout
 import me.zhanghai.android.files.ui.CheckableForegroundLinearLayout
 import me.zhanghai.android.files.ui.CheckableItemBackground
 import me.zhanghai.android.files.util.isMaterial3Theme
@@ -85,6 +88,9 @@ class FileListAdapter(
             field = value
             notifyItemRangeChanged(0, itemCount, PAYLOAD_STATE_CHANGED)
         }
+
+    // 白い熊 fork: the resolved grid style for the current folder (set by the fragment).
+    var skGridStyle: SkGridEffective? = null
 
     private val selectedFiles = fileItemSetOf()
 
@@ -267,9 +273,55 @@ class FileListAdapter(
             }
         }
         // 白い熊 fork: per-element file list styling from the UI page.
-        holder.nameText.applySkSlot(SkThemeSlot.FILE_NAME)
+        holder.nameText.applySkSlot(
+            if (viewType == FileViewType.GRID) SkThemeSlot.GRID_TEXT else SkThemeSlot.FILE_NAME
+        )
         holder.descriptionText?.applySkSlot(SkThemeSlot.FILE_DESCRIPTION)
         holder.iconImage.imageTintList = ColorStateList.valueOf(skColor(SkThemeSlot.FILE_ICONS))
+        // 白い熊 fork: grid style — text size, image dimensions and paddings, with
+        // per-folder overrides (see SkGridStyles).
+        if (viewType == FileViewType.GRID) {
+            skGridStyle?.let { style ->
+                val density = holder.itemView.resources.displayMetrics.density
+                if (style.textSizeSp > 0) {
+                    holder.nameText.setTextSize(
+                        TypedValue.COMPLEX_UNIT_SP, style.textSizeSp.toFloat()
+                    )
+                }
+                val paddingHPx = (style.paddingHDp * density).toInt()
+                val paddingVPx = (style.paddingVDp * density).toInt()
+                (holder.thumbnailImage.parent as? AspectRatioFrameLayout)?.let { container ->
+                    container.ratio =
+                        style.imageWidthDp.toFloat() / style.imageHeightDp.coerceAtLeast(1)
+                    container.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                        leftMargin = paddingHPx
+                        rightMargin = paddingHPx
+                        topMargin = paddingVPx
+                        // With the name line hidden (or drawn over the image), the image
+                        // itself carries the bottom padding.
+                        bottomMargin =
+                            if (!style.isTextVisible || style.isTextOverlay) paddingVPx else 0
+                    }
+                }
+                (holder.nameText.parent as? ViewGroup)?.let { nameRow ->
+                    nameRow.isVisible = style.isTextVisible
+                    nameRow.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                        bottomMargin = if (style.isTextOverlay) 0 else paddingVPx
+                        // Overlay mode pulls the name line up over the bottom of the image
+                        // (no background, seamless photos); otherwise the configured gap
+                        // separates the image and the name.
+                        topMargin = if (style.isTextOverlay) {
+                            -(nameRow.layoutParams.height.takeIf { it > 0 }
+                                ?: holder.itemView.resources.getDimensionPixelSize(
+                                    R.dimen.single_line_list_item_height
+                                )) - paddingVPx
+                        } else {
+                            (style.textGapDp * density).toInt()
+                        }
+                    }
+                }
+            }
+        }
         // 白い熊 fork: configurable icon size and inter-file padding; the additional
         // views always ellipsize the file name with trailing dots.
         if (viewType != FileViewType.GRID) {
