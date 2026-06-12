@@ -12,6 +12,10 @@
         android:title="@string/file_item_action_open_with" />
 
     <item
+        android:id="@+id/action_open_in_new_tab"
+        android:title="@string/sk_file_item_action_open_in_new_tab" />
+
+    <item
         android:id="@+id/action_cut"
         android:title="@string/cut" />
 

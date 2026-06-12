@@ -16,6 +16,7 @@ import android.os.Bundle
 import android.os.Environment
 import android.os.Handler
 import android.os.Looper
+import android.os.Parcelable
 import android.text.TextUtils
 import android.view.KeyCharacterMap
 import android.view.KeyEvent
@@ -45,6 +46,7 @@ import androidx.drawerlayout.widget.DrawerLayout
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.commit
 import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.LiveData
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
@@ -117,6 +119,7 @@ import me.zhanghai.android.files.util.extraPath
 import me.zhanghai.android.files.util.extraPathList
 import me.zhanghai.android.files.util.fadeToVisibilityUnsafe
 import me.zhanghai.android.files.util.getDimensionDp
+import me.zhanghai.android.files.util.getParcelableSafe
 import me.zhanghai.android.files.util.getQuantityString
 import me.zhanghai.android.files.util.hasSw600Dp
 import me.zhanghai.android.files.util.isOrientationLandscape
@@ -167,6 +170,13 @@ class FileListFragment : Fragment(), BreadcrumbLayout.Listener, FileListAdapter.
 
     private val viewModel by viewModels { { FileListViewModel() } }
 
+    val currentPathLiveData: LiveData<Path>
+        get() = viewModel.currentPathLiveData
+
+    // The last visited path, saved in the instance state so that each tab can restore its
+    // location after process death (the view model trail itself isn't saved yet).
+    private var savedPath: Path? = null
+
     private lateinit var binding: Binding
 
     private lateinit var navigationFragment: NavigationFragment
@@ -195,7 +205,14 @@ class FileListFragment : Fragment(), BreadcrumbLayout.Listener, FileListAdapter.
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        savedPath = savedInstanceState?.getParcelableSafe<Parcelable>(STATE_SAVED_PATH) as Path?
         setHasOptionsMenu(true)
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+
+        savedPath?.let { outState.putParcelable(STATE_SAVED_PATH, it as Parcelable) }
     }
 
     override fun onCreateView(
@@ -210,12 +227,16 @@ class FileListFragment : Fragment(), BreadcrumbLayout.Listener, FileListAdapter.
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
 
-        if (savedInstanceState == null) {
+        // This is also called with a null saved instance state when the fragment is re-attached
+        // after a tab switch, so look the child fragment up instead of relying on the saved
+        // instance state, lest we add a second NavigationFragment.
+        val existingNavigationFragment =
+            childFragmentManager.findFragmentById(R.id.navigationFragment) as NavigationFragment?
+        if (existingNavigationFragment == null) {
             navigationFragment = NavigationFragment()
             childFragmentManager.commit { add(R.id.navigationFragment, navigationFragment) }
         } else {
-            navigationFragment = childFragmentManager.findFragmentById(R.id.navigationFragment)
-                as NavigationFragment
+            navigationFragment = existingNavigationFragment
         }
         navigationFragment.listener = this
         val activity = requireActivity() as AppCompatActivity
@@ -332,6 +353,8 @@ class FileListFragment : Fragment(), BreadcrumbLayout.Listener, FileListAdapter.
                         }
                     }
             }
+            // Restore the last visited path after process death.
+            savedPath?.let { path = it }
             if (path == null) {
                 path = Settings.FILE_LIST_DEFAULT_DIRECTORY.valueCompat
             }
@@ -340,7 +363,10 @@ class FileListFragment : Fragment(), BreadcrumbLayout.Listener, FileListAdapter.
                 viewModel.pickOptions = pickOptions
             }
         }
-        viewModel.currentPathLiveData.observe(viewLifecycleOwner) { onCurrentPathChanged(it) }
+        viewModel.currentPathLiveData.observe(viewLifecycleOwner) {
+            savedPath = it
+            onCurrentPathChanged(it)
+        }
         viewModel.searchViewExpandedLiveData.observe(viewLifecycleOwner) {
             onSearchViewExpandedChanged(it)
         }
@@ -439,6 +465,7 @@ class FileListFragment : Fragment(), BreadcrumbLayout.Listener, FileListAdapter.
         super.onPrepareOptionsMenu(menu)
 
         updateViewSortMenuItems()
+        updateNewTabMenuItem()
         updateSelectAllMenuItem()
         updateShowHiddenFilesMenuItem()
     }
@@ -494,6 +521,10 @@ class FileListFragment : Fragment(), BreadcrumbLayout.Listener, FileListAdapter.
             }
             R.id.action_view_sort_path_specific -> {
                 viewModel.isViewSortPathSpecific = !menuBinding.viewSortPathSpecificItem.isChecked
+                true
+            }
+            R.id.action_new_tab -> {
+                openInNewTab()
                 true
             }
             R.id.action_new_task -> {
@@ -718,6 +749,17 @@ class FileListFragment : Fragment(), BreadcrumbLayout.Listener, FileListAdapter.
         openInNewTask(currentPath)
     }
 
+    private fun openInNewTab() {
+        (activity as? FileListActivity)?.openInNewTab(viewModel.currentPath)
+    }
+
+    private fun updateNewTabMenuItem() {
+        if (!this::menuBinding.isInitialized) {
+            return
+        }
+        menuBinding.newTabItem.isVisible = viewModel.pickOptions == null
+    }
+
     private fun refresh() {
         viewModel.reload()
     }
@@ -778,6 +820,10 @@ class FileListFragment : Fragment(), BreadcrumbLayout.Listener, FileListAdapter.
         val intent = FileListActivity.createViewIntent(path)
             .addFlags(Intent.FLAG_ACTIVITY_NEW_DOCUMENT or Intent.FLAG_ACTIVITY_MULTIPLE_TASK)
         startActivitySafe(intent)
+    }
+
+    override fun openInNewTab(file: FileItem) {
+        (activity as? FileListActivity)?.openInNewTab(file.listablePath)
     }
 
     private fun onPickOptionsChanged(pickOptions: PickOptions?) {
@@ -1627,6 +1673,8 @@ class FileListFragment : Fragment(), BreadcrumbLayout.Listener, FileListAdapter.
             "me.zhanghai.android.files.intent.action.VIEW_DOWNLOADS"
 
         private const val IMAGE_VIEWER_ACTIVITY_PATH_LIST_SIZE_MAX = 1000
+
+        private const val STATE_SAVED_PATH = "savedPath"
     }
 
     private class RequestAllFilesAccessContract : ActivityResultContract<Unit, Boolean>() {
@@ -1715,6 +1763,7 @@ class FileListFragment : Fragment(), BreadcrumbLayout.Listener, FileListAdapter.
         val sortOrderAscendingItem: MenuItem,
         val sortDirectoriesFirstItem: MenuItem,
         val viewSortPathSpecificItem: MenuItem,
+        val newTabItem: MenuItem,
         val selectAllItem: MenuItem,
         val showHiddenFilesItem: MenuItem
     ) {
@@ -1731,6 +1780,7 @@ class FileListFragment : Fragment(), BreadcrumbLayout.Listener, FileListAdapter.
                     menu.findItem(R.id.action_sort_order_ascending),
                     menu.findItem(R.id.action_sort_directories_first),
                     menu.findItem(R.id.action_view_sort_path_specific),
+                    menu.findItem(R.id.action_new_tab),
                     menu.findItem(R.id.action_select_all),
                     menu.findItem(R.id.action_show_hidden_files)
                 )
