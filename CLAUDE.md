@@ -126,6 +126,12 @@ There are no product flavors and no unit/instrumented tests in this repository.
   - `FileListFragment.onActivityCreated` re-runs with a null `savedInstanceState` on every
     re-attach — it must look up child fragments instead of recreating them (fixed for
     `NavigationFragment`); any future per-pane child fragments need the same care.
+  - **Never read `viewModel.viewType` (or any `MediatorLiveData` `valueCompat`) before the view
+    lifecycle is STARTED.** The mediator only computes its value once active, so it is still null
+    during `onActivityCreated` (e.g. a tab `commitNow`) and in early menu-prepare after a restore —
+    this crashed every new-tab "+" for tabs following the global view (fixed in `1.7.4+14`:
+    `effectiveViewType` falls back to `Settings.FILE_LIST_VIEW_TYPE.valueCompat` until
+    `onViewTypeChanged` re-applies the real value). Dual-pane fragments will hit the same window.
 
 ## Architecture (orientation)
 
