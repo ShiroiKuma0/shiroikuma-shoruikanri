@@ -117,4 +117,20 @@
     <string name="sk_open_with_clear_default">デフォルトを解除</string>
     <string name="sk_open_with_no_apps">この形式を開けるアプリがありません</string>
     <string name="sk_open_with_default_suffix">"（デフォルト）"</string>
+
+    <!-- Share dialog -->
+    <string name="sk_share_autoshare_command">AutoShare コマンド…</string>
+    <string name="sk_share_move_up">上へ移動</string>
+    <string name="sk_share_move_down">下へ移動</string>
+    <string name="sk_share_edit">編集</string>
+
+    <!-- Termux script targets -->
+    <string name="sk_termux_add">Termux スクリプトを追加…</string>
+    <string name="sk_termux_title">Termux スクリプト</string>
+    <string name="sk_termux_label_hint">ラベル（任意）</string>
+    <string name="sk_termux_path_hint">スクリプトのパス（例: ~/.termux/tasker/scp.sh）</string>
+    <string name="sk_termux_help">選択したファイルのパスを引数（$1, $2…）として Termux スクリプトを実行します。Termux で allow-external-apps=true が必要です。</string>
+    <string name="sk_termux_run_in_terminal">ターミナルを表示して実行</string>
+    <string name="sk_termux_missing">Termux がインストールされていません</string>
+    <string name="sk_termux_failed">Termux を起動できませんでした（allow-external-apps を確認）</string>
 </resources>

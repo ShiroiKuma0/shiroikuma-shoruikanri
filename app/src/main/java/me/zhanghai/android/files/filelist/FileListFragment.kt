@@ -96,6 +96,7 @@ import me.zhanghai.android.files.skui.SkOpenWith
 import me.zhanghai.android.files.skui.SkOpenWithDialog
 import me.zhanghai.android.files.skui.SkSeparatorDecoration
 import me.zhanghai.android.files.skui.SkSeparators
+import me.zhanghai.android.files.skui.SkShareDialog
 import me.zhanghai.android.files.skui.SkThemeSlot
 import me.zhanghai.android.files.skui.SkUi
 import me.zhanghai.android.files.skui.SkUiActivity
@@ -1678,9 +1679,13 @@ class FileListFragment : Fragment(), BreadcrumbLayout.Listener, FileListAdapter.
 
     private fun shareFiles(paths: List<Path>, mimeTypes: List<MimeType>) {
         val uris = paths.map { it.fileProviderUri }
+        // 白い熊 fork: our own share dialog (pinned candidates, AutoShare command
+        // chooser, one-click Termux script targets) instead of the system sheet.
         val intent = uris.createSendStreamIntent(mimeTypes)
-            .withChooser()
-        startActivitySafe(intent)
+            .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+        // Real filesystem paths for Termux script arguments (local files only).
+        val filePaths = paths.mapNotNull { if (it.isLinuxPath) it.toFile().path else null }
+        SkShareDialog(requireActivity(), intent, filePaths)
     }
 
     override fun copyPath(file: FileItem) {

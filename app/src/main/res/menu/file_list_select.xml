@@ -11,11 +11,28 @@
     xmlns:tools="http://schemas.android.com/tools"
     tools:ignore="AlwaysShowAction">
 
+    <!-- 白い熊 fork: Delete sits on the left, isolated by an empty spacer so it
+         is not tapped by accident; Share is a visible icon on the right. -->
+    <item
+        android:id="@+id/action_delete"
+        android:icon="@drawable/delete_icon_control_normal_24dp"
+        android:orderInCategory="10"
+        android:title="@string/delete"
+        app:showAsAction="always" />
+
+    <item
+        android:id="@+id/action_sk_spacer"
+        android:enabled="false"
+        android:icon="@drawable/sk_action_spacer_24dp"
+        android:orderInCategory="20"
+        android:title="@null"
+        app:showAsAction="always" />
+
     <item
         android:id="@+id/action_cut"
         android:alphabeticShortcut="x"
         android:icon="@drawable/cut_icon_control_normal_24dp"
-        android:orderInCategory="100"
+        android:orderInCategory="30"
         android:title="@string/cut"
         app:showAsAction="always" />
 
@@ -23,15 +40,23 @@
         android:id="@+id/action_copy"
         android:alphabeticShortcut="c"
         android:icon="@drawable/copy_icon_control_normal_24dp"
-        android:orderInCategory="100"
+        android:orderInCategory="40"
         android:title="@string/copy"
         app:showAsAction="always" />
 
     <item
-        android:id="@+id/action_delete"
-        android:icon="@drawable/delete_icon_control_normal_24dp"
-        android:orderInCategory="100"
-        android:title="@string/delete"
+        android:id="@+id/action_select_all"
+        android:alphabeticShortcut="a"
+        android:icon="@drawable/sk_select_all_icon_control_normal_24dp"
+        android:orderInCategory="45"
+        android:title="@string/select_all"
+        app:showAsAction="always" />
+
+    <item
+        android:id="@+id/action_share"
+        android:icon="@drawable/sk_share_icon_control_normal_24dp"
+        android:orderInCategory="50"
+        android:title="@string/share"
         app:showAsAction="always" />
 
     <item
@@ -44,18 +69,5 @@
         android:id="@+id/action_archive"
         android:orderInCategory="100"
         android:title="@string/file_list_select_action_archive"
-        app:showAsAction="never" />
-
-    <item
-        android:id="@+id/action_share"
-        android:orderInCategory="100"
-        android:title="@string/share"
-        app:showAsAction="never" />
-
-    <item
-        android:id="@+id/action_select_all"
-        android:alphabeticShortcut="a"
-        android:orderInCategory="100"
-        android:title="@string/select_all"
         app:showAsAction="never" />
 </menu>

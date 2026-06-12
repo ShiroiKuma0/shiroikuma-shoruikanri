@@ -117,4 +117,20 @@
     <string name="sk_open_with_clear_default">Forget default</string>
     <string name="sk_open_with_no_apps">No apps can open this type</string>
     <string name="sk_open_with_default_suffix">" (default)"</string>
+
+    <!-- Share dialog -->
+    <string name="sk_share_autoshare_command">AutoShare command…</string>
+    <string name="sk_share_move_up">Move up</string>
+    <string name="sk_share_move_down">Move down</string>
+    <string name="sk_share_edit">Edit</string>
+
+    <!-- Termux script targets -->
+    <string name="sk_termux_add">Add Termux script…</string>
+    <string name="sk_termux_title">Termux script</string>
+    <string name="sk_termux_label_hint">Label (optional)</string>
+    <string name="sk_termux_path_hint">Script path, e.g. ~/.termux/tasker/scp.sh</string>
+    <string name="sk_termux_help">Runs a Termux script with the selected file path(s) as arguments ($1, $2…). Needs allow-external-apps=true in Termux.</string>
+    <string name="sk_termux_run_in_terminal">Run in a visible terminal</string>
+    <string name="sk_termux_missing">Termux is not installed</string>
+    <string name="sk_termux_failed">Couldn\'t start Termux (check allow-external-apps)</string>
 </resources>
