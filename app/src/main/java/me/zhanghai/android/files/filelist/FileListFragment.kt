@@ -12,6 +12,7 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.res.ColorStateList
 import android.graphics.drawable.ColorDrawable
+import android.graphics.drawable.GradientDrawable
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -192,6 +193,13 @@ class FileListFragment : Fragment(), BreadcrumbLayout.Listener, FileListAdapter.
     // 白い熊 fork: the SkUi.generation our styling was last applied for.
     private var appliedSkUiGeneration = -1L
 
+    // 白い熊 fork: this tab's own listing view; null follows the global setting.
+    // Owned and persisted by FileListActivity with the tab set.
+    private var skTabViewType: FileViewType? = null
+
+    private val effectiveViewType: FileViewType
+        get() = skTabViewType ?: viewModel.viewType
+
     private lateinit var binding: Binding
 
     private lateinit var navigationFragment: NavigationFragment
@@ -254,6 +262,8 @@ class FileListFragment : Fragment(), BreadcrumbLayout.Listener, FileListAdapter.
             navigationFragment = existingNavigationFragment
         }
         navigationFragment.listener = this
+        // 白い熊 fork: pick up this tab's own listing view before any observer fires.
+        skTabViewType = (getActivity() as? FileListActivity)?.getTabViewType(tag)
         val activity = requireActivity() as AppCompatActivity
         activity.setTitle(R.string.file_list_title)
         activity.setSupportActionBar(binding.toolbar)
@@ -496,9 +506,20 @@ class FileListFragment : Fragment(), BreadcrumbLayout.Listener, FileListAdapter.
             SkThemeSlot.BOTTOM_BAR_BACKGROUND, SkThemeSlot.BOTTOM_BAR_TEXT, null,
             SkThemeSlot.BOTTOM_BAR_ICONS
         )
+        binding.speedDialView.mainFabClosedBackgroundColor = skColor(SkThemeSlot.FAB_BACKGROUND)
+        binding.speedDialView.mainFabOpenedBackgroundColor = skColor(SkThemeSlot.FAB_BACKGROUND)
         binding.speedDialView.mainFab.apply {
             backgroundTintList = ColorStateList.valueOf(skColor(SkThemeSlot.FAB_BACKGROUND))
             imageTintList = ColorStateList.valueOf(skColor(SkThemeSlot.FAB_ICON))
+            // The yellow ring around the otherwise black button.
+            foreground = GradientDrawable().apply {
+                shape = GradientDrawable.OVAL
+                setColor(android.graphics.Color.TRANSPARENT)
+                setStroke(
+                    (2 * resources.displayMetrics.density).toInt(),
+                    skColor(SkThemeSlot.FAB_ICON)
+                )
+            }
         }
         view?.findViewById<View>(R.id.navigationFragment)
             ?.setBackgroundColor(skColor(SkThemeSlot.DRAWER_BACKGROUND))
@@ -617,27 +638,27 @@ class FileListFragment : Fragment(), BreadcrumbLayout.Listener, FileListAdapter.
                 true
             }
             R.id.action_view_list, R.id.action_sk_view_list -> {
-                viewModel.viewType = FileViewType.LIST
+                setSkTabViewType(FileViewType.LIST)
                 true
             }
             R.id.action_view_grid, R.id.action_sk_view_grid -> {
-                viewModel.viewType = FileViewType.GRID
+                setSkTabViewType(FileViewType.GRID)
                 true
             }
             R.id.action_sk_view_compact -> {
-                viewModel.viewType = FileViewType.COMPACT
+                setSkTabViewType(FileViewType.COMPACT)
                 true
             }
             R.id.action_sk_view_column -> {
-                viewModel.viewType = FileViewType.COLUMN
+                setSkTabViewType(FileViewType.COLUMN)
                 true
             }
             R.id.action_sk_view_detailed -> {
-                viewModel.viewType = FileViewType.DETAILED
+                setSkTabViewType(FileViewType.DETAILED)
                 true
             }
             R.id.action_sk_view_wrapped -> {
-                viewModel.viewType = FileViewType.WRAPPED
+                setSkTabViewType(FileViewType.WRAPPED)
                 true
             }
             R.id.action_sort_by_name -> {
@@ -830,13 +851,24 @@ class FileListFragment : Fragment(), BreadcrumbLayout.Listener, FileListAdapter.
     }
 
     private fun onViewTypeChanged(viewType: FileViewType) {
+        applyEffectiveViewType()
+    }
+
+    // 白い熊 fork: this tab's own view wins over the global/path-specific setting.
+    private fun setSkTabViewType(viewType: FileViewType) {
+        skTabViewType = viewType
+        (activity as? FileListActivity)?.setTabViewType(tag, viewType)
+        applyEffectiveViewType()
+    }
+
+    private fun applyEffectiveViewType() {
         updateSpanCount()
-        adapter.viewType = viewType
+        adapter.viewType = effectiveViewType
         updateViewSortMenuItems()
     }
 
     private fun updateSpanCount() {
-        layoutManager.spanCount = when (viewModel.viewType) {
+        layoutManager.spanCount = when (effectiveViewType) {
             FileViewType.LIST, FileViewType.COMPACT, FileViewType.COLUMN,
             FileViewType.DETAILED -> 1
             FileViewType.WRAPPED -> 2
@@ -871,7 +903,7 @@ class FileListFragment : Fragment(), BreadcrumbLayout.Listener, FileListAdapter.
         if (searchViewExpanded) {
             return
         }
-        val viewType = viewModel.viewType
+        val viewType = effectiveViewType
         menuBinding.viewListItem.isChecked = viewType == FileViewType.LIST
         menuBinding.viewGridItem.isChecked = viewType == FileViewType.GRID
         val checkedSkViewItem = when (viewType) {
