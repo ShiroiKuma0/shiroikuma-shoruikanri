@@ -124,9 +124,9 @@ private fun skDefault(slot: SkThemeSlot): Int = when (slot) {
     SkThemeSlot.BOTTOM_BAR_TEXT -> skColor(SkThemeSlot.TEXT)
     SkThemeSlot.BOTTOM_BAR_ICONS -> skColor(SkThemeSlot.ACCENT)
 
-    // Speed dial
-    SkThemeSlot.FAB_BACKGROUND -> skColor(SkThemeSlot.ACCENT)
-    SkThemeSlot.FAB_ICON -> skColor(SkThemeSlot.BACKGROUND)
+    // Speed dial: black button, yellow border and plus
+    SkThemeSlot.FAB_BACKGROUND -> skColor(SkThemeSlot.BACKGROUND)
+    SkThemeSlot.FAB_ICON -> skColor(SkThemeSlot.ACCENT)
 }
 
 fun setSkColor(slot: SkThemeSlot, color: Int) = SkUi.setColorOverride(slot.key, color)
