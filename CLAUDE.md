@@ -36,6 +36,7 @@ customizations on top of upstream and rebuild as upstream releases new versions.
 | Fork versioning | `VERSION_NAME` / `VERSION_CODE` / `BUILD_NUMBER` | `gradle.properties` + fork logic in `app/build.gradle` |
 | ABI | arm64-v8a only (`ndk.abiFilters`) | `app/build.gradle` |
 | Signing | `shiroikuma-shoruikanri.jks` via gitignored `signing.properties` (upstream's own `signing.gradle` mechanism) | `~/.android-keystores/shiroikuma-shoruikanri.jks`, alias `shoruikanri` |
+| UI default palette | black `#000000` + **pure yellow `#FFFF00`** (never material `#FFEB3B`) | `SkUi.PALETTE_BLACK` / `SkUi.PALETTE_YELLOW` + `sk_theme.xml` |
 
 The app ID is deliberately changed so this fork installs **alongside** upstream without conflict.
 The namespace stays `me.zhanghai.android.files` so `R`/`BuildConfig` and all source packages remain
@@ -106,20 +107,25 @@ There are no product flavors and no unit/instrumented tests in this repository.
 
 ## Development Backlog
 
-1. **Tabs (first step).** Add multi-tab browsing. Analysis from 2026-06-12:
-   - `FileListActivity` is a ~90-line shell that just attaches one `FileListFragment` — the natural
-     insertion point for a tab host.
-   - `FileListViewModel` is **fragment-scoped** (`by viewModels`, `FileListFragment.kt`) and owns the
-     navigation trail (`TrailLiveData`) + search state, so multiple fragments coexist naturally,
-     each with its own history.
-   - Cheap path: keep `FileListFragment` (a ~1740-line monolith owning toolbar/drawer/breadcrumbs)
-     intact — one full fragment per tab, switched via `FragmentManager` attach/detach with a tab
-     strip in the activity. Avoid the big refactor (hoisting drawer/app bar + `ViewPager2`) for now.
-   - **`PasteState` must be hoisted** out of the fragment-scoped `FileListViewModel`
-     (`FileListViewModel.kt`, `addToPasteState`/`clearPasteState`) to an activity- or app-scoped
-     holder, so copy-in-tab-A → paste-in-tab-B works.
-   - Persist the open-tab list across process death; add "Open in new tab" to item context menus.
-2. **Dual-pane mode** (later) — two side-by-side panes on the tab foundation, MC-style.
+1. **Dual-pane mode** — two side-by-side panes on the tab foundation, MC-style.
+
+### Done
+
+- **Tabs** (2026-06-12, commit `48b77f94`, shipped in `1.7.4+2`). `FileListActivity` is the tab
+  host: a bottom tab strip (`TabLayout` + add button, layout `sk_file_list_activity.xml`) over a
+  fragment container, one **full `FileListFragment` per tab** switched via `FragmentManager`
+  attach/detach (tags `tab_<id>`). The strip only shows with ≥ 2 tabs; pick mode stays single-tab.
+  Tab state (id + last path) lives in the activity instance state; each fragment also saves its
+  last visited path and prefers it over the args path when recreating the trail, so tabs restore
+  their location after process death. "Open in new tab" is in the file context menu, "New tab" in
+  the overflow; back closes the tab (when > 1) once the tab no longer handles it. Fork resources
+  are `sk_`-prefixed in new files. Notes for dual-pane:
+  - `PasteState` needed **no hoisting** — upstream already keeps `_pasteStateLiveData` in a
+    `companion object` (`FileListViewModel.kt`), i.e. process-wide; cross-tab/pane paste works
+    as-is.
+  - `FileListFragment.onActivityCreated` re-runs with a null `savedInstanceState` on every
+    re-attach — it must look up child fragments instead of recreating them (fixed for
+    `NavigationFragment`); any future per-pane child fragments need the same care.
 
 ## Architecture (orientation)
 
