@@ -206,8 +206,15 @@ class FileListFragment : Fragment(), BreadcrumbLayout.Listener, FileListAdapter.
     // 白い熊 fork: separator lines between files (global + per-folder, per view).
     private val skSeparatorDecoration = SkSeparatorDecoration()
 
+    // 白い熊 fork: viewModel.viewType is a MediatorLiveData that only computes its
+    // value once active (view lifecycle STARTED). applySkUi()/menu prepare can read
+    // it earlier (onActivityCreated during a tab commitNow, or a posted
+    // populateOptionsMenu after restore), so fall back to the global setting until
+    // the live data delivers — onViewTypeChanged() then re-applies the real value.
     private val effectiveViewType: FileViewType
-        get() = skTabViewType ?: viewModel.viewType
+        get() = skTabViewType
+            ?: viewModel.viewTypeLiveData.value
+            ?: Settings.FILE_LIST_VIEW_TYPE.valueCompat
 
     private lateinit var binding: Binding
 
