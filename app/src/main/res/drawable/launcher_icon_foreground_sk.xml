@@ -2,7 +2,7 @@
 
 <!-- 白い熊 fork launcher icon foreground: the upstream folder glyph traced in
      yellow (a black carve-stroke along the outline keeps the lines thin),
-     sized to ~65% of the masked icon. -->
+     sized to 100% of the masked icon. -->
 <vector
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:width="108dp"
@@ -11,10 +11,10 @@
     android:viewportHeight="90">
 
     <group
-        android:scaleX="1.203"
-        android:scaleY="1.203"
-        android:translateX="-9.4"
-        android:translateY="-9.13">
+        android:scaleX="1.875"
+        android:scaleY="1.875"
+        android:translateX="-39.375"
+        android:translateY="-39.375">
         <path
             android:fillColor="#FFFF00"
             android:strokeColor="#000000"
