@@ -18,6 +18,11 @@
     <string name="sk_ui_group_tabs">Tabs</string>
     <string name="sk_ui_group_bottom_bar">Bottom bar</string>
     <string name="sk_ui_group_speed_dial">New-item button</string>
+    <string name="sk_ui_group_share">Share → Termux</string>
+    <string name="sk_ui_share_one_target">One-tap share (single target; off = chooser)</string>
+    <string name="sk_ui_share_staging_dir">Staging folder</string>
+    <string name="sk_ui_share_staging_dir_help">When something is shared to a Termux target without a readable real path, it\'s copied here first, then passed to the script. Termux reads /storage/emulated/0/… directly.</string>
+    <string name="sk_ui_reset_default">Default</string>
 
     <string name="sk_ui_subgroup_text">Text</string>
     <string name="sk_ui_subgroup_icons">Icons</string>
@@ -133,4 +138,21 @@
     <string name="sk_termux_run_in_terminal">Run in a visible terminal</string>
     <string name="sk_termux_missing">Termux is not installed</string>
     <string name="sk_termux_failed">Couldn\'t start Termux (check allow-external-apps)</string>
+
+    <!-- Sort -->
+    <string name="sk_file_list_action_sort_by_name_literal">Name (literal)</string>
+
+    <!-- Inbound system share → Termux -->
+    <string name="sk_inbound_no_files">Nothing was shared</string>
+    <string name="sk_inbound_no_targets">No Termux targets yet — add one from the share dialog</string>
+    <string name="sk_inbound_choose_target">Send to Termux script</string>
+    <string name="sk_inbound_running_format">Sending to “%s”…</string>
+    <string name="sk_inbound_resolve_failed">Couldn\'t read the shared file(s)</string>
+
+    <!-- Static one-tap share slots (slot N → the Nth Termux script) -->
+    <string name="sk_share_slot_1" translatable="false">白い熊 Termux ①</string>
+    <string name="sk_share_slot_2" translatable="false">白い熊 Termux ②</string>
+    <string name="sk_share_slot_3" translatable="false">白い熊 Termux ③</string>
+    <string name="sk_share_slot_4" translatable="false">白い熊 Termux ④</string>
+    <string name="sk_share_slot_5" translatable="false">白い熊 Termux ⑤</string>
 </resources>

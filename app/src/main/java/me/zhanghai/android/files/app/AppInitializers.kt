@@ -16,6 +16,7 @@ import me.zhanghai.android.files.ftpserver.ftpServerServiceNotificationTemplate
 import me.zhanghai.android.files.hiddenapi.HiddenApi
 import me.zhanghai.android.files.provider.FileSystemProviders
 import me.zhanghai.android.files.settings.Settings
+import me.zhanghai.android.files.skui.SkShareShortcuts
 import me.zhanghai.android.files.skui.SkUi
 import me.zhanghai.android.files.storage.FtpServerAuthenticator
 import me.zhanghai.android.files.storage.SftpServerAuthenticator
@@ -40,6 +41,7 @@ val appInitializers = listOf(
     ::initializeLiveDataObjects,
     ::initializeCustomTheme,
     ::initializeSkUi,
+    ::initializeSkShareShortcuts,
     ::initializeNightMode,
     ::createNotificationChannels
 )
@@ -88,6 +90,12 @@ private fun initializeCustomTheme() {
 // 白い熊 fork: one-time migrations of the persisted skui slot colors.
 private fun initializeSkUi() {
     SkUi.migrateToPureYellow()
+}
+
+// 白い熊 fork: publish the per-script Termux Direct-Share targets (off the main
+// thread inside sync()) so they appear in the system share sheet after install.
+private fun initializeSkShareShortcuts() {
+    SkShareShortcuts.sync(application)
 }
 
 private fun initializeNightMode() {

@@ -29,4 +29,10 @@
             android:action="me.zhanghai.android.files.intent.action.MANAGE_FTP_SERVER"
             android:targetPackage="me.zhanghai.android.files" />
     </shortcut>
+
+    <!-- 白い熊 fork: per-script Termux Direct-Share targets (SkShareShortcuts). -->
+    <share-target android:targetClass="me.zhanghai.android.files.skui.SkShareReceiverActivity">
+        <data android:mimeType="*/*" />
+        <category android:name="me.zhanghai.android.files.skui.category.TERMUX_TARGET" />
+    </share-target>
 </shortcuts>

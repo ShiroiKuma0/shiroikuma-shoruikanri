@@ -28,7 +28,6 @@ import android.widget.LinearLayout
 import android.widget.ScrollView
 import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
-import androidx.core.content.ContextCompat
 import me.zhanghai.android.files.R
 import me.zhanghai.android.files.util.showToast
 import me.zhanghai.android.files.util.startActivitySafe
@@ -156,17 +155,8 @@ class SkShareDialog(
             activity.showToast(R.string.sk_termux_missing)
             return
         }
-        val intent = Intent(TERMUX_ACTION_RUN_COMMAND).apply {
-            setClassName(TERMUX_PACKAGE, TERMUX_RUN_COMMAND_SERVICE)
-            putExtra(TERMUX_EXTRA_COMMAND_PATH, script.absolutePath)
-            putExtra(TERMUX_EXTRA_ARGUMENTS, filePaths.toTypedArray())
-            putExtra(TERMUX_EXTRA_WORKDIR, TERMUX_HOME)
-            putExtra(TERMUX_EXTRA_BACKGROUND, script.background)
-        }
         dialog?.dismiss()
-        try {
-            ContextCompat.startForegroundService(activity, intent)
-        } catch (e: Exception) {
+        if (!SkTermux.run(activity, script, filePaths)) {
             // Most commonly: allow-external-apps not enabled, or permission denied.
             activity.showToast(R.string.sk_termux_failed)
         }

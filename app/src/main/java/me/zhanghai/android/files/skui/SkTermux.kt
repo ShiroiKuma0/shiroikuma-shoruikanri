@@ -13,7 +13,9 @@
 package me.zhanghai.android.files.skui
 
 import android.content.Context
+import android.content.Intent
 import android.content.SharedPreferences
+import androidx.core.content.ContextCompat
 import me.zhanghai.android.files.app.application
 import org.json.JSONArray
 import org.json.JSONObject
@@ -46,10 +48,36 @@ class SkTermuxScript(
 
 object SkTermux {
     private const val KEY_SCRIPTS = "scripts"
+    private const val KEY_STAGING_DIR = "staging_dir"
+    private const val KEY_ONE_TARGET = "one_target"
+
+    // Where inbound shares (SkShareReceiverActivity) stage a copy when the shared
+    // item has no readable real path. Settable on the 白い熊 UI page. Termux reads
+    // /storage/emulated/0/… directly, so this must be a plain shared-storage path.
+    const val DEFAULT_STAGING_DIR = "/storage/emulated/0/tmp"
 
     private val prefs: SharedPreferences by lazy {
         application.getSharedPreferences("sk_termux", Context.MODE_PRIVATE)
     }
+
+    var stagingDir: String
+        get() = prefs.getString(KEY_STAGING_DIR, DEFAULT_STAGING_DIR)
+            ?.takeIf { it.isNotBlank() } ?: DEFAULT_STAGING_DIR
+        set(value) {
+            prefs.edit()
+                .putString(KEY_STAGING_DIR, value.trim().ifBlank { DEFAULT_STAGING_DIR })
+                .apply()
+        }
+
+    // true  = one share tile that fires the first script in one tap (default);
+    // false = one share tile that opens the chooser of all scripts (by name).
+    // Either way the app exposes a single SEND tile so EMUI doesn't group it.
+    var oneTargetMode: Boolean
+        get() = prefs.getBoolean(KEY_ONE_TARGET, true)
+        set(value) {
+            prefs.edit().putBoolean(KEY_ONE_TARGET, value).apply()
+            SkShareShortcuts.sync(application)
+        }
 
     var scripts: List<SkTermuxScript>
         get() =
@@ -77,7 +105,36 @@ object SkTermux {
                 )
             }
             prefs.edit().putString(KEY_SCRIPTS, array.toString()).apply()
+            // Keep the system-share Direct-Share targets in sync with the script list.
+            SkShareShortcuts.sync(application)
         }
+
+    fun isInstalled(context: Context): Boolean =
+        try {
+            context.packageManager.getPackageInfo(TERMUX_PACKAGE, 0)
+            true
+        } catch (e: Exception) {
+            false
+        }
+
+    // Fire RunCommandService for [script] with [paths] as its command-line arguments
+    // ($1, $2…). Returns false if Termux couldn't be started (most commonly
+    // allow-external-apps not enabled, or the RUN_COMMAND permission denied).
+    fun run(context: Context, script: SkTermuxScript, paths: List<String>): Boolean {
+        val intent = Intent(TERMUX_ACTION_RUN_COMMAND).apply {
+            setClassName(TERMUX_PACKAGE, TERMUX_RUN_COMMAND_SERVICE)
+            putExtra(TERMUX_EXTRA_COMMAND_PATH, script.absolutePath)
+            putExtra(TERMUX_EXTRA_ARGUMENTS, paths.toTypedArray())
+            putExtra(TERMUX_EXTRA_WORKDIR, TERMUX_HOME)
+            putExtra(TERMUX_EXTRA_BACKGROUND, script.background)
+        }
+        return try {
+            ContextCompat.startForegroundService(context, intent)
+            true
+        } catch (e: Exception) {
+            false
+        }
+    }
 
     fun add(script: SkTermuxScript) {
         scripts = scripts + script
