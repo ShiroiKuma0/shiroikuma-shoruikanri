@@ -540,7 +540,8 @@ class FileListAdapter(
     override fun getPopupText(view: View, position: Int): CharSequence {
         val file = getItem(position)
         return when (sortOptions.by) {
-            FileSortOptions.By.NAME -> file.name.take(1).uppercase(Locale.getDefault())
+            FileSortOptions.By.NAME, FileSortOptions.By.NAME_LITERAL ->
+                file.name.take(1).uppercase(Locale.getDefault())
             FileSortOptions.By.TYPE -> file.extension.uppercase(Locale.getDefault())
             FileSortOptions.By.SIZE -> file.attributes.fileSize.formatHumanReadable(view.context)
             FileSortOptions.By.LAST_MODIFIED ->

@@ -164,6 +164,139 @@
             android:label="@string/file_edit_title"
             android:theme="@style/Theme.MaterialFiles.Translucent" />
 
+        <!--
+          ~ 白い熊 fork: inbound system-share receiver → Termux script
+          ~ (SkShareReceiverActivity). The «書類管理» entry always shows; per-script
+          ~ Direct-Share targets come from the <share-target> in res/xml/shortcuts.xml.
+          -->
+        <activity
+            android:name="me.zhanghai.android.files.skui.SkShareReceiverActivity"
+            android:excludeFromRecents="true"
+            android:exported="true"
+            android:taskAffinity=""
+            android:theme="@style/Theme.MaterialFiles.Translucent" />
+
+        <!--
+          ~ 白い熊 fork: the «白い熊 書類管理» chooser tile (multi-target mode). It has
+          ~ the SEND filters (the receiver itself is target/shortcut only), so the
+          ~ tile can be toggled on/off via PackageManager. Launching it makes the
+          ~ receiver show the in-app chooser of all scripts by name.
+          -->
+        <activity-alias
+            android:name="me.zhanghai.android.files.skui.SkShareChooser"
+            android:enabled="false"
+            android:exported="true"
+            android:label="@string/app_name"
+            android:targetActivity="me.zhanghai.android.files.skui.SkShareReceiverActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.SEND" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="*/*" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.SEND_MULTIPLE" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="*/*" />
+            </intent-filter>
+        </activity-alias>
+
+        <!--
+          ~ 白い熊 fork: static one-tap share slots. EMUI/Huawei never surface
+          ~ Direct-Share shortcuts, so these activity-aliases each appear as their
+          ~ own plain share-sheet entry. SkShareShortcuts enables exactly one slot
+          ~ per defined Termux script (slot N → the Nth script) and disables the
+          ~ rest. Keep SkShareShortcuts.SLOT_COUNT in sync with the count here.
+          -->
+        <activity-alias
+            android:name="me.zhanghai.android.files.skui.SkShareSlot1"
+            android:enabled="false"
+            android:exported="true"
+            android:label="@string/sk_share_slot_1"
+            android:targetActivity="me.zhanghai.android.files.skui.SkShareReceiverActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.SEND" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="*/*" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.SEND_MULTIPLE" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="*/*" />
+            </intent-filter>
+        </activity-alias>
+
+        <activity-alias
+            android:name="me.zhanghai.android.files.skui.SkShareSlot2"
+            android:enabled="false"
+            android:exported="true"
+            android:label="@string/sk_share_slot_2"
+            android:targetActivity="me.zhanghai.android.files.skui.SkShareReceiverActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.SEND" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="*/*" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.SEND_MULTIPLE" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="*/*" />
+            </intent-filter>
+        </activity-alias>
+
+        <activity-alias
+            android:name="me.zhanghai.android.files.skui.SkShareSlot3"
+            android:enabled="false"
+            android:exported="true"
+            android:label="@string/sk_share_slot_3"
+            android:targetActivity="me.zhanghai.android.files.skui.SkShareReceiverActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.SEND" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="*/*" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.SEND_MULTIPLE" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="*/*" />
+            </intent-filter>
+        </activity-alias>
+
+        <activity-alias
+            android:name="me.zhanghai.android.files.skui.SkShareSlot4"
+            android:enabled="false"
+            android:exported="true"
+            android:label="@string/sk_share_slot_4"
+            android:targetActivity="me.zhanghai.android.files.skui.SkShareReceiverActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.SEND" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="*/*" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.SEND_MULTIPLE" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="*/*" />
+            </intent-filter>
+        </activity-alias>
+
+        <activity-alias
+            android:name="me.zhanghai.android.files.skui.SkShareSlot5"
+            android:enabled="false"
+            android:exported="true"
+            android:label="@string/sk_share_slot_5"
+            android:targetActivity="me.zhanghai.android.files.skui.SkShareReceiverActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.SEND" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="*/*" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.SEND_MULTIPLE" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="*/*" />
+            </intent-filter>
+        </activity-alias>
+
         <activity
             android:name="me.zhanghai.android.files.filelist.OpenFileAsDialogActivity"
             android:autoRemoveFromRecents="true"

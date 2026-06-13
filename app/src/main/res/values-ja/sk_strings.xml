@@ -18,6 +18,11 @@
     <string name="sk_ui_group_tabs">タブ</string>
     <string name="sk_ui_group_bottom_bar">下部バー</string>
     <string name="sk_ui_group_speed_dial">新規作成ボタン</string>
+    <string name="sk_ui_group_share">共有 → Termux</string>
+    <string name="sk_ui_share_one_target">ワンタップ共有（1ターゲット／オフで選択メニュー）</string>
+    <string name="sk_ui_share_staging_dir">受け取りフォルダ</string>
+    <string name="sk_ui_share_staging_dir_help">読み取り可能な実パスのない項目を Termux ターゲットへ共有すると、まずここへコピーしてからスクリプトへ渡します。Termux は /storage/emulated/0/… を直接読み取れます。</string>
+    <string name="sk_ui_reset_default">デフォルト</string>
 
     <string name="sk_ui_subgroup_text">テキスト</string>
     <string name="sk_ui_subgroup_icons">アイコン</string>
@@ -133,4 +138,14 @@
     <string name="sk_termux_run_in_terminal">ターミナルを表示して実行</string>
     <string name="sk_termux_missing">Termux がインストールされていません</string>
     <string name="sk_termux_failed">Termux を起動できませんでした（allow-external-apps を確認）</string>
+
+    <!-- Sort -->
+    <string name="sk_file_list_action_sort_by_name_literal">名前（文字順）</string>
+
+    <!-- Inbound system share → Termux -->
+    <string name="sk_inbound_no_files">共有されたものがありません</string>
+    <string name="sk_inbound_no_targets">Termux ターゲットがありません（共有ダイアログで追加してください）</string>
+    <string name="sk_inbound_choose_target">Termux スクリプトへ送信</string>
+    <string name="sk_inbound_running_format">「%s」へ送信中…</string>
+    <string name="sk_inbound_resolve_failed">共有ファイルを読み取れませんでした</string>
 </resources>

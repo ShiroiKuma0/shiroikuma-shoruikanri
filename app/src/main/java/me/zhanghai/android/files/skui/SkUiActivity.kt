@@ -11,9 +11,11 @@ import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.GradientDrawable
 import android.net.Uri
 import android.os.Bundle
+import android.text.InputType
 import android.text.TextUtils
 import android.view.Gravity
 import android.view.View
+import android.widget.EditText
 import android.widget.LinearLayout
 import android.widget.SeekBar
 import android.widget.TextView
@@ -223,6 +225,49 @@ class SkUiActivity : AppActivity() {
         addSection(R.string.sk_ui_group_speed_dial)
         addColorRow(SkThemeSlot.FAB_BACKGROUND, stepPx)
         addColorRow(SkThemeSlot.FAB_ICON, stepPx)
+
+        // Share → Termux
+        addSection(R.string.sk_ui_group_share)
+        addSwitchRow(R.string.sk_ui_share_one_target, SkTermux.oneTargetMode, stepPx) {
+            SkTermux.oneTargetMode = it
+        }
+        addValueRow(R.string.sk_ui_share_staging_dir, SkTermux.stagingDir, stepPx) { valueView ->
+            showStagingDirDialog(valueView)
+        }
+    }
+
+    private fun showStagingDirDialog(valueView: TextView) {
+        val edit = EditText(this).apply {
+            inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS
+            setText(SkTermux.stagingDir)
+            setSelection(text.length)
+        }
+        val form = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            setPadding(dp(20), dp(8), dp(20), 0)
+            addView(
+                TextView(this@SkUiActivity).apply {
+                    text = getString(R.string.sk_ui_share_staging_dir_help)
+                    textSize = 13f
+                    setTextColor(skColor(SkThemeSlot.TEXT_SECONDARY))
+                    setPadding(0, 0, 0, dp(8))
+                }
+            )
+            addView(edit)
+        }
+        SkMaterialAlertDialogBuilder(this)
+            .setTitle(R.string.sk_ui_share_staging_dir)
+            .setView(form)
+            .setPositiveButton(android.R.string.ok) { _, _ ->
+                SkTermux.stagingDir = edit.text.toString()
+                valueView.text = SkTermux.stagingDir
+            }
+            .setNeutralButton(R.string.sk_ui_reset_default) { _, _ ->
+                SkTermux.stagingDir = SkTermux.DEFAULT_STAGING_DIR
+                valueView.text = SkTermux.stagingDir
+            }
+            .setNegativeButton(android.R.string.cancel, null)
+            .show()
     }
 
     private fun ellipsizeLabel(value: TextUtils.TruncateAt): String =

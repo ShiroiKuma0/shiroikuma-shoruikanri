@@ -43,6 +43,9 @@
                     android:id="@+id/action_sort_by_name"
                     android:title="@string/file_list_action_sort_by_name" />
                 <item
+                    android:id="@+id/action_sort_by_name_literal"
+                    android:title="@string/sk_file_list_action_sort_by_name_literal" />
+                <item
                     android:id="@+id/action_sort_by_type"
                     android:title="@string/file_list_action_sort_by_type" />
                 <item

@@ -689,6 +689,10 @@ class FileListFragment : Fragment(), BreadcrumbLayout.Listener, FileListAdapter.
                 viewModel.setSortBy(By.NAME)
                 true
             }
+            R.id.action_sort_by_name_literal -> {
+                viewModel.setSortBy(By.NAME_LITERAL)
+                true
+            }
             R.id.action_sort_by_type -> {
                 viewModel.setSortBy(By.TYPE)
                 true
@@ -982,6 +986,7 @@ class FileListFragment : Fragment(), BreadcrumbLayout.Listener, FileListAdapter.
         val sortOptions = viewModel.sortOptions
         val checkedSortByItem = when (sortOptions.by) {
             By.NAME -> menuBinding.sortByNameItem
+            By.NAME_LITERAL -> menuBinding.sortByNameLiteralItem
             By.TYPE -> menuBinding.sortByTypeItem
             By.SIZE -> menuBinding.sortBySizeItem
             By.LAST_MODIFIED -> menuBinding.sortByLastModifiedItem
@@ -2037,6 +2042,7 @@ class FileListFragment : Fragment(), BreadcrumbLayout.Listener, FileListAdapter.
         val viewListItem: MenuItem,
         val viewGridItem: MenuItem,
         val sortByNameItem: MenuItem,
+        val sortByNameLiteralItem: MenuItem,
         val sortByTypeItem: MenuItem,
         val sortBySizeItem: MenuItem,
         val sortByLastModifiedItem: MenuItem,
@@ -2061,6 +2067,7 @@ class FileListFragment : Fragment(), BreadcrumbLayout.Listener, FileListAdapter.
                     menu, menu.findItem(R.id.action_search), menu.findItem(R.id.action_view_sort),
                     menu.findItem(R.id.action_view_list), menu.findItem(R.id.action_view_grid),
                     menu.findItem(R.id.action_sort_by_name),
+                    menu.findItem(R.id.action_sort_by_name_literal),
                     menu.findItem(R.id.action_sort_by_type),
                     menu.findItem(R.id.action_sort_by_size),
                     menu.findItem(R.id.action_sort_by_last_modified),
