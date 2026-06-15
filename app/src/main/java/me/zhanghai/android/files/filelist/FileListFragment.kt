@@ -1194,51 +1194,82 @@ class FileListFragment : Fragment(), BreadcrumbLayout.Listener, FileListAdapter.
 
     private fun updateOverlayToolbar() {
         val files = viewModel.selectedFiles
-        if (files.isEmpty()) {
+        val pickOptions = viewModel.pickOptions
+        if (files.isNotEmpty()) {
+            if (pickOptions != null) {
+                overlayActionMode.title =
+                    getString(R.string.file_list_select_title_format, files.size)
+                overlayActionMode.setMenuResource(R.menu.file_list_pick)
+                val menu = overlayActionMode.menu
+                val isOpen = when (pickOptions.mode) {
+                    PickOptions.Mode.OPEN_FILE, PickOptions.Mode.OPEN_DIRECTORY -> true
+                    PickOptions.Mode.CREATE_FILE -> false
+                }
+                menu.findItem(R.id.action_open).isVisible = isOpen
+                menu.findItem(R.id.action_create).isVisible = !isOpen
+                menu.findItem(R.id.action_select_all).isVisible = pickOptions.allowMultiple
+            } else {
+                overlayActionMode.title =
+                    getString(R.string.file_list_select_title_format, files.size)
+                overlayActionMode.setMenuResource(R.menu.file_list_select)
+                val menu = overlayActionMode.menu
+                val isAnyFileReadOnly = files.any { it.path.fileSystem.isReadOnly }
+                menu.findItem(R.id.action_cut).isVisible = !isAnyFileReadOnly
+                val areAllFilesArchivePaths = files.all { it.path.isArchivePath }
+                menu.findItem(R.id.action_copy)
+                    .setIcon(
+                        if (areAllFilesArchivePaths) {
+                            R.drawable.extract_icon_control_normal_24dp
+                        } else {
+                            R.drawable.copy_icon_control_normal_24dp
+                        }
+                    )
+                    .setTitle(
+                        if (areAllFilesArchivePaths) {
+                            R.string.file_list_select_action_extract
+                        } else {
+                            R.string.copy
+                        }
+                    )
+                menu.findItem(R.id.action_delete).isVisible = !isAnyFileReadOnly
+                val areAllFilesArchiveFiles = files.all { it.isArchiveFile }
+                menu.findItem(R.id.action_extract).isVisible = areAllFilesArchiveFiles
+                val isCurrentPathReadOnly = viewModel.currentPath.fileSystem.isReadOnly
+                menu.findItem(R.id.action_archive).isVisible = !isCurrentPathReadOnly
+            }
+        } else if (pickOptions == null && viewModel.pasteState.files.isNotEmpty()) {
+            // 白い熊 fork: show the pending paste at the top in the overlay toolbar (in
+            // place of the copy/cut icons) rather than in the bottom action-mode bar.
+            val pasteState = viewModel.pasteState
+            val pasteFiles = pasteState.files
+            val areAllFilesArchivePaths = pasteFiles.all { it.path.isArchivePath }
+            overlayActionMode.title = getString(
+                if (pasteState.copy) {
+                    if (areAllFilesArchivePaths) {
+                        R.string.file_list_paste_extract_title_format
+                    } else {
+                        R.string.file_list_paste_copy_title_format
+                    }
+                } else {
+                    R.string.file_list_paste_move_title_format
+                }, pasteFiles.size
+            )
+            overlayActionMode.setMenuResource(R.menu.file_list_paste)
+            val isCurrentPathReadOnly = viewModel.currentPath.fileSystem.isReadOnly
+            overlayActionMode.menu.findItem(R.id.action_paste)
+                .setTitle(
+                    if (areAllFilesArchivePaths) {
+                        R.string.file_list_paste_action_extract_here
+                    } else {
+                        R.string.paste
+                    }
+                )
+                .isEnabled = !isCurrentPathReadOnly
+        } else {
             if (overlayActionMode.isActive) {
                 overlayActionMode.finish()
             }
             return
-        }
-        val pickOptions = viewModel.pickOptions
-        if (pickOptions != null) {
-            overlayActionMode.title = getString(R.string.file_list_select_title_format, files.size)
-            overlayActionMode.setMenuResource(R.menu.file_list_pick)
-            val menu = overlayActionMode.menu
-            val isOpen = when (pickOptions.mode) {
-                PickOptions.Mode.OPEN_FILE, PickOptions.Mode.OPEN_DIRECTORY -> true
-                PickOptions.Mode.CREATE_FILE -> false
-            }
-            menu.findItem(R.id.action_open).isVisible = isOpen
-            menu.findItem(R.id.action_create).isVisible = !isOpen
-            menu.findItem(R.id.action_select_all).isVisible = pickOptions.allowMultiple
-        } else {
-            overlayActionMode.title = getString(R.string.file_list_select_title_format, files.size)
-            overlayActionMode.setMenuResource(R.menu.file_list_select)
-            val menu = overlayActionMode.menu
-            val isAnyFileReadOnly = files.any { it.path.fileSystem.isReadOnly }
-            menu.findItem(R.id.action_cut).isVisible = !isAnyFileReadOnly
-            val areAllFilesArchivePaths = files.all { it.path.isArchivePath }
-            menu.findItem(R.id.action_copy)
-                .setIcon(
-                    if (areAllFilesArchivePaths) {
-                        R.drawable.extract_icon_control_normal_24dp
-                    } else {
-                        R.drawable.copy_icon_control_normal_24dp
-                    }
-                )
-                .setTitle(
-                    if (areAllFilesArchivePaths) {
-                        R.string.file_list_select_action_extract
-                    } else {
-                        R.string.copy
-                    }
-                )
-            menu.findItem(R.id.action_delete).isVisible = !isAnyFileReadOnly
-            val areAllFilesArchiveFiles = files.all { it.isArchiveFile }
-            menu.findItem(R.id.action_extract).isVisible = areAllFilesArchiveFiles
-            val isCurrentPathReadOnly = viewModel.currentPath.fileSystem.isReadOnly
-            menu.findItem(R.id.action_archive).isVisible = !isCurrentPathReadOnly
         }
         if (!overlayActionMode.isActive) {
             binding.appBarLayout.setExpanded(true)
@@ -1296,11 +1327,22 @@ class FileListFragment : Fragment(), BreadcrumbLayout.Listener, FileListAdapter.
                 selectAllFiles()
                 true
             }
+            // 白い熊 fork: paste now lives in the overlay toolbar (top) instead of the bottom bar.
+            R.id.action_paste -> {
+                pasteFiles(currentPath)
+                true
+            }
             else -> false
         }
 
     private fun onOverlayActionModeFinished() {
-        viewModel.clearSelectedFiles()
+        // 白い熊 fork: the overlay toolbar serves both selection and the pending paste, so
+        // dismiss whichever it is currently showing. (When both are empty this is a no-op.)
+        if (viewModel.selectedFiles.isNotEmpty()) {
+            viewModel.clearSelectedFiles()
+        } else if (viewModel.pickOptions == null && viewModel.pasteState.files.isNotEmpty()) {
+            viewModel.clearPasteState()
+        }
     }
 
     private fun confirmReplaceFile(file: FileItem, setFileName: Boolean = true) {
@@ -1370,10 +1412,13 @@ class FileListFragment : Fragment(), BreadcrumbLayout.Listener, FileListAdapter.
     }
 
     private fun onPasteStateChanged(pasteState: PasteState) {
-        updateBottomToolbar()
+        // 白い熊 fork: the pending paste is shown in the overlay toolbar (top), not the bottom bar.
+        updateOverlayToolbar()
     }
 
     private fun updateBottomToolbar() {
+        // 白い熊 fork: the bottom bar now only hosts pick mode (create file / open directory);
+        // the pending paste moved to the overlay toolbar (see updateOverlayToolbar).
         val pickOptions = viewModel.pickOptions
         if (pickOptions != null) {
             bottomActionMode.setMenuResource(R.menu.file_list_pick_bottom)
@@ -1416,34 +1461,10 @@ class FileListFragment : Fragment(), BreadcrumbLayout.Listener, FileListAdapter.
                 }
             }
         } else {
-            val pasteState = viewModel.pasteState
-            val files = pasteState.files
-            if (files.isEmpty()) {
-                if (bottomActionMode.isActive) {
-                    bottomActionMode.finish()
-                }
-                return
+            if (bottomActionMode.isActive) {
+                bottomActionMode.finish()
             }
-            val areAllFilesArchivePaths = files.all { it.path.isArchivePath }
-            bottomActionMode.title = getString(
-                if (pasteState.copy) {
-                    if (areAllFilesArchivePaths) {
-                        R.string.file_list_paste_extract_title_format
-                    } else {
-                        R.string.file_list_paste_copy_title_format
-                    }
-                } else {
-                    R.string.file_list_paste_move_title_format
-                }, files.size
-            )
-            binding.bottomCreateFileNameEdit.isVisible = false
-            bottomActionMode.setMenuResource(R.menu.file_list_paste)
-            val isCurrentPathReadOnly = viewModel.currentPath.fileSystem.isReadOnly
-            bottomActionMode.menu.findItem(R.id.action_paste)
-                .setTitle(
-                    if (areAllFilesArchivePaths) R.string.file_list_paste_action_extract_here else R.string.paste
-                )
-                .isEnabled = !isCurrentPathReadOnly
+            return
         }
         if (!bottomActionMode.isActive) {
             bottomActionMode.start(object : ToolbarActionMode.Callback {
