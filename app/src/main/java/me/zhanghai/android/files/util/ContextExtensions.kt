@@ -39,6 +39,7 @@ import androidx.appcompat.view.ContextThemeWrapper
 import androidx.core.content.res.ResourcesCompat
 import androidx.core.util.TypedValueCompat
 import me.zhanghai.android.files.R
+import me.zhanghai.android.files.skui.SkToast
 import me.zhanghai.android.files.compat.complexUnitCompat
 import me.zhanghai.android.files.compat.getFloatCompat
 import me.zhanghai.android.files.compat.mainExecutorCompat
@@ -238,7 +239,7 @@ fun Context.showToast(textRes: Int, duration: Int = Toast.LENGTH_SHORT) {
         mainExecutorCompat.execute { showToast(textRes, duration) }
         return
     }
-    Toast.makeText(this, textRes, duration).show()
+    (SkToast.make(this, getText(textRes), duration) ?: Toast.makeText(this, textRes, duration)).show()
 }
 
 fun Context.showToast(text: CharSequence, duration: Int = Toast.LENGTH_SHORT) {
@@ -246,7 +247,7 @@ fun Context.showToast(text: CharSequence, duration: Int = Toast.LENGTH_SHORT) {
         mainExecutorCompat.execute { showToast(text, duration) }
         return
     }
-    Toast.makeText(this, text, duration).show()
+    (SkToast.make(this, text, duration) ?: Toast.makeText(this, text, duration)).show()
 }
 
 fun Context.startActivitySafe(intent: Intent, options: Bundle? = null) {
