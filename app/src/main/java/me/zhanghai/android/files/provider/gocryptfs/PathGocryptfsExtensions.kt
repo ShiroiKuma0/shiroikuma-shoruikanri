@@ -12,3 +12,7 @@ import java8.nio.file.Path
 
 fun Path.createGocryptfsRootPath(): Path =
     GocryptfsFileSystemProvider.getOrNewFileSystem(this).rootDirectory
+
+/** The backing cipher dir of a gocryptfs path, or null if this isn't one. */
+val Path.gocryptfsCipherDirOrNull: Path?
+    get() = (this as? GocryptfsPath)?.cipherDir

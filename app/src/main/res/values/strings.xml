@@ -311,7 +311,10 @@
     <string name="file_list_breadcrumb_action_open_in_new_task">Open in new window</string>
     <string name="sk_breadcrumb_action_path_diagnostics">Path diagnostics</string>
     <string name="sk_path_diagnostics_title">Path diagnostics</string>
-    <string name="sk_action_gocryptfs_spike" translatable="false">Open gocryptfs (temp)</string>
+    <string name="sk_gocryptfs_unlock_title">Unlock encrypted volume</string>
+    <string name="sk_gocryptfs_unlock_hint">Password</string>
+    <string name="sk_gocryptfs_unlock_action">Unlock</string>
+    <string name="sk_gocryptfs_unlock_failed">Couldn’t unlock — wrong password, or not a gocryptfs volume.</string>
     <string name="file_list_select_title_format">%1$,d</string>
     <string name="file_list_select_action_extract" translatable="false">@string/file_item_action_extract</string>
     <string name="file_list_select_action_archive" translatable="false">@string/file_item_action_archive</string>
