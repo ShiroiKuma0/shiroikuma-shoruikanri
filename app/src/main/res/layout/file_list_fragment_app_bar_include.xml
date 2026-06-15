@@ -70,6 +70,17 @@
                 android:paddingStart="@dimen/content_start_margin_minus_12dp"
                 android:paddingEnd="@dimen/screen_edge_margin_minus_12dp" />
 
+            <!-- 白い熊 fork: unlock button, shown only when the current dir is a gocryptfs
+                 volume; sits to the left of the address-line / separator button. -->
+            <ImageButton
+                android:id="@+id/skGocryptfsButton"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="@string/sk_gocryptfs_unlock_title"
+                android:src="@drawable/lock_icon_white_24dp"
+                android:visibility="gone" />
+
             <ImageButton
                 android:id="@+id/skGridStyleButton"
                 android:layout_width="40dp"

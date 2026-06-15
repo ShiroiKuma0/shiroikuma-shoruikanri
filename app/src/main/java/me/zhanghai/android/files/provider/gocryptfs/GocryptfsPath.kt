@@ -61,6 +61,9 @@ internal class GocryptfsPath : ByteStringListPath<GocryptfsPath> {
 
     override fun getFileSystem(): GocryptfsFileSystem = fileSystem
 
+    internal val cipherDir: Path
+        get() = fileSystem.cipherDir
+
     override fun getRoot(): GocryptfsPath? = if (isAbsolute) fileSystem.rootDirectory else null
 
     @Throws(IOException::class)

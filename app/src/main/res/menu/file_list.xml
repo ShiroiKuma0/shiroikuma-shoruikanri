@@ -112,13 +112,6 @@
         android:title="@string/sk_file_list_action_new_tab"
         app:showAsAction="never" />
 
-    <!-- 白い熊 fork: TEMPORARY gocryptfs spike (Phase 1). Remove with SkGocryptfsSpike. -->
-    <item
-        android:id="@+id/action_sk_gocryptfs_spike"
-        android:orderInCategory="100"
-        android:title="@string/sk_action_gocryptfs_spike"
-        app:showAsAction="never" />
-
     <item
         android:id="@+id/action_new_task"
         android:orderInCategory="100"

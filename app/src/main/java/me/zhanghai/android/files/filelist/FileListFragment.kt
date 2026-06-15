@@ -89,6 +89,7 @@ import me.zhanghai.android.files.navigation.NavigationFragment
 import me.zhanghai.android.files.navigation.NavigationRootMapLiveData
 import me.zhanghai.android.files.provider.archive.createArchiveRootPath
 import me.zhanghai.android.files.provider.archive.isArchivePath
+import me.zhanghai.android.files.provider.gocryptfs.isGocryptfsPath
 import me.zhanghai.android.files.provider.linux.isLinuxPath
 import me.zhanghai.android.files.settings.Settings
 import me.zhanghai.android.files.skui.SkGridStyleSheet
@@ -547,6 +548,8 @@ class FileListFragment : Fragment(), BreadcrumbLayout.Listener, FileListAdapter.
             ColorStateList.valueOf(skColor(SkThemeSlot.TOOLBAR_ICONS))
         binding.skGridStyleButton.setOnClickListener { showSkGridStyleSheet() }
         binding.skGridStyleButton.isVisible = true
+        binding.skGocryptfsButton.imageTintList =
+            ColorStateList.valueOf(skColor(SkThemeSlot.TOOLBAR_ICONS))
         refreshSkGridStyle()
         updateSkTabStrip()
     }
@@ -728,11 +731,6 @@ class FileListFragment : Fragment(), BreadcrumbLayout.Listener, FileListAdapter.
                 openInNewTab()
                 true
             }
-            R.id.action_sk_gocryptfs_spike -> {
-                // 白い熊 fork: TEMPORARY gocryptfs spike (Phase 1). Remove with SkGocryptfsSpike.
-                SkGocryptfsSpike.run(this, currentPath)
-                true
-            }
             R.id.action_new_task -> {
                 newTask()
                 true
@@ -859,6 +857,27 @@ class FileListFragment : Fragment(), BreadcrumbLayout.Listener, FileListAdapter.
         }
         if (stateful is Success) {
             viewModel.pendingState?.let { layoutManager.onRestoreInstanceState(it) }
+        }
+        updateGocryptfsButton(files)
+    }
+
+    // 白い熊 fork: an unlock (open padlock) button on a gocryptfs cipher dir — a real (linux) path
+    // whose listing contains gocryptfs.conf — and a lock (closed padlock) button inside an unlocked
+    // volume. Hidden everywhere else.
+    private fun updateGocryptfsButton(files: List<FileItem>?) {
+        val button = binding.skGocryptfsButton
+        when {
+            currentPath.isLinuxPath && files?.any { it.name == "gocryptfs.conf" } == true -> {
+                button.setImageResource(R.drawable.sk_lock_open_24dp)
+                button.setOnClickListener { SkGocryptfsUnlock.prompt(this, currentPath) }
+                button.isVisible = true
+            }
+            currentPath.isGocryptfsPath -> {
+                button.setImageResource(R.drawable.lock_icon_white_24dp)
+                button.setOnClickListener { SkGocryptfsUnlock.lock(this, currentPath) }
+                button.isVisible = true
+            }
+            else -> button.isVisible = false
         }
     }
 
@@ -2013,6 +2032,7 @@ class FileListFragment : Fragment(), BreadcrumbLayout.Listener, FileListAdapter.
         val overlayToolbar: Toolbar,
         val skTabBar: SkFolderTabBar,
         val breadcrumbLayout: BreadcrumbLayout,
+        val skGocryptfsButton: ImageButton,
         val skGridStyleButton: ImageButton,
         val contentLayout: ViewGroup,
         val progress: ProgressBar,
@@ -2044,6 +2064,7 @@ class FileListFragment : Fragment(), BreadcrumbLayout.Listener, FileListAdapter.
                     appBarBinding.toolbar, appBarBinding.overlayToolbar,
                     appBarBinding.skTabBar,
                     appBarBinding.breadcrumbLayout,
+                    appBarBinding.skGocryptfsButton,
                     appBarBinding.skGridStyleButton, contentBinding.contentLayout,
                     contentBinding.progress, contentBinding.errorText, contentBinding.emptyView,
                     contentBinding.swipeRefreshLayout, contentBinding.recyclerView,
