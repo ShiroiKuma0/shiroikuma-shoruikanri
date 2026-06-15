@@ -92,6 +92,7 @@ import me.zhanghai.android.files.provider.archive.isArchivePath
 import me.zhanghai.android.files.provider.linux.isLinuxPath
 import me.zhanghai.android.files.settings.Settings
 import me.zhanghai.android.files.skui.SkGridStyleSheet
+import me.zhanghai.android.files.skui.SkMaterialAlertDialogBuilder
 import me.zhanghai.android.files.skui.SkOpenWith
 import me.zhanghai.android.files.skui.SkOpenWithDialog
 import me.zhanghai.android.files.skui.SkSeparatorDecoration
@@ -727,6 +728,11 @@ class FileListFragment : Fragment(), BreadcrumbLayout.Listener, FileListAdapter.
                 openInNewTab()
                 true
             }
+            R.id.action_sk_gocryptfs_spike -> {
+                // 白い熊 fork: TEMPORARY gocryptfs spike (Phase 1). Remove with SkGocryptfsSpike.
+                SkGocryptfsSpike.run(this, currentPath)
+                true
+            }
             R.id.action_new_task -> {
                 newTask()
                 true
@@ -1081,6 +1087,19 @@ class FileListFragment : Fragment(), BreadcrumbLayout.Listener, FileListAdapter.
         val intent = FileListActivity.createViewIntent(path)
             .addFlags(Intent.FLAG_ACTIVITY_NEW_DOCUMENT or Intent.FLAG_ACTIVITY_MULTIPLE_TASK)
         startActivitySafe(intent)
+    }
+
+    // 白い熊 fork: breadcrumb long-press → real-path vs SAF access diagnostic.
+    override fun showPathDiagnostics(path: Path) {
+        val report = SkPathDiagnostics.report(requireContext(), path)
+        SkMaterialAlertDialogBuilder(requireContext())
+            .setTitle(R.string.sk_path_diagnostics_title)
+            .setMessage(report)
+            .setNeutralButton(android.R.string.copy) { _, _ ->
+                clipboardManager.copyText(report, requireContext())
+            }
+            .setPositiveButton(android.R.string.ok, null)
+            .show()
     }
 
     override fun openInNewTab(file: FileItem) {
