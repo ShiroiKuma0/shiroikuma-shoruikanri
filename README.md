@@ -1,82 +1,101 @@
-# Material Files
+<div align="center">
 
-[本文中文版](README_zh-CN.md)
+<img src="app/src/main/res/mipmap-xxxhdpi/launcher_icon.png" width="120" alt="白い熊 書類管理 app icon" />
 
-[![Android CI status](https://github.com/zhanghai/MaterialFiles/workflows/Android%20CI/badge.svg)](https://github.com/zhanghai/MaterialFiles/actions) [![GitHub release](https://img.shields.io/github/v/release/zhanghai/MaterialFiles)](https://github.com/zhanghai/MaterialFiles/releases) [![License](https://img.shields.io/github/license/zhanghai/MaterialFiles?color=blue)](LICENSE)
+# 白い熊 書類管理
 
-An open source Material Design file manager, for Android 5.0+.
+## 書類管理 is read SHORUI-KANRI — “document management” in Japanese: a file manager built for keeping your documents in order, in private. :@)
 
-[<img alt="Get it on Google Play" src="https://play.google.com/intl/en_us/badges/static/images/badges/en_badge_web_generic.png" width="240">](https://play.google.com/store/apps/details?id=me.zhanghai.android.files) [<img alt="Get it on F-Droid" src="https://fdroid.gitlab.io/artwork/badge/get-it-on.png" width="240">](https://f-droid.org/packages/me.zhanghai.android.files) [<img alt="Get it on GitHub" src="https://raw.githubusercontent.com/Kunzisoft/Github-badge/main/get-it-on-github.png" width="240">](https://github.com/zhanghai/MaterialFiles/releases/latest/download/app-release-universal.apk)
+**A black-and-yellow, tab-driven file manager — with encrypted gocryptfs volumes built right in.**
 
-[Help translation on Transifex](https://www.transifex.com/zhanghai/MaterialFiles/) ([Search Android & GNOME translations](https://translations.zhanghai.me/), [Microsoft language resources](https://learn.microsoft.com/en-us/globalization/reference/microsoft-language-resources), [MIME type translations](https://gitlab.freedesktop.org/xdg/shared-mime-info/-/tree/master/po))
+A fork of [Material Files](https://github.com/zhanghai/MaterialFiles) with **major additions**:
+in-app **gocryptfs** encrypted volumes (no FUSE, no root), **multi-folder tabs**, a full
+**black/yellow theme system**, **six listing views** with per-folder styling, a **custom open-with
+chooser**, and deep **Termux / share** integration.
 
-## Preview
+Installs **side-by-side** with the official Material Files (app ID `shiroikuma.shoruikanri`).
 
-<p><img src="fastlane/metadata/android/en-US/images/phoneScreenshots/1.png" width="32%" /> <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/2.png" width="32%" /> <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/3.png" width="32%" />
-<img src="fastlane/metadata/android/en-US/images/phoneScreenshots/4.png" width="32%" /> <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/5.png" width="32%" /> <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/6.png" width="32%" /></p>
+**📥 Latest release: [`1.7.4+36`](https://github.com/ShiroiKuma0/shiroikuma-shoruikanri/releases/latest)** — [all releases & APK downloads »](https://github.com/ShiroiKuma0/shiroikuma-shoruikanri/releases)
 
-## Features
+</div>
 
-- Open source: Lightweight, clean and secure.
-- Material Design: Follows Material Design guidelines, with attention into details.
-- Breadcrumbs: Navigate in the filesystem with ease.
-- Root support: View and manage files with root access.
-- Archive support: View, extract and create common compressed files.
-- NAS support: View and manage files on FTP, SFTP, SMB and WebDAV servers.
-- Themes: Customizable UI colors, plus night mode with optional true black.
-- Linux-aware: Like [Nautilus](https://apps.gnome.org/Nautilus/), knows symbolic links, file permissions and SELinux context.
-- Robust: Uses Linux system calls under the hood, not yet another [`ls` parser](https://news.ycombinator.com/item?id=7994720).
-- Well-implemented: Built upon the right things, including [Java NIO2 File API](https://docs.oracle.com/javase/8/docs/api/java/nio/file/package-summary.html) and [LiveData](https://developer.android.com/topic/libraries/architecture/livedata).
+<!-- README screenshots / videos go here once captured. -->
 
-## Why Material Files?
+---
 
-Because I like Material Design, and clean Material Design.
+## 🔒 Encrypted gocryptfs volumes, in-app
 
-There are already a handful of powerful file managers, but most of them just aren't Material Design. And even among the ones with Material Design, they usually have various minor design flaws (layout, alignment, padding, icon, font, etc) across the app which makes me uncomfortable, while still being minor enough so that not everybody would care to fix it. So I had to create my own.
+Open, browse, read and write **gocryptfs** encrypted volumes like any other folder — **no FUSE, no
+root**. A JNI-backed file provider over `libgocryptfs` does the crypto in-process. On any cipher
+directory a padlock appears next to the address bar: tap it, enter the password, and you’re inside
+the decrypted tree; a closing padlock locks the volume again. Your encrypted documents stay encrypted
+on disk and never leave the device.
 
-Because I want an open source file manager.
+## 🗂 Multi-folder tabs
 
-Most of the popular and reliable file managers are just closed source, and I sometimes use them to view and modify files that require root access. But deep down inside, I just feel uneasy with giving any closed source app the root access to my device. After all, that means giving literally full access to my device, which stays with me every day and stores my own information, and what apps do with such access merely depends on their good intent.
+Keep several folders open at once in a stacked **paper-folder tab bar**. Each tab remembers its own
+listing view; **drag** to reorder, **swipe** the file area to flip between tabs, and **long-press** a
+tab to pin its folder to your favorites. The whole tab set — paths, selection and per-tab view —
+**survives restarts, reboots and app updates**.
 
-Because I want a file manager that is implemented the right way.
+## 🎨 Black & yellow, themed to the pixel
 
-- This app implemented [Java NIO2 File API](https://docs.oracle.com/javase/8/docs/api/java/nio/file/package-summary.html) as its backend, instead of inventing a custom model for file information/operations, which often gets coupled with UI logic and grows into a mixture of everything ([example](https://github.com/TeamAmaze/AmazeFileManager/blob/master/app/src/main/java/com/amaze/filemanager/filesystem/HybridFile.java)). On the contrary, a decoupled backend allows cleaner code (which means less bugs), and easier addition of support for other file systems.
+A pure-**black** background with pure-**yellow** text, icons and borders, everywhere — lists,
+dialogs, menus, toasts, the speed-dial button and the image viewer. A dedicated **UI page** lets you
+retune it: per-element **colours** (picker with swatches + hex), **fonts** (import your own
+`.ttf`/`.otf`, set family/weight/size), icon size and spacing — all with live previews.
 
-- This app doesn't use `java.io.File` or parse the output of `ls`, but built bindings to Linux syscalls to properly access the file system. `java.io.File` is an old API missing many features, and just can't handle things like symbolic links correctly, which is the reason why many people rather parse `ls` instead. However parsing the output `ls` is not only slow, but also [unreliable](https://news.ycombinator.com/item?id=7994720), which made [Cabinet](https://github.com/aminb/cabinet/blob/master/app/src/main/java/com/afollestad/cabinet/file/root/LsParser.java) broken on newer Android versions. By virtue of using Linux syscalls, this app is able to be fast and smooth, and handle advanced things like Linux permissions, symbolic links and even SELinux context. It can also handle file names with invalid UTF-8 encoding because paths are not naively stored as Java `String`s, which most file managers does and fails during file operation.
+## 🔭 Six listing views + per-folder styling
 
-- This app built its frontend upon modern `ViewModel` and `LiveData` which enables a clear code structure and support for rotation. It also properly handles things like errors during file operation, file conflicts and foreground/background state.
+**List, Grid, Compact, Column, Detailed** and **Wrapped** views. Style the grid to taste — image
+size, padding down to zero, a name-over-photo overlay for **seamless photo walls**, or no names at
+all — and set **row/column separators** as a clean lattice. Every tweak can be a **global default**
+or a **per-folder override** from a sheet on the address line, remembered per path.
 
-In a word, this app tries to follow the best practices on Android and do the right thing, while keeping its source code clean and maintainable.
+## 📂 A smarter Open-with
 
-Because I know people can do it right.
+An in-app open-with chooser that shows every handler with its icon and lets you **remember a default
+per file type** — with an “Open as…” escape hatch and a one-tap “forget default”. Remembered
+installers even bypass the APK prompt. No more wrestling with the system chooser.
 
-[Nautilus](https://wiki.gnome.org/Apps/Files) is a beautifully-designed and user-friendly file manager on Linux desktop, and it's fully Linux-aware. [Phonograph](https://github.com/kabouzeid/Phonograph) is an open source Material Design music player app (which I've been using for years), and it has just the right Material Design and implementation.
+## 📤 Share & Termux, your way
 
-So, it's time for yet another Android file manager.
+A custom share dialog (pin your favourite apps to the top), an **AutoShare** command entry, and
+**one-click Termux script targets** that run a script on the selected file’s real path. It works the
+other way too: **share files from any app into 書類管理** and have them piped straight to a Termux
+script, with one-tap share tiles.
 
-## Inclusion in custom ROMs
+## 🔤 Power-user touches
 
-Thank you if you choose to include Material Files in your custom ROM! However since I've received several user complaints due to improper inclusion, I'd like to offer some suggestions on including this app properly for the good of end users:
+- **“Name (literal)” sort** — a per-folder mode that orders digit runs by character instead of
+  numeric magnitude, for when you want strict lexicographic order.
+- **Paste from the top toolbar** — the pending paste sits top-right where Copy/Cut were, not in a
+  bottom bar.
+- **FOSS & independent** — Firebase Analytics/Crashlytics stripped out, arm64-v8a, signed and
+  released on its own, installed alongside the official app.
 
-- Please don't replace the AOSP [DocumentsUI](https://android.googlesource.com/platform/packages/apps/DocumentsUI/) app with this app. This app is not designed to replace DocumentsUI and can't handle a number of functionalities in DocumentsUI - in fact, it relies on DocumentsUI to do things like granting external SD card access.
+See [`CHANGELOG.md`](CHANGELOG.md) for the complete, detailed list of everything this fork adds.
 
-- Please make sure this app can be uninstalled or at least disabled. Some users may not want this app for a variety of reasons, and get very upset when they can't remove it.
+---
 
-- Please avoid conflict with the Play/F-Droid version of this app. App stores cannot update apps signed with a different certificate, so you can either ship an APK that's signed by me (or F-Droid) so that users will be able to update it on Play/F-Droid, or fork this project and rename the package name when you need to sign the APK with a different certificate and potentially making other changes.
+## Built on Material Files
 
-## License
+This project is a fork of [Material Files](https://github.com/zhanghai/MaterialFiles) by Hai Zhang
+(installed as `shiroikuma.shoruikanri`, so it coexists with the official build). All upstream work —
+the backported NIO2 file layer, Linux-aware file handling (symlinks, permissions, SELinux contexts),
+archive support, the FTP/SFTP/SMB/WebDAV clients and the Material Design base — belongs to the
+Material Files authors. See the [upstream repository](https://github.com/zhanghai/MaterialFiles) for
+issues, contributing and the canonical source. The code remains under the [GNU GPL v3](LICENSE).
 
-    Copyright (C) 2018 Hai Zhang
+## Building
 
-    This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
+Requires **JDK 17+** and the **Android SDK**. On a machine whose default `java` is older, point
+`JAVA_HOME` at a newer JDK:
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
+```
+JAVA_HOME=/usr/lib/jvm/java-21-openjdk-amd64 ./gradlew buildApk
+```
 
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+`buildApk` produces a signed release APK (signing via the gitignored `signing.properties`), copies it
+to `~/tmp/`, and bumps the fork build number. See [`CLAUDE.md`](CLAUDE.md) for the full fork workflow —
+remotes and branches, versioning, and rebasing onto new upstream releases.
