@@ -30,6 +30,10 @@
 -keep class me.zhanghai.android.files.** implements androidx.appcompat.view.CollapsibleActionView { *; }
 -keep class me.zhanghai.android.files.provider.common.ByteString { *; }
 -keep class me.zhanghai.android.files.provider.linux.syscall.** { *; }
+# 白い熊 fork: gocryptfs JNI types are constructed from native code (libgocryptfs_jni.so),
+# invisible to R8 — keep the classes + their constructors/factory (GocryptfsStat(IJJ),
+# GocryptfsEntry.new) or NewObject/CallStaticObjectMethod aborts with "mid == null".
+-keep class me.zhanghai.android.files.provider.gocryptfs.client.** { *; }
 -keepnames class * extends java.lang.Exception
 # For Class.getEnumConstants()
 -keepclassmembers enum * {

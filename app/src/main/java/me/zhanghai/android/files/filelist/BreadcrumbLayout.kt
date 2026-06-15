@@ -216,6 +216,10 @@ class BreadcrumbLayout : HorizontalScrollView {
                         listener.openInNewTask(path)
                         true
                     }
+                    R.id.action_path_diagnostics -> {
+                        listener.showPathDiagnostics(path)
+                        true
+                    }
                     else -> false
                 }
             }
@@ -226,5 +230,6 @@ class BreadcrumbLayout : HorizontalScrollView {
         fun navigateTo(path: Path)
         fun copyPath(path: Path)
         fun openInNewTask(path: Path)
+        fun showPathDiagnostics(path: Path)
     }
 }
