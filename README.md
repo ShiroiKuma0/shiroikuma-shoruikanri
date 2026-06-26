@@ -15,7 +15,7 @@ chooser**, and deep **Termux / share** integration.
 
 Installs **side-by-side** with the official Material Files (app ID `shiroikuma.shoruikanri`).
 
-**📥 Latest release: [`1.7.4+36`](https://github.com/ShiroiKuma0/shiroikuma-shoruikanri/releases/latest)** — [all releases & APK downloads »](https://github.com/ShiroiKuma0/shiroikuma-shoruikanri/releases)
+**📥 Latest release: [`1.7.4+37`](https://github.com/ShiroiKuma0/shiroikuma-shoruikanri/releases/latest)** — [all releases & APK downloads »](https://github.com/ShiroiKuma0/shiroikuma-shoruikanri/releases)
 
 </div>
 
@@ -70,7 +70,8 @@ script, with one-tap share tiles.
 - **“Name (literal)” sort** — a per-folder mode that orders digit runs by character instead of
   numeric magnitude, for when you want strict lexicographic order.
 - **Paste from the top toolbar** — the pending paste sits top-right where Copy/Cut were, not in a
-  bottom bar.
+  bottom bar. **Back keeps your copy armed** (it just navigates the filesystem); long-press the
+  paste icon to cancel a pending paste.
 - **FOSS & independent** — Firebase Analytics/Crashlytics stripped out, arm64-v8a, signed and
   released on its own, installed alongside the official app.
 

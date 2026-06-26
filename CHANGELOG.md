@@ -5,6 +5,22 @@ by Hai Zhang. Versions are `<upstream version>+<fork build>` — the upstream ve
 plus our build increment (e.g. `1.7.4+36`). This fork installs side-by-side with upstream under the
 app ID `shiroikuma.shoruikanri`.
 
+## 1.7.4+37
+
+### New since 1.7.4+36
+
+#### 📋 File operations
+
+- **Copy/Cut now survives Back.** With a paste pending (the paste icon showing top-right in the
+  overlay toolbar), **Back navigates the filesystem** — up the directory tree — instead of cancelling
+  the pending copy/cut. The selected files stay armed for paste while you browse to the destination,
+  so Back is pure navigation again.
+- **Long-press the paste icon to cancel** a pending paste (the overlay toolbar's close button still
+  cancels it too). The plain selection action mode is unchanged — Back there still clears the
+  selection.
+
+Everything from 1.7.4+36 (below) is included in this build.
+
 ## 1.7.4+36
 
 First public release. Everything below is what this fork adds to (or changes from) stock Material
