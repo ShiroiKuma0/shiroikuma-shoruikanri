@@ -1265,6 +1265,18 @@ class FileListFragment : Fragment(), BreadcrumbLayout.Listener, FileListAdapter.
                     }
                 )
                 .isEnabled = !isCurrentPathReadOnly
+            // 白い熊 fork: long-press the paste icon to cancel the pending paste. Back no longer
+            // does this — it navigates the filesystem instead (see the back callback at the end
+            // of this method), so the files stay "selected" for paste while you navigate to the
+            // destination. The menu-item view is (re)created when the toolbar lays out, so wire
+            // the listener from a post once it exists.
+            binding.overlayToolbar.post {
+                binding.overlayToolbar.findViewById<View>(R.id.action_paste)
+                    ?.setOnLongClickListener {
+                        viewModel.clearPasteState()
+                        true
+                    }
+            }
         } else {
             if (overlayActionMode.isActive) {
                 overlayActionMode.finish()
@@ -1287,6 +1299,11 @@ class FileListFragment : Fragment(), BreadcrumbLayout.Listener, FileListAdapter.
                 }
             })
         }
+        // 白い熊 fork: while a paste is pending, Back navigates the filesystem (navigate-up)
+        // rather than cancelling the paste, so the overlay action mode only intercepts Back in
+        // the selection state. start() above always enables the callback, so override it here.
+        // The pending paste is cancelled by long-pressing the paste icon (see the paste branch).
+        overlayActionMode.onBackPressedCallback.isEnabled = viewModel.selectedFiles.isNotEmpty()
     }
 
     private fun onOverlayActionModeMenuItemClicked(item: MenuItem): Boolean =
