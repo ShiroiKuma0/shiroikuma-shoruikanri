@@ -68,8 +68,9 @@ So when upstream's `versionCode` climbs (e.g. 39 → 40), our fork's codes for t
    to confirm the build script still evaluates.
 
 6. **Build the new `+1`** via the **build-apk** skill
-   (`JAVA_HOME=/usr/lib/jvm/java-21-openjdk-amd64 ./gradlew buildApk < /dev/null`), then **ask** before
-   any `adb push`. This is the first build of the new upstream line (`<newVersion>+1`).
+   (`JAVA_HOME=/usr/lib/jvm/java-21-openjdk-amd64 ./gradlew buildApk < /dev/null`), then deliver it via
+   **`/after-build`** (auto: `/adb-push` if a phone is connected, else `/scp` to skhw — no prompt). This
+   is the first build of the new upstream line (`<newVersion>+1`).
 
 7. **Stop.** Let the user test. Commit/push only on their explicit **"Push"** (force-push may be needed
    for `custom` since rebasing rewrites history: `git push --force-with-lease origin custom`; `master`
