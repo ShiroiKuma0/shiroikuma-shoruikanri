@@ -6,6 +6,11 @@
     <string name="sk_file_list_close_tab">Close tab</string>
     <string name="sk_file_item_action_open_in_new_tab">Open in new tab</string>
 
+    <!-- Built-in audio mini-player -->
+    <string name="sk_audio_player_play">Play</string>
+    <string name="sk_audio_player_pause">Pause</string>
+    <string name="sk_audio_player_error">Unable to play this audio file.</string>
+
     <!-- 白い熊 UI page -->
     <string name="sk_ui_title">白い熊 書類管理 UI</string>
     <string name="sk_ui_theme_enabled">白い熊 theme (black / yellow)</string>
@@ -54,6 +59,11 @@
     <string name="sk_ui_bottom_bar_icons">Bottom bar icons</string>
     <string name="sk_ui_fab_background">Button background</string>
     <string name="sk_ui_fab_icon">Button icon</string>
+    <string name="sk_ui_group_audio_player">Audio player</string>
+    <string name="sk_ui_audio_player_background">Background</string>
+    <string name="sk_ui_audio_player_title">Title</string>
+    <string name="sk_ui_audio_player_time">Time</string>
+    <string name="sk_ui_audio_player_controls">Controls</string>
 
     <!-- Fonts -->
     <string name="sk_font">Font</string>
