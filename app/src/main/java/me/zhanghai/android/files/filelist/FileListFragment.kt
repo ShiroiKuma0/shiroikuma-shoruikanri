@@ -101,6 +101,7 @@ import me.zhanghai.android.files.skui.SkSeparatorDecoration
 import me.zhanghai.android.files.skui.SkSeparators
 import me.zhanghai.android.files.skui.SkShareDialog
 import me.zhanghai.android.files.skui.SkThemeSlot
+import me.zhanghai.android.files.skui.SkTooltip
 import me.zhanghai.android.files.skui.SkUi
 import me.zhanghai.android.files.skui.SkUiActivity
 import me.zhanghai.android.files.skui.applySkChrome
@@ -649,6 +650,8 @@ class FileListFragment : Fragment(), BreadcrumbLayout.Listener, FileListAdapter.
         updateNewTabMenuItem()
         updateSelectAllMenuItem()
         updateShowHiddenFilesMenuItem()
+        // 白い熊 fork: re-skin the toolbar buttons' long-press tooltips (black/yellow).
+        SkTooltip.applyToToolbar(binding.toolbar)
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {

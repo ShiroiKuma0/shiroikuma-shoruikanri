@@ -13,6 +13,7 @@ import androidx.annotation.DrawableRes
 import androidx.annotation.MenuRes
 import androidx.annotation.StringRes
 import androidx.appcompat.widget.Toolbar
+import me.zhanghai.android.files.skui.SkTooltip
 
 abstract class ToolbarActionMode(
     private val bar: ViewGroup,
@@ -84,6 +85,8 @@ abstract class ToolbarActionMode(
         toolbar.menu.clear()
         if (menuRes != 0) {
             toolbar.inflateMenu(menuRes)
+            // 白い熊 fork: re-skin the action buttons' long-press tooltips (black/yellow).
+            SkTooltip.applyToToolbar(toolbar)
         }
     }
 
