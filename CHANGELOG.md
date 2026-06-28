@@ -5,6 +5,45 @@ by Hai Zhang. Versions are `<upstream version>+<fork build>` — the upstream ve
 plus our build increment (e.g. `1.7.4+36`). This fork installs side-by-side with upstream under the
 app ID `shiroikuma.shoruikanri`.
 
+## 1.7.4+42
+
+### New since 1.7.4+37
+
+#### 🎵 Built-in audio mini-player
+
+- **Play audio in-app.** Tapping a voice recording, `.m4a` or other audio file opens a small
+  **floating mini-player** docked at the bottom — not a full-screen player — so the file list stays
+  visible and usable behind it (non-modal: no dimming, and touches pass straight through to the list).
+- Three rows: **filename + close**, a **seek bar**, and **current time · play/pause · duration**. It
+  auto-plays on open, rewinds to the start when it finishes, and **playback survives rotation** (the
+  `MediaPlayer` lives in a ViewModel). Closing it (the ✕ or Back) stops and releases playback; only
+  one track plays at a time, and it floats over the list across tab switches.
+- Plays **any provider path** — local recordings and, via the file provider, remote / SAF sources.
+  Tapping uses the mini-player by default, but a **remembered open-with default still wins**, and
+  long-press → **Open with** → an external player still works (and can be set as the default).
+- **Themeable** from the UI page: a new **Audio player** slot group — background, title, time and
+  controls — with the **title and time** carrying their own font family / weight / size.
+
+#### 🔭 Per-folder listing view
+
+- The listing view (**List / Grid / Compact / Column / Detailed / Wrapped**) is now remembered
+  **per folder** instead of per tab. Change the view in a folder and it sticks to **that folder
+  only**; navigating away — including **Back** — restores each folder's own remembered view, falling
+  back to **List** where you've set none. (This supersedes the earlier per-tab listing view.)
+- **Fixed stale check marks** in the view menu: after switching views the previously selected ones
+  stayed ticked (the six view items were independent checkboxes, so the marks piled up) — now only
+  the active view is checked.
+
+#### 🎨 Theme system (skui)
+
+- **Black/yellow long-press tooltips.** The long-press tooltips on the toolbar buttons (e.g.
+  **"More options"** on the overflow) now match the theme — a **black popup with a yellow border and
+  yellow text** — instead of the platform's light box. The platform tooltip background is a private
+  attribute that can't be themed in XML, so the fork suppresses it and draws its own; this covers the
+  main toolbar and the selection-mode action toolbars.
+
+Everything from 1.7.4+37 and 1.7.4+36 (below) is included in this build.
+
 ## 1.7.4+37
 
 ### New since 1.7.4+36
