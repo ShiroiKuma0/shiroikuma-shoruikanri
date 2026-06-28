@@ -202,21 +202,18 @@ class FileListFragment : Fragment(), BreadcrumbLayout.Listener, FileListAdapter.
     // 白い熊 fork: the SkUi.generation our styling was last applied for.
     private var appliedSkUiGeneration = -1L
 
-    // 白い熊 fork: this tab's own listing view; null follows the global setting.
-    // Owned and persisted by FileListActivity with the tab set.
-    private var skTabViewType: FileViewType? = null
-
     // 白い熊 fork: separator lines between files (global + per-folder, per view).
     private val skSeparatorDecoration = SkSeparatorDecoration()
 
-    // 白い熊 fork: viewModel.viewType is a MediatorLiveData that only computes its
-    // value once active (view lifecycle STARTED). applySkUi()/menu prepare can read
-    // it earlier (onActivityCreated during a tab commitNow, or a posted
-    // populateOptionsMenu after restore), so fall back to the global setting until
-    // the live data delivers — onViewTypeChanged() then re-applies the real value.
+    // 白い熊 fork: the listing view is per-folder, driven by viewModel.viewTypeLiveData
+    // (a per-path MediatorLiveData that recomputes whenever this tab changes folder).
+    // That mediator only computes its value once active (view lifecycle STARTED), and
+    // applySkUi()/menu prepare can read it earlier (onActivityCreated during a tab
+    // commitNow, or a posted populateOptionsMenu after restore), so fall back to the
+    // global default until the live data delivers — onViewTypeChanged() then re-applies
+    // the real per-folder value.
     private val effectiveViewType: FileViewType
-        get() = skTabViewType
-            ?: viewModel.viewTypeLiveData.value
+        get() = viewModel.viewTypeLiveData.value
             ?: Settings.FILE_LIST_VIEW_TYPE.valueCompat
 
     private lateinit var binding: Binding
@@ -281,8 +278,6 @@ class FileListFragment : Fragment(), BreadcrumbLayout.Listener, FileListAdapter.
             navigationFragment = existingNavigationFragment
         }
         navigationFragment.listener = this
-        // 白い熊 fork: pick up this tab's own listing view before any observer fires.
-        skTabViewType = (getActivity() as? FileListActivity)?.getTabViewType(tag)
         val activity = requireActivity() as AppCompatActivity
         activity.setTitle(R.string.file_list_title)
         activity.setSupportActionBar(binding.toolbar)
@@ -666,27 +661,27 @@ class FileListFragment : Fragment(), BreadcrumbLayout.Listener, FileListAdapter.
                 true
             }
             R.id.action_view_list, R.id.action_sk_view_list -> {
-                setSkTabViewType(FileViewType.LIST)
+                setViewType(FileViewType.LIST)
                 true
             }
             R.id.action_view_grid, R.id.action_sk_view_grid -> {
-                setSkTabViewType(FileViewType.GRID)
+                setViewType(FileViewType.GRID)
                 true
             }
             R.id.action_sk_view_compact -> {
-                setSkTabViewType(FileViewType.COMPACT)
+                setViewType(FileViewType.COMPACT)
                 true
             }
             R.id.action_sk_view_column -> {
-                setSkTabViewType(FileViewType.COLUMN)
+                setViewType(FileViewType.COLUMN)
                 true
             }
             R.id.action_sk_view_detailed -> {
-                setSkTabViewType(FileViewType.DETAILED)
+                setViewType(FileViewType.DETAILED)
                 true
             }
             R.id.action_sk_view_wrapped -> {
-                setSkTabViewType(FileViewType.WRAPPED)
+                setViewType(FileViewType.WRAPPED)
                 true
             }
             R.id.action_sort_by_name -> {
@@ -912,10 +907,12 @@ class FileListFragment : Fragment(), BreadcrumbLayout.Listener, FileListAdapter.
         applyEffectiveViewType()
     }
 
-    // 白い熊 fork: this tab's own view wins over the global/path-specific setting.
-    private fun setSkTabViewType(viewType: FileViewType) {
-        skTabViewType = viewType
-        (activity as? FileListActivity)?.setTabViewType(tag, viewType)
+    // 白い熊 fork: remember the chosen view for the current folder only. The write goes
+    // to this path's per-folder setting (FileViewTypeLiveData.putValue), which feeds back
+    // through viewModel.viewTypeLiveData → onViewTypeChanged(); applyEffectiveViewType()
+    // here makes the change immediate even when that value is unchanged.
+    private fun setViewType(viewType: FileViewType) {
+        viewModel.viewType = viewType
         applyEffectiveViewType()
     }
 
@@ -999,15 +996,15 @@ class FileListFragment : Fragment(), BreadcrumbLayout.Listener, FileListAdapter.
         val viewType = effectiveViewType
         menuBinding.viewListItem.isChecked = viewType == FileViewType.LIST
         menuBinding.viewGridItem.isChecked = viewType == FileViewType.GRID
-        val checkedSkViewItem = when (viewType) {
-            FileViewType.LIST -> menuBinding.skViewListItem
-            FileViewType.GRID -> menuBinding.skViewGridItem
-            FileViewType.COMPACT -> menuBinding.skViewCompactItem
-            FileViewType.COLUMN -> menuBinding.skViewColumnItem
-            FileViewType.DETAILED -> menuBinding.skViewDetailedItem
-            FileViewType.WRAPPED -> menuBinding.skViewWrappedItem
-        }
-        checkedSkViewItem.isChecked = true
+        // 白い熊 fork: these items carry android:checkable="true", which makes them
+        // independent (non-exclusive) checkboxes, so the menu won't clear the previous
+        // selection for us — set every item explicitly or stale checkmarks pile up.
+        menuBinding.skViewListItem.isChecked = viewType == FileViewType.LIST
+        menuBinding.skViewGridItem.isChecked = viewType == FileViewType.GRID
+        menuBinding.skViewCompactItem.isChecked = viewType == FileViewType.COMPACT
+        menuBinding.skViewColumnItem.isChecked = viewType == FileViewType.COLUMN
+        menuBinding.skViewDetailedItem.isChecked = viewType == FileViewType.DETAILED
+        menuBinding.skViewWrappedItem.isChecked = viewType == FileViewType.WRAPPED
         val sortOptions = viewModel.sortOptions
         val checkedSortByItem = when (sortOptions.by) {
             By.NAME -> menuBinding.sortByNameItem

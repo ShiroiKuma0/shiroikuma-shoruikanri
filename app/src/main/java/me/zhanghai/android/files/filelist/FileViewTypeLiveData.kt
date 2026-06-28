@@ -28,11 +28,11 @@ class FileViewTypeLiveData(pathLiveData: LiveData<Path>) : MediatorLiveData<File
     }
 
     fun putValue(value: FileViewType) {
-        if (pathViewTypeLiveData.value != null) {
-            pathViewTypeLiveData.putValue(value)
-        } else {
-            Settings.FILE_LIST_VIEW_TYPE.putValue(value)
-        }
+        // 白い熊 fork: the listing view is per-folder. Always store it against the
+        // current path so changing it in one directory never leaks into others;
+        // the global Settings.FILE_LIST_VIEW_TYPE stays the default for folders
+        // that have no override of their own (see loadValue()).
+        pathViewTypeLiveData.putValue(value)
     }
 
     init {
