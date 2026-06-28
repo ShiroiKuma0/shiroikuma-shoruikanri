@@ -10,12 +10,12 @@
 
 A fork of [Material Files](https://github.com/zhanghai/MaterialFiles) with **major additions**:
 in-app **gocryptfs** encrypted volumes (no FUSE, no root), **multi-folder tabs**, a full
-**black/yellow theme system**, **six listing views** with per-folder styling, a **custom open-with
-chooser**, and deep **Termux / share** integration.
+**black/yellow theme system**, **six listing views** with per-folder styling, a **built-in audio
+mini-player**, a **custom open-with chooser**, and deep **Termux / share** integration.
 
 Installs **side-by-side** with the official Material Files (app ID `shiroikuma.shoruikanri`).
 
-**📥 Latest release: [`1.7.4+37`](https://github.com/ShiroiKuma0/shiroikuma-shoruikanri/releases/latest)** — [all releases & APK downloads »](https://github.com/ShiroiKuma0/shiroikuma-shoruikanri/releases)
+**📥 Latest release: [`1.7.4+42`](https://github.com/ShiroiKuma0/shiroikuma-shoruikanri/releases/latest)** — [all releases & APK downloads »](https://github.com/ShiroiKuma0/shiroikuma-shoruikanri/releases)
 
 </div>
 
@@ -33,10 +33,9 @@ on disk and never leave the device.
 
 ## 🗂 Multi-folder tabs
 
-Keep several folders open at once in a stacked **paper-folder tab bar**. Each tab remembers its own
-listing view; **drag** to reorder, **swipe** the file area to flip between tabs, and **long-press** a
-tab to pin its folder to your favorites. The whole tab set — paths, selection and per-tab view —
-**survives restarts, reboots and app updates**.
+Keep several folders open at once in a stacked **paper-folder tab bar**. **Drag** a tab to reorder,
+**swipe** the file area to flip between tabs, and **long-press** a tab to pin its folder to your
+favorites. The whole tab set — paths and selection — **survives restarts, reboots and app updates**.
 
 ## 🎨 Black & yellow, themed to the pixel
 
@@ -47,7 +46,8 @@ retune it: per-element **colours** (picker with swatches + hex), **fonts** (impo
 
 ## 🔭 Six listing views + per-folder styling
 
-**List, Grid, Compact, Column, Detailed** and **Wrapped** views. Style the grid to taste — image
+**List, Grid, Compact, Column, Detailed** and **Wrapped** views — and each **folder remembers its own
+view**, restored as you navigate (Back included), defaulting to List. Style the grid to taste — image
 size, padding down to zero, a name-over-photo overlay for **seamless photo walls**, or no names at
 all — and set **row/column separators** as a clean lattice. Every tweak can be a **global default**
 or a **per-folder override** from a sheet on the address line, remembered per path.
@@ -57,6 +57,14 @@ or a **per-folder override** from a sheet on the address line, remembered per pa
 An in-app open-with chooser that shows every handler with its icon and lets you **remember a default
 per file type** — with an “Open as…” escape hatch and a one-tap “forget default”. Remembered
 installers even bypass the APK prompt. No more wrestling with the system chooser.
+
+## 🎵 Built-in audio mini-player
+
+Tap a voice recording or `.m4a` and it plays **in-app** — in a small **mini-player** docked at the
+bottom, not a full-screen takeover. The list stays visible and usable behind it, so you can keep
+browsing while it plays. Filename, a seek bar, play/pause and the time read-out; it auto-plays,
+survives rotation, and closing it stops playback. A remembered open-with default still wins if you'd
+rather use another player, and the player's colours and fonts are tunable from the UI page.
 
 ## 📤 Share & Termux, your way
 
