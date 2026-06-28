@@ -226,6 +226,13 @@ class SkUiActivity : AppActivity() {
         addColorRow(SkThemeSlot.FAB_BACKGROUND, stepPx)
         addColorRow(SkThemeSlot.FAB_ICON, stepPx)
 
+        // Audio mini-player
+        addSection(R.string.sk_ui_group_audio_player)
+        addColorRow(SkThemeSlot.AUDIO_PLAYER_BACKGROUND, stepPx)
+        addTextRow(SkThemeSlot.AUDIO_PLAYER_TITLE, stepPx)
+        addTextRow(SkThemeSlot.AUDIO_PLAYER_TIME, stepPx)
+        addColorRow(SkThemeSlot.AUDIO_PLAYER_CONTROLS, stepPx)
+
         // Share → Termux
         addSection(R.string.sk_ui_group_share)
         addSwitchRow(R.string.sk_ui_share_one_target, SkTermux.oneTargetMode, stepPx) {

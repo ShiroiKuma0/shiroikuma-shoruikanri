@@ -22,7 +22,8 @@ enum class SkThemeGroup(@StringRes val labelRes: Int) {
     DRAWER(R.string.sk_ui_group_drawer),
     TABS(R.string.sk_ui_group_tabs),
     BOTTOM_BAR(R.string.sk_ui_group_bottom_bar),
-    SPEED_DIAL(R.string.sk_ui_group_speed_dial)
+    SPEED_DIAL(R.string.sk_ui_group_speed_dial),
+    AUDIO_PLAYER(R.string.sk_ui_group_audio_player)
 }
 
 enum class SkThemeSlot(
@@ -74,7 +75,13 @@ enum class SkThemeSlot(
 
     // Speed dial (new file/folder button)
     FAB_BACKGROUND("sk_fab_background", SkThemeGroup.SPEED_DIAL, R.string.sk_ui_fab_background),
-    FAB_ICON("sk_fab_icon", SkThemeGroup.SPEED_DIAL, R.string.sk_ui_fab_icon)
+    FAB_ICON("sk_fab_icon", SkThemeGroup.SPEED_DIAL, R.string.sk_ui_fab_icon),
+
+    // Audio mini-player
+    AUDIO_PLAYER_BACKGROUND("sk_audio_player_background", SkThemeGroup.AUDIO_PLAYER, R.string.sk_ui_audio_player_background),
+    AUDIO_PLAYER_TITLE("sk_audio_player_title", SkThemeGroup.AUDIO_PLAYER, R.string.sk_ui_audio_player_title, hasFont = true),
+    AUDIO_PLAYER_TIME("sk_audio_player_time", SkThemeGroup.AUDIO_PLAYER, R.string.sk_ui_audio_player_time, hasFont = true),
+    AUDIO_PLAYER_CONTROLS("sk_audio_player_controls", SkThemeGroup.AUDIO_PLAYER, R.string.sk_ui_audio_player_controls)
 }
 
 private fun Int.withAlphaFraction(fraction: Float): Int =
@@ -129,6 +136,12 @@ private fun skDefault(slot: SkThemeSlot): Int = when (slot) {
     // Speed dial: black button, yellow border and plus
     SkThemeSlot.FAB_BACKGROUND -> skColor(SkThemeSlot.BACKGROUND)
     SkThemeSlot.FAB_ICON -> skColor(SkThemeSlot.ACCENT)
+
+    // Audio mini-player
+    SkThemeSlot.AUDIO_PLAYER_BACKGROUND -> skColor(SkThemeSlot.BACKGROUND)
+    SkThemeSlot.AUDIO_PLAYER_TITLE -> skColor(SkThemeSlot.TEXT)
+    SkThemeSlot.AUDIO_PLAYER_TIME -> skColor(SkThemeSlot.TEXT_SECONDARY)
+    SkThemeSlot.AUDIO_PLAYER_CONTROLS -> skColor(SkThemeSlot.ACCENT)
 }
 
 fun setSkColor(slot: SkThemeSlot, color: Int) = SkUi.setColorOverride(slot.key, color)

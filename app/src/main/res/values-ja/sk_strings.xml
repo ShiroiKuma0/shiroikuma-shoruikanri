@@ -6,6 +6,11 @@
     <string name="sk_file_list_close_tab">タブを閉じる</string>
     <string name="sk_file_item_action_open_in_new_tab">新しいタブで開く</string>
 
+    <!-- Built-in audio mini-player -->
+    <string name="sk_audio_player_play">再生</string>
+    <string name="sk_audio_player_pause">一時停止</string>
+    <string name="sk_audio_player_error">この音声ファイルを再生できませんでした。</string>
+
     <!-- 白い熊 UI page -->
     <string name="sk_ui_title">白い熊 書類管理 UI</string>
     <string name="sk_ui_theme_enabled">白い熊テーマ（黒・黄）</string>
@@ -54,6 +59,11 @@
     <string name="sk_ui_bottom_bar_icons">下部バーのアイコン</string>
     <string name="sk_ui_fab_background">ボタンの背景</string>
     <string name="sk_ui_fab_icon">ボタンのアイコン</string>
+    <string name="sk_ui_group_audio_player">音声プレーヤー</string>
+    <string name="sk_ui_audio_player_background">背景</string>
+    <string name="sk_ui_audio_player_title">タイトル</string>
+    <string name="sk_ui_audio_player_time">再生時間</string>
+    <string name="sk_ui_audio_player_controls">コントロール</string>
 
     <!-- Fonts -->
     <string name="sk_font">フォント</string>

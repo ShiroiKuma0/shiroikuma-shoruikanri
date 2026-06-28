@@ -133,6 +133,21 @@ There are no product flavors and no unit/instrumented tests in this repository.
     `effectiveViewType` falls back to `Settings.FILE_LIST_VIEW_TYPE.valueCompat` until
     `onViewTypeChanged` re-applies the real value). Dual-pane fragments will hit the same window.
 
+- **Audio mini-player** (2026-06-28, shipped in `1.7.4+41`). A floating mini-player for audio
+  files (voice recordings, m4a), in `viewer/audio/`: `AudioPlayerDialogFragment` (a non-modal
+  bottom `DialogFragment` — a small rounded box over the file list with `FLAG_NOT_TOUCH_MODAL` and
+  no dim, so the list stays visible and usable behind it) + `AudioPlayerViewModel` (owns the
+  `MediaPlayer`, so playback survives rotation; source is
+  `MediaPlayer.setDataSource(application, path.fileProviderUri)`, which works for any provider
+  path — local fd / remote proxy fd). Hosted on the activity `FragmentManager` via
+  `show(path, fragment)` with a fixed tag (one instance at a time, floats over the list across tab
+  switches). Routed from `FileListFragment.openFile` → `openAudio` when `mimeType.isAudio`,
+  honoring a remembered `SkOpenWith` default first (so long-press → "Open with" → external still
+  works and can be set default). Themeable from the 白い熊 UI page via the `AUDIO_PLAYER` slot
+  group (background, title, time, controls; title/time carry font family/weight/size), applied in
+  `applySkUi()`. Not yet: prev/next across the folder, background-playback notification /
+  foreground service, playback speed.
+
 ## Architecture (orientation)
 
 - `filelist/` — the main file-list UI (`FileListActivity`/`FileListFragment`/`FileListViewModel`,

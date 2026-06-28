@@ -78,6 +78,7 @@ import me.zhanghai.android.files.file.asMimeTypeOrNull
 import me.zhanghai.android.files.file.extension
 import me.zhanghai.android.files.file.fileProviderUri
 import me.zhanghai.android.files.file.isApk
+import me.zhanghai.android.files.file.isAudio
 import me.zhanghai.android.files.file.isImage
 import me.zhanghai.android.files.filejob.FileJobService
 import me.zhanghai.android.files.filelist.FileSortOptions.By
@@ -153,6 +154,7 @@ import me.zhanghai.android.files.util.takeIfNotEmpty
 import me.zhanghai.android.files.util.valueCompat
 import me.zhanghai.android.files.util.viewModels
 import me.zhanghai.android.files.util.withChooser
+import me.zhanghai.android.files.viewer.audio.AudioPlayerDialogFragment
 import me.zhanghai.android.files.viewer.image.ImageViewerActivity
 import kotlin.math.abs
 import kotlin.math.roundToInt
@@ -1599,7 +1601,21 @@ class FileListFragment : Fragment(), BreadcrumbLayout.Listener, FileListAdapter.
             navigateTo(file.listablePath)
             return
         }
+        if (file.mimeType.isAudio) {
+            openAudio(file)
+            return
+        }
         openFileWithIntent(file, false)
+    }
+
+    // 白い熊 fork: play audio in our built-in mini-player unless a different default was
+    // set through our open-with dialog (mirrors how openApk() honors a remembered default).
+    private fun openAudio(file: FileItem) {
+        if (SkOpenWith.getDefault(file.mimeType) != null) {
+            openFileWithIntent(file, false)
+            return
+        }
+        AudioPlayerDialogFragment.show(file.path, this)
     }
 
     private fun openApk(file: FileItem) {
