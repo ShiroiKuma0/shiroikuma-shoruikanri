@@ -121,10 +121,10 @@ class FileListActivity : AppActivity() {
     }
 
     private fun TabInfo.toTabState(): TabState =
-        TabState(id, path, viewType?.ordinal ?: -1)
+        TabState(id, path)
 
     private fun TabState.toTabInfo(): TabInfo =
-        TabInfo(id, path, FileViewType.entries.getOrNull(viewTypeOrdinal))
+        TabInfo(id, path)
 
     override fun onKeyShortcut(keyCode: Int, event: KeyEvent): Boolean {
         if (currentFragment?.onKeyShortcut(keyCode, event) == true) {
@@ -137,21 +137,9 @@ class FileListActivity : AppActivity() {
         if (isInPickMode) {
             return
         }
-        // A new tab inherits the listing view of the tab it was opened from.
-        addTab(
-            FileListFragment.Args(createViewIntent(path)), path,
-            tabs.getOrNull(selectedTabIndex)?.viewType
-        )
-    }
-
-    // 白い熊 fork: each tab keeps its own listing view, persisted with the tab set.
-    fun getTabViewType(fragmentTag: String?): FileViewType? =
-        tabs.firstOrNull { getTabFragmentTag(it.id) == fragmentTag }?.viewType
-
-    fun setTabViewType(fragmentTag: String?, viewType: FileViewType) {
-        val tabInfo = tabs.firstOrNull { getTabFragmentTag(it.id) == fragmentTag } ?: return
-        tabInfo.viewType = viewType
-        persistTabs()
+        // 白い熊 fork: the listing view is per-folder, so a new tab simply picks up
+        // whatever view its destination folder already remembers (or the default).
+        addTab(FileListFragment.Args(createViewIntent(path)), path)
     }
 
     // The tab bar's "+" button: duplicate the current location into a new tab.
@@ -197,8 +185,8 @@ class FileListActivity : AppActivity() {
         selectTab((selectedTabIndex + direction + tabs.size) % tabs.size)
     }
 
-    private fun addTab(args: FileListFragment.Args, path: Path?, viewType: FileViewType? = null) {
-        val tabInfo = TabInfo(nextTabId++, path, viewType)
+    private fun addTab(args: FileListFragment.Args, path: Path?) {
+        val tabInfo = TabInfo(nextTabId++, path)
         val fragment = FileListFragment().putArgs(args)
         val oldFragment = currentFragment
         stopObservingCurrentPath()
@@ -319,14 +307,12 @@ class FileListActivity : AppActivity() {
 
     private fun getTabFragmentTag(id: Int): String = "tab_$id"
 
-    private class TabInfo(val id: Int, var path: Path?, var viewType: FileViewType? = null)
+    private class TabInfo(val id: Int, var path: Path?)
 
     @Parcelize
     private class TabState(
         val id: Int,
-        val path: @WriteWith<ParcelableParceler> Path?,
-        // 白い熊 fork: each tab keeps its own listing view (-1 = follow the setting).
-        val viewTypeOrdinal: Int
+        val path: @WriteWith<ParcelableParceler> Path?
     ) : Parcelable
 
     @Parcelize
