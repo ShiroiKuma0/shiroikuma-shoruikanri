@@ -5,6 +5,19 @@ by Hai Zhang. Versions are `<upstream version>+<fork build>` — the upstream ve
 plus our build increment (e.g. `1.7.4+36`). This fork installs side-by-side with upstream under the
 app ID `shiroikuma.shoruikanri`.
 
+## 1.7.4+43
+
+### New since 1.7.4+42
+
+#### 🗂 Tabs & favorites
+
+- **Folder tabs show bookmark names.** A tab sitting at a bookmarked folder now titles itself with
+  the bookmark's name — including a custom name given via long-press → rename in the drawer —
+  instead of the folder's literal directory name. **Renaming a bookmark updates any open tab's
+  title immediately**; navigating into a subfolder shows that folder's own name again, as before.
+
+Everything from 1.7.4+42 and earlier (below) is included in this build.
+
 ## 1.7.4+42
 
 ### New since 1.7.4+37
