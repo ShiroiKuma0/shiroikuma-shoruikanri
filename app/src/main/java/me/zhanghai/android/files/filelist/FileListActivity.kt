@@ -85,6 +85,9 @@ class FileListActivity : AppActivity() {
 
         setContentView(R.layout.sk_file_list_activity)
         onBackPressedDispatcher.addCallback(this, closeTabOnBackPressedCallback)
+        // Tab titles can come from bookmark names; repaint the strip when a
+        // bookmark is renamed (or added/removed) while its tab sits open.
+        Settings.BOOKMARK_DIRECTORIES.observe(this) { notifyTabStrip() }
 
         if (savedInstanceState == null) {
             // Restore the persisted tab set on a cold start (survives reboots and app
@@ -276,7 +279,12 @@ class FileListActivity : AppActivity() {
 
     private fun getTabTitle(path: Path?): String {
         path ?: return getString(R.string.loading)
-        return NavigationRootMapLiveData.value?.get(path)?.getName(this) ?: path.name
+        NavigationRootMapLiveData.value?.get(path)?.getName(this)?.let { return it }
+        // A tab sitting exactly at a bookmarked path shows the bookmark's (custom)
+        // name; several bookmarks may share a path, so take the first match.
+        return Settings.BOOKMARK_DIRECTORIES.valueCompat
+            .firstOrNull { it.path == path }?.name
+            ?: path.name
     }
 
     private fun observeCurrentPath(fragment: FileListFragment) {
