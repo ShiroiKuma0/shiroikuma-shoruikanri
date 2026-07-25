@@ -20,9 +20,11 @@ import me.zhanghai.android.files.util.valueCompat
 import java.io.IOException
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Future
+import java.util.concurrent.atomic.AtomicInteger
 
 class FileListLiveData(private val path: Path) : CloseableLiveData<Stateful<List<FileItem>>>() {
     private var future: Future<Unit>? = null
+    private val loadGeneration = AtomicInteger()
 
     private val observer: PathObserver
 
@@ -35,6 +37,9 @@ class FileListLiveData(private val path: Path) : CloseableLiveData<Stateful<List
     }
 
     fun loadValue() {
+        // Bump the generation before interrupting, so the superseded task can
+        // never pass the generation check below once its interrupt lands.
+        val generation = loadGeneration.incrementAndGet()
         future?.cancel(true)
         value = Loading(value?.value)
         future = (AsyncTask.THREAD_POOL_EXECUTOR as ExecutorService).submit<Unit> {
@@ -57,7 +62,14 @@ class FileListLiveData(private val path: Path) : CloseableLiveData<Stateful<List
             } catch (e: Exception) {
                 Failure(valueCompat.value, e)
             }
-            postValue(value)
+            // A superseded load was cancelled by a newer one (cancel(true)
+            // interrupts a network wait, surfacing as e.g. an SFTPException
+            // wrapping InterruptedException) — discard its outcome instead of
+            // posting a failure for an error we caused ourselves, or a stale
+            // success over a newer result.
+            if (loadGeneration.get() == generation) {
+                postValue(value)
+            }
         }
     }
 
@@ -78,6 +90,7 @@ class FileListLiveData(private val path: Path) : CloseableLiveData<Stateful<List
 
     override fun close() {
         observer.close()
+        loadGeneration.incrementAndGet()
         future?.cancel(true)
     }
 }
