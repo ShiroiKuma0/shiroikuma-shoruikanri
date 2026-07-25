@@ -535,6 +535,21 @@
 
         <receiver android:name="me.zhanghai.android.files.ftpserver.FtpServerReceiver" />
 
+        <!--
+          ~ 白い熊 fork: the sister-app 保存復元 automation contract — a headless
+          ~ category-ZIP export (EXPORT_STATE) and the category enumeration
+          ~ (LIST_CATEGORIES) behind it. No android:permission: the caller (自由作業盤)
+          ~ cannot hold one, so the automation token is the gate.
+          -->
+        <receiver
+            android:name="me.zhanghai.android.files.skui.SkStateExportReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="${applicationId}.action.EXPORT_STATE" />
+                <action android:name="${applicationId}.action.LIST_CATEGORIES" />
+            </intent-filter>
+        </receiver>
+
         <meta-data
             android:name="firebase_crashlytics_collection_enabled"
             android:value="false" />

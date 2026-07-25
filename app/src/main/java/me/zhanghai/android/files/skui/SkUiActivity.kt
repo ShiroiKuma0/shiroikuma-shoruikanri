@@ -25,11 +25,13 @@ import androidx.appcompat.widget.SwitchCompat
 import androidx.core.view.isVisible
 import me.zhanghai.android.files.R
 import me.zhanghai.android.files.app.AppActivity
+import me.zhanghai.android.files.app.clipboardManager
 import me.zhanghai.android.files.databinding.SkUiActivityBinding
 import me.zhanghai.android.files.file.MimeType
 import me.zhanghai.android.files.filelist.FileListActivity
 import me.zhanghai.android.files.filelist.FileViewType
 import me.zhanghai.android.files.settings.Settings
+import me.zhanghai.android.files.util.primaryText
 import me.zhanghai.android.files.util.showToast
 import me.zhanghai.android.files.util.valueCompat
 
@@ -104,6 +106,13 @@ class SkUiActivity : AppActivity() {
             R.string.sk_eximport_open, eximportStatus, rowL1Px,
             if (eximportWarn) WARN_COLOR else null
         ) { openEximportSheet() }
+        // …and, right below the export rows, the automation gate: the same
+        // export run headlessly by a sister app's 保存復元 task.
+        addSwitchRow(
+            R.string.sk_automation_enabled, SkAutomation.isEnabled, rowL1Px,
+            R.string.sk_automation_enabled_desc
+        ) { SkAutomation.isEnabled = it }
+        addAutomationTokenRow(rowL1Px)
 
         // Foundation — the colors everything else inherits from
         addSection(R.string.sk_ui_group_foundation)
@@ -435,6 +444,31 @@ class SkUiActivity : AppActivity() {
             layoutParams = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f)
         }
 
+    // The label, optionally over a smaller explanatory line — both taking the
+    // row's free width, so the control on the right keeps its natural size.
+    private fun makeLabelColumn(@StringRes labelRes: Int, @StringRes descriptionRes: Int?): View {
+        val label = makeLabel(labelRes)
+        if (descriptionRes == null) {
+            return label
+        }
+        return LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            layoutParams = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f)
+            label.layoutParams = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT
+            )
+            addView(label)
+            addView(
+                TextView(this@SkUiActivity).apply {
+                    text = getString(descriptionRes)
+                    textSize = 13f
+                    setTextColor(skColor(SkThemeSlot.TEXT_SECONDARY))
+                    setPadding(0, dp(1), dp(8), 0)
+                }
+            )
+        }
+    }
+
     private fun makeSwatch(color: Int): View =
         View(this).apply {
             background = GradientDrawable().apply {
@@ -501,15 +535,59 @@ class SkUiActivity : AppActivity() {
         @StringRes labelRes: Int,
         checked: Boolean,
         indent: Int,
+        @StringRes descriptionRes: Int? = null,
         onToggle: (Boolean) -> Unit
     ) {
         val row = makeRow(indent)
-        row.addView(makeLabel(labelRes))
+        row.addView(makeLabelColumn(labelRes, descriptionRes))
         val switch = SwitchCompat(this).apply { isChecked = checked }
         row.addView(switch)
         switch.setOnCheckedChangeListener { _, isChecked -> onToggle(isChecked) }
         row.setOnClickListener { switch.toggle() }
         binding.holder.addView(row)
+    }
+
+    // The automation shared secret: shown abbreviated, copied whole on tap (it
+    // is pasted into 自由作業盤's 保存復元 settings), regenerated from the action
+    // at the end of the row.
+    private fun addAutomationTokenRow(indent: Int) {
+        val row = makeRow(indent)
+        row.addView(makeLabel(R.string.sk_automation_token))
+        val valueView = TextView(this).apply {
+            text = SkAutomation.abbreviatedToken()
+            textSize = 14f
+            setTextColor(skColor(SkThemeSlot.TEXT_SECONDARY))
+        }
+        row.addView(valueView)
+        row.addView(
+            TextView(this).apply {
+                text = getString(R.string.sk_automation_token_regenerate)
+                textSize = 14f
+                setTypeface(typeface, android.graphics.Typeface.BOLD)
+                setTextColor(skColor(SkThemeSlot.ACCENT))
+                setPaddingRelative(dp(16), dp(8), dp(4), dp(8))
+                setBackgroundResource(android.R.drawable.list_selector_background)
+                setOnClickListener { confirmRegenerateToken(valueView) }
+            }
+        )
+        row.setOnClickListener {
+            clipboardManager.primaryText = SkAutomation.token
+            showToast(R.string.sk_automation_token_copied)
+        }
+        binding.holder.addView(row)
+    }
+
+    private fun confirmRegenerateToken(valueView: TextView) {
+        SkMaterialAlertDialogBuilder(this)
+            .setTitle(R.string.sk_automation_token_regenerate)
+            .setMessage(R.string.sk_automation_token_regenerate_message)
+            .setPositiveButton(R.string.sk_automation_token_regenerate) { _, _ ->
+                SkAutomation.regenerateToken()
+                valueView.text = SkAutomation.abbreviatedToken()
+                showToast(R.string.sk_automation_token_regenerated)
+            }
+            .setNegativeButton(android.R.string.cancel, null)
+            .show()
     }
 
     // A concrete text element: its color, font family, weight, size and a live sample of all four.

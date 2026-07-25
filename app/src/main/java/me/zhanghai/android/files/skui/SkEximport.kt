@@ -40,8 +40,14 @@ object SkEximport {
     const val FORMAT = "shiroikuma-shoruikanri-export"
     const val VERSION = 1
 
-    // Doubles as the "is this one of ours" filter for the last-export scan.
-    private const val EXPORT_PREFIX = "shiroikuma-shoruikanri-"
+    // The family name convention (白い熊, 2026-07-25): every 白い熊 app writes
+    // "<english-app-name>_<yyyy-MM-dd_HH-mm-ss>.zip" — no version, no infix, no
+    // suffix — so all apps' backups sort and read uniformly in one directory.
+    private const val EXPORT_PREFIX = "shiroikuma-shoruikanri_"
+
+    // Pre-2026-07-25 name ("shiroikuma-shoruikanri-<version>-export_<stamp>.zip"),
+    // still recognised by the last-export scan.
+    private const val LEGACY_EXPORT_PREFIX = "shiroikuma-shoruikanri-"
 
     // Device-local store for the export directory; deliberately not a category,
     // so an import from another device never installs a dead directory.
@@ -95,7 +101,9 @@ object SkEximport {
                 stream
                     .mapNotNull { path ->
                         val name = path.fileName?.toString() ?: return@mapNotNull null
-                        if (!name.startsWith(EXPORT_PREFIX) || !name.endsWith(".zip")) {
+                        val isOurs =
+                            name.startsWith(EXPORT_PREFIX) || name.startsWith(LEGACY_EXPORT_PREFIX)
+                        if (!isOurs || !name.endsWith(".zip")) {
                             return@mapNotNull null
                         }
                         name to runCatching { path.getLastModifiedTime().toMillis() }
@@ -106,14 +114,22 @@ object SkEximport {
         }.getOrNull()
 
     fun newExportFileName(): String =
-        EXPORT_PREFIX + BuildConfig.VERSION_NAME + "-export_" +
-            SimpleDateFormat("yyyy-MM-dd_HH-mm-ss", Locale.ROOT).format(Date()) + ".zip"
+        EXPORT_PREFIX + SimpleDateFormat("yyyy-MM-dd_HH-mm-ss", Locale.ROOT).format(Date()) + ".zip"
 
     // --- Export ---
 
-    /** Write a ZIP of the selected categories to [out]. Returns the category count. */
-    fun export(cats: Set<Cat>, out: OutputStream): Int {
+    /**
+     * Write a ZIP of the selected categories to [out]. Returns the category count. [onProgress]
+     * (done, total, category label) fires after each written category — the automation bridge
+     * ([SkStateExportReceiver]) forwards it as contract progress broadcasts; the panel omits it.
+     */
+    fun export(
+        cats: Set<Cat>,
+        out: OutputStream,
+        onProgress: ((done: Int, total: Int, catLabel: String) -> Unit)? = null
+    ): Int {
         var count = 0
+        val total = Cat.entries.count { it in cats }
         ZipOutputStream(out).use { zip ->
             val manifest = JSONObject()
                 .put("format", FORMAT)
@@ -132,6 +148,7 @@ object SkEximport {
                     exportFonts(zip)
                 }
                 ++count
+                onProgress?.invoke(count, total, application.getString(cat.labelRes))
             }
         }
         return count
