@@ -46,6 +46,15 @@
     <string name="sk_eximport_cat_share">Share (Termux · pinned)</string>
     <string name="sk_eximport_cat_open_with">Open-with defaults</string>
 
+    <!-- Automation export (the sister-app 保存復元 contract) -->
+    <string name="sk_automation_enabled">Automation export</string>
+    <string name="sk_automation_enabled_desc">Let sister-app tasks run this export headlessly through the token-gated intent.</string>
+    <string name="sk_automation_token">Automation token (tap to copy)</string>
+    <string name="sk_automation_token_copied">Automation token copied</string>
+    <string name="sk_automation_token_regenerate">Regenerate</string>
+    <string name="sk_automation_token_regenerate_message">The old token stops working immediately — every pasted copy (自由作業盤\'s 保存復元 settings) has to be updated.</string>
+    <string name="sk_automation_token_regenerated">New token — update the pasted copies</string>
+
     <!-- 白い熊 UI page -->
     <string name="sk_ui_title">白い熊 書類管理 UI</string>
     <string name="sk_ui_theme_enabled">白い熊 theme (black / yellow)</string>
