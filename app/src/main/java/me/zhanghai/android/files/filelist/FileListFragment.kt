@@ -650,8 +650,11 @@ class FileListFragment : Fragment(), BreadcrumbLayout.Listener, FileListAdapter.
         updateNewTabMenuItem()
         updateSelectAllMenuItem()
         updateShowHiddenFilesMenuItem()
-        // 白い熊 fork: re-skin the toolbar buttons' long-press tooltips (black/yellow).
-        SkTooltip.applyToToolbar(binding.toolbar)
+        // 白い熊 fork: re-skin the toolbar buttons' long-press tooltips (black/yellow);
+        // long-press on the overflow (⋮) opens the UI page, like the navigation icon.
+        SkTooltip.applyToToolbar(binding.toolbar) {
+            startActivity(SkUiActivity::class.createIntent())
+        }
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
