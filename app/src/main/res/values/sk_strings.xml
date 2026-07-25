@@ -11,6 +11,41 @@
     <string name="sk_audio_player_pause">Pause</string>
     <string name="sk_audio_player_error">Unable to play this audio file.</string>
 
+    <!-- Export / Import -->
+    <string name="sk_eximport_title">Export / Import</string>
+    <string name="sk_eximport_open">Export / import settings…</string>
+    <string name="sk_eximport_desc">Save or load every setting — colours, fonts, folders, tabs — as selectable categories.</string>
+    <string name="sk_eximport_dir">Export directory (tap to choose)</string>
+    <string name="sk_eximport_dir_unset">Not set — tap to choose a directory</string>
+    <string name="sk_eximport_warn_nodir">No directory set yet — pick one to enable one-tap export.</string>
+    <string name="sk_eximport_warn_none">No export in this directory yet.</string>
+    <string name="sk_eximport_status_nodir">No export folder set</string>
+    <string name="sk_eximport_status_none">No export yet</string>
+    <string name="sk_eximport_last">Last export: %1$s</string>
+    <string name="sk_eximport_select_all">Select all</string>
+    <string name="sk_eximport_export">Export</string>
+    <string name="sk_eximport_import">Import</string>
+    <string name="sk_eximport_exporting">Exporting…</string>
+    <string name="sk_eximport_importing">Importing…</string>
+    <string name="sk_eximport_none_selected">No categories selected.</string>
+    <string name="sk_eximport_export_done_title">✓ Export finished</string>
+    <string name="sk_eximport_export_done_body">Saved:\n%1$s</string>
+    <string name="sk_eximport_export_fail">Export failed: %1$s</string>
+    <string name="sk_eximport_import_done_title">✓ Import finished</string>
+    <string name="sk_eximport_import_done_body">Imported:\n\n%1$s\n\nRestart to apply everything.</string>
+    <string name="sk_eximport_import_fail">Import failed: %1$s</string>
+    <string name="sk_eximport_import_none">No 白い熊 書類管理 export found in that file.</string>
+    <string name="sk_eximport_restart_now">Restart now</string>
+    <string name="sk_eximport_later">Later</string>
+    <string name="sk_eximport_cat_ui">UI theme (colours · fonts)</string>
+    <string name="sk_eximport_cat_separators">Separators &amp; grid styles</string>
+    <string name="sk_eximport_cat_settings">App settings</string>
+    <string name="sk_eximport_cat_storages">Storages &amp; bookmarks</string>
+    <string name="sk_eximport_cat_folders">Per-folder view &amp; sort</string>
+    <string name="sk_eximport_cat_tabs">Open tabs</string>
+    <string name="sk_eximport_cat_share">Share (Termux · pinned)</string>
+    <string name="sk_eximport_cat_open_with">Open-with defaults</string>
+
     <!-- 白い熊 UI page -->
     <string name="sk_ui_title">白い熊 書類管理 UI</string>
     <string name="sk_ui_theme_enabled">白い熊 theme (black / yellow)</string>

@@ -48,6 +48,11 @@ private val typefaceCache = HashMap<String, Typeface>()
 
 fun skFontsDir(): File = File(application.filesDir, "fonts").apply { if (!exists()) mkdirs() }
 
+/** Drop the in-memory typeface cache (e.g. after an import replaced font files). */
+fun skInvalidateFontCache() {
+    typefaceCache.clear()
+}
+
 /** Built-in families + every font the user has imported. */
 fun Context.skAvailableFontOptions(): List<SkFontOption> {
     val options = mutableListOf(
