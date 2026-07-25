@@ -16,7 +16,7 @@ mini-player**, a **custom open-with chooser**, **full settings export/import**, 
 
 Installs **side-by-side** with the official Material Files (app ID `shiroikuma.shoruikanri`).
 
-**📥 Latest release: [`1.7.4+46`](https://github.com/ShiroiKuma0/shiroikuma-shoruikanri/releases/latest)** — [all releases & APK downloads »](https://github.com/ShiroiKuma0/shiroikuma-shoruikanri/releases)
+**📥 Latest release: [`1.7.4+47`](https://github.com/ShiroiKuma0/shiroikuma-shoruikanri/releases/latest)** — [all releases & APK downloads »](https://github.com/ShiroiKuma0/shiroikuma-shoruikanri/releases)
 
 </div>
 
@@ -67,6 +67,12 @@ tabs, share targets and open-with defaults — exports to a **single ZIP of plai
 **selectable categories**. Set an export folder once and it's **one-tap export** from then on, with
 the latest export shown right on the UI page. Import merges category-by-category — take a whole
 setup, or just the theme — and never wipes what it doesn't touch.
+
+And it runs **headlessly** too: with the **Automation export** switch on, a sister app's backup task
+can trigger the very same export through a **token-gated intent** — pick the target folder and the
+categories, watch **real counts** stream back as it writes (`区分 3/8 — App settings`, never a
+percentage), and get the path and exact size in reply. The token is copied from the UI page with one
+tap and never travels inside a backup.
 
 ## 🎵 Built-in audio mini-player
 
