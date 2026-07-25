@@ -11,6 +11,41 @@
     <string name="sk_audio_player_pause">一時停止</string>
     <string name="sk_audio_player_error">この音声ファイルを再生できませんでした。</string>
 
+    <!-- Export / Import -->
+    <string name="sk_eximport_title">エクスポート / インポート</string>
+    <string name="sk_eximport_open">設定のエクスポート / インポート…</string>
+    <string name="sk_eximport_desc">すべての設定（色・フォント・フォルダー・タブなど）をカテゴリー別に保存・復元します。</string>
+    <string name="sk_eximport_dir">エクスポート先フォルダー（タップして選択）</string>
+    <string name="sk_eximport_dir_unset">未設定 — タップしてフォルダーを選択</string>
+    <string name="sk_eximport_warn_nodir">フォルダーが未設定です — 選択するとワンタップでエクスポートできます。</string>
+    <string name="sk_eximport_warn_none">このフォルダーにはまだエクスポートがありません。</string>
+    <string name="sk_eximport_status_nodir">エクスポート先未設定</string>
+    <string name="sk_eximport_status_none">エクスポートなし</string>
+    <string name="sk_eximport_last">最終エクスポート: %1$s</string>
+    <string name="sk_eximport_select_all">すべて選択</string>
+    <string name="sk_eximport_export">エクスポート</string>
+    <string name="sk_eximport_import">インポート</string>
+    <string name="sk_eximport_exporting">エクスポート中…</string>
+    <string name="sk_eximport_importing">インポート中…</string>
+    <string name="sk_eximport_none_selected">カテゴリーが選択されていません。</string>
+    <string name="sk_eximport_export_done_title">✓ エクスポート完了</string>
+    <string name="sk_eximport_export_done_body">保存しました:\n%1$s</string>
+    <string name="sk_eximport_export_fail">エクスポート失敗: %1$s</string>
+    <string name="sk_eximport_import_done_title">✓ インポート完了</string>
+    <string name="sk_eximport_import_done_body">インポートしました:\n\n%1$s\n\n完全に反映するには再起動してください。</string>
+    <string name="sk_eximport_import_fail">インポート失敗: %1$s</string>
+    <string name="sk_eximport_import_none">このファイルに白い熊 書類管理のエクスポートが見つかりません。</string>
+    <string name="sk_eximport_restart_now">今すぐ再起動</string>
+    <string name="sk_eximport_later">後で</string>
+    <string name="sk_eximport_cat_ui">UIテーマ（色・フォント）</string>
+    <string name="sk_eximport_cat_separators">区切り線・グリッドスタイル</string>
+    <string name="sk_eximport_cat_settings">アプリ設定</string>
+    <string name="sk_eximport_cat_storages">ストレージ・ブックマーク</string>
+    <string name="sk_eximport_cat_folders">フォルダー別表示・並び順</string>
+    <string name="sk_eximport_cat_tabs">開いているタブ</string>
+    <string name="sk_eximport_cat_share">共有（Termux・固定）</string>
+    <string name="sk_eximport_cat_open_with">アプリで開く既定</string>
+
     <!-- 白い熊 UI page -->
     <string name="sk_ui_title">白い熊 書類管理 UI</string>
     <string name="sk_ui_theme_enabled">白い熊テーマ（黒・黄）</string>

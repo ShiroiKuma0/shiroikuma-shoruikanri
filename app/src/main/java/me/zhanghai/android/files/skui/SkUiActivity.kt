@@ -26,17 +26,27 @@ import androidx.core.view.isVisible
 import me.zhanghai.android.files.R
 import me.zhanghai.android.files.app.AppActivity
 import me.zhanghai.android.files.databinding.SkUiActivityBinding
+import me.zhanghai.android.files.file.MimeType
+import me.zhanghai.android.files.filelist.FileListActivity
 import me.zhanghai.android.files.filelist.FileViewType
 import me.zhanghai.android.files.settings.Settings
 import me.zhanghai.android.files.util.showToast
 import me.zhanghai.android.files.util.valueCompat
 
-private const val INDENT_STEP_DP = 72
+// The kxkb indent ladder: section heading 36, sub-heading 54, level-1 rows 72,
+// level-2 rows 90 — one 18dp step per cascade level.
+private const val HEADING_INDENT_DP = 36
+private const val SUBHEADING_INDENT_DP = 54
+private const val ROW_INDENT_DP = 72
+private const val ROW_SUB_INDENT_DP = 90
+private const val INDENT_STEP_DP = 18
 private const val MAX_FONT_SIZE_SP = 40
+private const val WARN_COLOR = 0xFFFF5252.toInt()
 
 class SkUiActivity : AppActivity() {
     private lateinit var binding: SkUiActivityBinding
-    private var stepPx = 0
+    private var rowL1Px = 0
+    private var rowL2Px = 0
     private var densityPx = 1f
 
     private var pendingFontSlot: SkThemeSlot? = null
@@ -44,6 +54,18 @@ class SkUiActivity : AppActivity() {
     private val fontImportLauncher =
         registerForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
             onFontImported(uri)
+        }
+
+    private var eximportSheet: SkEximportSheet? = null
+
+    private val eximportDirLauncher =
+        registerForActivityResult(FileListActivity.OpenDirectoryContract()) { path ->
+            path?.let { eximportSheet?.onDirectoryPicked(it) }
+        }
+
+    private val eximportFileLauncher =
+        registerForActivityResult(FileListActivity.OpenFileContract()) { path ->
+            path?.let { eximportSheet?.onImportFilePicked(it) }
         }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -64,7 +86,8 @@ class SkUiActivity : AppActivity() {
 
     private fun buildRows() {
         densityPx = resources.displayMetrics.density
-        stepPx = (INDENT_STEP_DP * densityPx).toInt()
+        rowL1Px = dp(ROW_INDENT_DP)
+        rowL2Px = dp(ROW_SUB_INDENT_DP)
         binding.holder.removeAllViews()
 
         window.setBackgroundDrawable(ColorDrawable(skColor(SkThemeSlot.BACKGROUND)))
@@ -72,84 +95,94 @@ class SkUiActivity : AppActivity() {
         binding.toolbar.setTitleTextColor(skColor(SkThemeSlot.TOOLBAR_TITLE))
         binding.toolbar.navigationIcon?.setTint(skColor(SkThemeSlot.TOOLBAR_ICONS))
 
+        // Export / Import — carry every setting between installs (the Kōjiki
+        // flow); the row's value is the latest export found in the export
+        // directory, queried on every page open.
+        addSection(R.string.sk_eximport_title)
+        val (eximportStatus, eximportWarn) = eximportPageStatus()
+        addValueRow(
+            R.string.sk_eximport_open, eximportStatus, rowL1Px,
+            if (eximportWarn) WARN_COLOR else null
+        ) { openEximportSheet() }
+
         // Foundation — the colors everything else inherits from
         addSection(R.string.sk_ui_group_foundation)
-        addSwitchRow(R.string.sk_ui_theme_enabled, SkUi.isSkThemeEnabled, stepPx) {
+        addSwitchRow(R.string.sk_ui_theme_enabled, SkUi.isSkThemeEnabled, rowL1Px) {
             SkUi.isSkThemeEnabled = it
             recreate()
         }
         SkThemeSlot.entries.filter { it.group == SkThemeGroup.FOUNDATION }.forEach {
-            addColorRow(it, stepPx)
+            addColorRow(it, rowL1Px)
         }
 
         // Toolbar
         addSection(R.string.sk_ui_group_toolbar)
-        addColorRow(SkThemeSlot.TOOLBAR_BACKGROUND, stepPx)
-        addTextRow(SkThemeSlot.TOOLBAR_TITLE, stepPx)
-        addTextRow(SkThemeSlot.TOOLBAR_SUBTITLE, stepPx)
-        addColorRow(SkThemeSlot.TOOLBAR_ICONS, stepPx)
+        addColorRow(SkThemeSlot.TOOLBAR_BACKGROUND, rowL1Px)
+        addTextRow(SkThemeSlot.TOOLBAR_TITLE, rowL1Px)
+        addTextRow(SkThemeSlot.TOOLBAR_SUBTITLE, rowL1Px)
+        addColorRow(SkThemeSlot.TOOLBAR_ICONS, rowL1Px)
 
         // Breadcrumbs
         addSection(R.string.sk_ui_group_breadcrumbs)
-        addTextRow(SkThemeSlot.BREADCRUMB_SELECTED, stepPx)
-        addColorRow(SkThemeSlot.BREADCRUMB_UNSELECTED, stepPx)
-        addColorRow(SkThemeSlot.BREADCRUMB_ARROWS, stepPx)
+        addTextRow(SkThemeSlot.BREADCRUMB_SELECTED, rowL1Px)
+        addColorRow(SkThemeSlot.BREADCRUMB_UNSELECTED, rowL1Px)
+        addColorRow(SkThemeSlot.BREADCRUMB_ARROWS, rowL1Px)
 
         // File list
         addSection(R.string.sk_ui_group_file_list)
-        val updateFileListPreview = addFileListPreview(stepPx)
+        val updateFileListPreview = addFileListPreview(rowL1Px)
         addSubgroup(R.string.sk_ui_subgroup_text)
-        addTextRow(SkThemeSlot.FILE_NAME, stepPx * 2)
-        addTextRow(SkThemeSlot.FILE_DESCRIPTION, stepPx * 2)
+        addTextRow(SkThemeSlot.FILE_NAME, rowL2Px)
+        addTextRow(SkThemeSlot.FILE_DESCRIPTION, rowL2Px)
         addSubgroup(R.string.sk_ui_subgroup_icons)
-        addColorRow(SkThemeSlot.FILE_ICONS, stepPx * 2)
+        addColorRow(SkThemeSlot.FILE_ICONS, rowL2Px)
         addSliderRow(
-            R.string.sk_ui_file_icon_size, 16, 64, SkUi.fileIconSizeDp, stepPx * 2
+            R.string.sk_ui_file_icon_size, 16, 64, SkUi.fileIconSizeDp, rowL2Px
         ) {
             SkUi.fileIconSizeDp = it
             updateFileListPreview()
         }
         addSubgroup(R.string.sk_ui_subgroup_grid)
-        val updateGridPreview = addGridPreview(stepPx * 2)
-        addTextRow(SkThemeSlot.GRID_TEXT, stepPx * 2)
+        val updateGridPreview = addGridPreview(rowL2Px)
+        addTextRow(SkThemeSlot.GRID_TEXT, rowL2Px)
         addSliderRow(
-            R.string.sk_ui_grid_image_width, 48, 320, SkUi.gridImageWidthDp, stepPx * 2
+            R.string.sk_ui_grid_image_width, 48, 320, SkUi.gridImageWidthDp, rowL2Px
         ) {
             SkUi.gridImageWidthDp = it
             updateGridPreview()
         }
         addSliderRow(
-            R.string.sk_ui_grid_image_height, 48, 320, SkUi.gridImageHeightDp, stepPx * 2
+            R.string.sk_ui_grid_image_height, 48, 320, SkUi.gridImageHeightDp, rowL2Px
         ) {
             SkUi.gridImageHeightDp = it
             updateGridPreview()
         }
         addSliderRow(
-            R.string.sk_ui_grid_padding_h, 0, 32, SkUi.gridPaddingHDp, stepPx * 2
+            R.string.sk_ui_grid_padding_h, 0, 32, SkUi.gridPaddingHDp, rowL2Px
         ) {
             SkUi.gridPaddingHDp = it
             updateGridPreview()
         }
         addSliderRow(
-            R.string.sk_ui_grid_padding_v, 0, 32, SkUi.gridPaddingVDp, stepPx * 2
+            R.string.sk_ui_grid_padding_v, 0, 32, SkUi.gridPaddingVDp, rowL2Px
         ) {
             SkUi.gridPaddingVDp = it
             updateGridPreview()
         }
         addSliderRow(
-            R.string.sk_ui_grid_text_gap, 0, 24, SkUi.gridTextGapDp, stepPx * 2
+            R.string.sk_ui_grid_text_gap, 0, 24, SkUi.gridTextGapDp, rowL2Px
         ) {
             SkUi.gridTextGapDp = it
             updateGridPreview()
         }
         addSwitchRow(
-            R.string.sk_ui_grid_text_overlay, SkUi.isGridTextOverlay, stepPx * 2
+            R.string.sk_ui_grid_text_overlay, SkUi.isGridTextOverlay, rowL2Px
         ) {
             SkUi.isGridTextOverlay = it
             updateGridPreview()
         }
         addSwitchRow(
-            R.string.sk_ui_grid_text_show, SkUi.isGridTextVisible, stepPx * 2
+            R.string.sk_ui_grid_text_show, SkUi.isGridTextVisible, rowL2Px
         ) {
             SkUi.isGridTextVisible = it
             updateGridPreview()
@@ -164,16 +197,16 @@ class SkUiActivity : AppActivity() {
         ).forEach { (separatorViewType, nameRes) ->
             addSliderRowText(
                 getString(nameRes), 0, 8,
-                SkSeparators.getGlobalThickness(separatorViewType), stepPx * 2
+                SkSeparators.getGlobalThickness(separatorViewType), rowL2Px
             ) { SkSeparators.setGlobalThickness(separatorViewType, it) }
             addCustomColorRow(
                 getString(R.string.sk_ui_separator_color_format, getString(nameRes)),
-                SkSeparators.getGlobalColor(separatorViewType), stepPx * 2
+                SkSeparators.getGlobalColor(separatorViewType), rowL2Px
             ) { SkSeparators.setGlobalColor(separatorViewType, it) }
         }
         addSubgroup(R.string.sk_ui_subgroup_options)
         addSliderRow(
-            R.string.sk_ui_file_padding, 0, 24, SkUi.filePaddingDp, stepPx * 2
+            R.string.sk_ui_file_padding, 0, 24, SkUi.filePaddingDp, rowL2Px
         ) {
             SkUi.filePaddingDp = it
             updateFileListPreview()
@@ -181,12 +214,12 @@ class SkUiActivity : AppActivity() {
         addSwitchRow(
             R.string.settings_file_list_animation_title,
             Settings.FILE_LIST_ANIMATION.valueCompat,
-            stepPx * 2
+            rowL2Px
         ) { Settings.FILE_LIST_ANIMATION.putValue(it) }
         addValueRow(
             R.string.settings_file_name_ellipsize_title,
             ellipsizeLabel(Settings.FILE_NAME_ELLIPSIZE.valueCompat),
-            stepPx * 2
+            rowL2Px
         ) { valueView ->
             val entries = resources.getStringArray(R.array.settings_file_name_ellipsize_entries)
             SkMaterialAlertDialogBuilder(this)
@@ -204,43 +237,66 @@ class SkUiActivity : AppActivity() {
 
         // Navigation drawer
         addSection(R.string.sk_ui_group_drawer)
-        addColorRow(SkThemeSlot.DRAWER_BACKGROUND, stepPx)
-        addTextRow(SkThemeSlot.DRAWER_ITEM, stepPx)
-        addColorRow(SkThemeSlot.DRAWER_ICONS, stepPx)
+        addColorRow(SkThemeSlot.DRAWER_BACKGROUND, rowL1Px)
+        addTextRow(SkThemeSlot.DRAWER_ITEM, rowL1Px)
+        addColorRow(SkThemeSlot.DRAWER_ICONS, rowL1Px)
 
         // Tab bar
         addSection(R.string.sk_ui_group_tabs)
-        addColorRow(SkThemeSlot.TAB_BACKGROUND, stepPx)
-        addTextRow(SkThemeSlot.TAB_SELECTED, stepPx)
-        addColorRow(SkThemeSlot.TAB_UNSELECTED, stepPx)
-        addColorRow(SkThemeSlot.TAB_BUTTONS, stepPx)
+        addColorRow(SkThemeSlot.TAB_BACKGROUND, rowL1Px)
+        addTextRow(SkThemeSlot.TAB_SELECTED, rowL1Px)
+        addColorRow(SkThemeSlot.TAB_UNSELECTED, rowL1Px)
+        addColorRow(SkThemeSlot.TAB_BUTTONS, rowL1Px)
 
         // Bottom bar
         addSection(R.string.sk_ui_group_bottom_bar)
-        addColorRow(SkThemeSlot.BOTTOM_BAR_BACKGROUND, stepPx)
-        addTextRow(SkThemeSlot.BOTTOM_BAR_TEXT, stepPx)
-        addColorRow(SkThemeSlot.BOTTOM_BAR_ICONS, stepPx)
+        addColorRow(SkThemeSlot.BOTTOM_BAR_BACKGROUND, rowL1Px)
+        addTextRow(SkThemeSlot.BOTTOM_BAR_TEXT, rowL1Px)
+        addColorRow(SkThemeSlot.BOTTOM_BAR_ICONS, rowL1Px)
 
         // Speed dial
         addSection(R.string.sk_ui_group_speed_dial)
-        addColorRow(SkThemeSlot.FAB_BACKGROUND, stepPx)
-        addColorRow(SkThemeSlot.FAB_ICON, stepPx)
+        addColorRow(SkThemeSlot.FAB_BACKGROUND, rowL1Px)
+        addColorRow(SkThemeSlot.FAB_ICON, rowL1Px)
 
         // Audio mini-player
         addSection(R.string.sk_ui_group_audio_player)
-        addColorRow(SkThemeSlot.AUDIO_PLAYER_BACKGROUND, stepPx)
-        addTextRow(SkThemeSlot.AUDIO_PLAYER_TITLE, stepPx)
-        addTextRow(SkThemeSlot.AUDIO_PLAYER_TIME, stepPx)
-        addColorRow(SkThemeSlot.AUDIO_PLAYER_CONTROLS, stepPx)
+        addColorRow(SkThemeSlot.AUDIO_PLAYER_BACKGROUND, rowL1Px)
+        addTextRow(SkThemeSlot.AUDIO_PLAYER_TITLE, rowL1Px)
+        addTextRow(SkThemeSlot.AUDIO_PLAYER_TIME, rowL1Px)
+        addColorRow(SkThemeSlot.AUDIO_PLAYER_CONTROLS, rowL1Px)
 
         // Share → Termux
         addSection(R.string.sk_ui_group_share)
-        addSwitchRow(R.string.sk_ui_share_one_target, SkTermux.oneTargetMode, stepPx) {
+        addSwitchRow(R.string.sk_ui_share_one_target, SkTermux.oneTargetMode, rowL1Px) {
             SkTermux.oneTargetMode = it
         }
-        addValueRow(R.string.sk_ui_share_staging_dir, SkTermux.stagingDir, stepPx) { valueView ->
+        addValueRow(R.string.sk_ui_share_staging_dir, SkTermux.stagingDir, rowL1Px) { valueView ->
             showStagingDirDialog(valueView)
         }
+    }
+
+    // The Export/Import row's page status: the latest export found in the
+    // export directory, or a short warning (true = warn).
+    private fun eximportPageStatus(): Pair<String, Boolean> {
+        val dir = SkEximport.exportDirPath
+            ?: return getString(R.string.sk_eximport_status_nodir) to true
+        val newest = SkEximport.latestExport(dir)
+            ?: return getString(R.string.sk_eximport_status_none) to true
+        return getString(
+            R.string.sk_eximport_last,
+            java.text.SimpleDateFormat("yyyy-MM-dd HH:mm", java.util.Locale.ROOT)
+                .format(java.util.Date(newest.second))
+        ) to false
+    }
+
+    private fun openEximportSheet() {
+        eximportSheet = SkEximportSheet(
+            this,
+            onPickDirectory = { eximportDirLauncher.launch(SkEximport.exportDirPath) },
+            onPickImportFile = { eximportFileLauncher.launch(listOf(MimeType.ANY)) },
+            onDismissed = { eximportSheet = null }
+        ).also { it.show() }
     }
 
     private fun showStagingDirDialog(valueView: TextView) {
@@ -285,54 +341,79 @@ class SkUiActivity : AppActivity() {
 
     private fun dp(value: Int): Int = (value * densityPx).toInt()
 
-    private fun addSection(@StringRes labelRes: Int) {
+    // A heading underlined exactly as wide as its text: the wrap_content
+    // wrapper measures to the text, so the match_parent underline collapses to
+    // that width (the kxkb idiom).
+    private fun makeUnderlinedHeading(
+        @StringRes labelRes: Int,
+        textSizeSp: Float,
+        underlineHeightDp: Float
+    ): LinearLayout {
         val accent = skColor(SkThemeSlot.ACCENT)
-        val holder = LinearLayout(this).apply {
+        val box = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
-            setPadding(dp(16), dp(20), dp(16), dp(6))
+            layoutParams = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT
+            )
         }
-        holder.addView(
+        box.addView(
             TextView(this).apply {
                 text = getString(labelRes)
-                textSize = 18f
+                textSize = textSizeSp
                 setTypeface(typeface, android.graphics.Typeface.BOLD)
                 setTextColor(accent)
             }
         )
-        holder.addView(
+        box.addView(
             View(this).apply {
                 setBackgroundColor(accent)
                 layoutParams = LinearLayout.LayoutParams(
-                    LinearLayout.LayoutParams.MATCH_PARENT, dp(2)
-                ).apply { topMargin = dp(6) }
+                    LinearLayout.LayoutParams.MATCH_PARENT, (underlineHeightDp * densityPx).toInt()
+                ).apply { topMargin = dp(2) }
+            }
+        )
+        return box
+    }
+
+    // kxkb-style section header: an edge-to-edge 1px accent rule separating it
+    // from the previous section, then a 20sp bold accent title with a 2.5dp
+    // text-wide underline.
+    private fun addSection(@StringRes labelRes: Int) {
+        val first = binding.holder.childCount == 0
+        val holder = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            setPadding(0, dp(if (first) 12 else 10), 0, dp(2))
+        }
+        if (!first) {
+            holder.addView(
+                View(this).apply {
+                    setBackgroundColor(skColor(SkThemeSlot.ACCENT))
+                    layoutParams = LinearLayout.LayoutParams(
+                        LinearLayout.LayoutParams.MATCH_PARENT, 1
+                    )
+                }
+            )
+        }
+        holder.addView(
+            LinearLayout(this).apply {
+                orientation = LinearLayout.VERTICAL
+                setPaddingRelative(dp(HEADING_INDENT_DP), dp(8), 0, 0)
+                addView(makeUnderlinedHeading(labelRes, 20f, 2.5f))
             }
         )
         binding.holder.addView(holder)
     }
 
+    // A sub-section heading one level down: 17sp bold with a 1.5dp text-wide
+    // underline, no rule of its own.
     private fun addSubgroup(@StringRes labelRes: Int) {
-        val accent = skColor(SkThemeSlot.ACCENT)
-        val holder = LinearLayout(this).apply {
-            orientation = LinearLayout.VERTICAL
-            setPaddingRelative(stepPx, dp(12), dp(16), dp(4))
-        }
-        holder.addView(
-            TextView(this).apply {
-                text = getString(labelRes)
-                textSize = 15f
-                setTypeface(typeface, android.graphics.Typeface.BOLD)
-                setTextColor(accent)
+        binding.holder.addView(
+            LinearLayout(this).apply {
+                orientation = LinearLayout.VERTICAL
+                setPaddingRelative(dp(SUBHEADING_INDENT_DP), dp(10), 0, dp(2))
+                addView(makeUnderlinedHeading(labelRes, 17f, 1.5f))
             }
         )
-        holder.addView(
-            View(this).apply {
-                setBackgroundColor(accent)
-                layoutParams = LinearLayout.LayoutParams(
-                    LinearLayout.LayoutParams.WRAP_CONTENT, dp(2)
-                ).apply { topMargin = dp(4) }
-            }
-        )
-        binding.holder.addView(holder)
     }
 
     private fun makeRow(indent: Int): LinearLayout =
@@ -340,7 +421,7 @@ class SkUiActivity : AppActivity() {
             orientation = LinearLayout.HORIZONTAL
             gravity = Gravity.CENTER_VERTICAL
             minimumHeight = dp(48)
-            setPaddingRelative(dp(16) + indent, dp(4), dp(16), dp(4))
+            setPaddingRelative(indent, dp(4), dp(16), dp(4))
             setBackgroundResource(android.R.drawable.list_selector_background)
         }
 
@@ -401,6 +482,7 @@ class SkUiActivity : AppActivity() {
         @StringRes labelRes: Int,
         value: String,
         indent: Int,
+        valueColor: Int? = null,
         onClick: (TextView) -> Unit
     ) {
         val row = makeRow(indent)
@@ -408,7 +490,7 @@ class SkUiActivity : AppActivity() {
         val valueView = TextView(this).apply {
             text = value
             textSize = 14f
-            setTextColor(skColor(SkThemeSlot.TEXT_SECONDARY))
+            setTextColor(valueColor ?: skColor(SkThemeSlot.TEXT_SECONDARY))
         }
         row.addView(valueView)
         row.setOnClickListener { onClick(valueView) }
@@ -445,7 +527,7 @@ class SkUiActivity : AppActivity() {
         }
         holder.addView(colorRow)
 
-        val subIndent = indent + stepPx
+        val subIndent = indent + dp(INDENT_STEP_DP)
 
         // Font family
         val fontRow = makeRow(subIndent)
@@ -498,7 +580,7 @@ class SkUiActivity : AppActivity() {
 
         // Font size + live sample
         val sample = TextView(this).apply {
-            setPaddingRelative(dp(16) + subIndent, dp(2), dp(16), dp(10))
+            setPaddingRelative(subIndent, dp(2), dp(16), dp(10))
         }
 
         val sizeRow = makeRow(subIndent)
@@ -594,7 +676,7 @@ class SkUiActivity : AppActivity() {
         val row = LinearLayout(this).apply {
             orientation = LinearLayout.HORIZONTAL
             gravity = Gravity.CENTER_VERTICAL
-            setPaddingRelative(dp(16) + indent, dp(4), dp(16), dp(4))
+            setPaddingRelative(indent, dp(4), dp(16), dp(4))
         }
         val icon = android.widget.ImageView(this).apply {
             setImageResource(R.drawable.directory_icon_white_24dp)
@@ -622,7 +704,7 @@ class SkUiActivity : AppActivity() {
                 android.content.res.ColorStateList.valueOf(skColor(SkThemeSlot.FILE_ICONS))
             val paddingPx = dp(SkUi.filePaddingDp)
             row.setPaddingRelative(
-                dp(16) + indent, dp(4) + paddingPx, dp(16), dp(4) + paddingPx
+                indent, dp(4) + paddingPx, dp(16), dp(4) + paddingPx
             )
             nameView.applySkSlot(SkThemeSlot.FILE_NAME)
             descriptionView.applySkSlot(SkThemeSlot.FILE_DESCRIPTION)
@@ -636,7 +718,7 @@ class SkUiActivity : AppActivity() {
     private fun addGridPreview(indent: Int): () -> Unit {
         val cell = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
-            setPaddingRelative(dp(16) + indent, dp(4), dp(16), dp(4))
+            setPaddingRelative(indent, dp(4), dp(16), dp(4))
         }
         val imageBox = View(this)
         val nameView = TextView(this).apply {
