@@ -11,11 +11,12 @@
 A fork of [Material Files](https://github.com/zhanghai/MaterialFiles) with **major additions**:
 in-app **gocryptfs** encrypted volumes (no FUSE, no root), **multi-folder tabs**, a full
 **black/yellow theme system**, **six listing views** with per-folder styling, a **built-in audio
-mini-player**, a **custom open-with chooser**, and deep **Termux / share** integration.
+mini-player**, a **custom open-with chooser**, **full settings export/import**, and deep
+**Termux / share** integration.
 
 Installs **side-by-side** with the official Material Files (app ID `shiroikuma.shoruikanri`).
 
-**📥 Latest release: [`1.7.4+43`](https://github.com/ShiroiKuma0/shiroikuma-shoruikanri/releases/latest)** — [all releases & APK downloads »](https://github.com/ShiroiKuma0/shiroikuma-shoruikanri/releases)
+**📥 Latest release: [`1.7.4+46`](https://github.com/ShiroiKuma0/shiroikuma-shoruikanri/releases/latest)** — [all releases & APK downloads »](https://github.com/ShiroiKuma0/shiroikuma-shoruikanri/releases)
 
 </div>
 
@@ -57,6 +58,15 @@ or a **per-folder override** from a sheet on the address line, remembered per pa
 An in-app open-with chooser that shows every handler with its icon and lets you **remember a default
 per file type** — with an “Open as…” escape hatch and a one-tap “forget default”. Remembered
 installers even bypass the APK prompt. No more wrestling with the system chooser.
+
+## 💾 Full settings export / import
+
+Everything settable in the app — theme colours and fonts (including your imported font files),
+separators and grid styles, app settings, storages and bookmarks, per-folder views and sorting, open
+tabs, share targets and open-with defaults — exports to a **single ZIP of plain JSON**, split into
+**selectable categories**. Set an export folder once and it's **one-tap export** from then on, with
+the latest export shown right on the UI page. Import merges category-by-category — take a whole
+setup, or just the theme — and never wipes what it doesn't touch.
 
 ## 🎵 Built-in audio mini-player
 

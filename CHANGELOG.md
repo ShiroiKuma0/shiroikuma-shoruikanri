@@ -5,6 +5,56 @@ by Hai Zhang. Versions are `<upstream version>+<fork build>` — the upstream ve
 plus our build increment (e.g. `1.7.4+36`). This fork installs side-by-side with upstream under the
 app ID `shiroikuma.shoruikanri`.
 
+## 1.7.4+46
+
+### New since 1.7.4+43
+
+#### 💾 Settings Export / Import
+
+- **Every setting in the app can now be exported and imported**, from the new **Export / Import**
+  section at the top of the UI page. The export is a single ZIP of **plain, type-tagged JSON files —
+  one per category** — plus your imported font files as real files and a manifest; nothing binary,
+  nothing opaque.
+- **Eight selectable categories** cover everything settable: **UI theme** (colours · fonts, with the
+  font files), **separators & grid styles**, **app settings**, **storages & bookmarks**,
+  **per-folder view & sort**, **open tabs**, **share** (Termux scripts · pinned targets), and
+  **open-with defaults**. One checklist drives both directions — export saves the ticked categories,
+  import applies the ticked categories the chosen ZIP contains (absent ones are skipped).
+- **A persisted export directory** (picked with the app's own directory picker) enables **one-tap
+  export**; the panel — and the UI page itself, on every open — shows the **latest export** found
+  there, with red warnings when the folder is unset or empty. Export files are named
+  `shiroikuma-shoruikanri-<version>-export_<timestamp>.zip`.
+- **Safe import semantics:** merges per key — never clears — so device-local state survives; skips
+  unknown keys and categories, so exports round-trip across app versions. After import, styling
+  refreshes immediately and a **Restart now / Later** dialog offers the full reload.
+- The panel is a bottom sheet in the sister-repo style: an inset yellow-bordered box, a tappable
+  directory box, the category checklist, and **round pill buttons** — Cancel alone on the left,
+  Import / Export on the right. Success ends in a **yellow-bordered info dialog**; acknowledging it
+  closes the whole chain (dialog → panel → UI page). Failures toast and leave the panel open.
+
+#### 🎨 UI page restyle (kxkb look)
+
+- The whole UI page now follows the kxkb sister-repo visual system: **bold yellow section headings
+  underlined exactly as wide as their text** (20 sp with a 2.5 dp underline; sub-sections 17 sp with
+  1.5 dp), an **edge-to-edge 1 px yellow rule** separating consecutive sections, and a tightened
+  **36/54/72/90 dp indent ladder** (18 dp per nesting level) replacing the old 72 dp jumps — deep
+  controls no longer crawl across the screen.
+
+#### 🧰 Toolbar
+
+- **Long-press the overflow (⋮) button — top-right on the main page — to open the UI page**, same
+  as the existing long-press on the drawer (hamburger) icon on the left. The selection-mode
+  toolbars keep their black/yellow tooltip on long-press.
+
+#### 🛠 Fixes
+
+- **No more phantom errors when navigating quickly on slow (e.g. SFTP) folders.** Starting a new
+  folder load cancels the previous one; the cancelled load's interrupt used to surface as an error
+  flash — an error the app caused itself — and a slow stale load could even overwrite a newer
+  listing. Superseded loads now discard their outcome entirely.
+
+Everything from 1.7.4+43 and earlier (below) is included in this build.
+
 ## 1.7.4+43
 
 ### New since 1.7.4+42
