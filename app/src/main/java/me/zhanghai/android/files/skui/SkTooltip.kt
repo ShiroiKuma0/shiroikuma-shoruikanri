@@ -12,6 +12,7 @@ package me.zhanghai.android.files.skui
 import android.util.TypedValue
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
 import android.widget.PopupWindow
 import android.widget.TextView
 import androidx.appcompat.content.res.AppCompatResources
@@ -42,14 +43,25 @@ object SkTooltip {
     // direct children of the ActionMenuView are touched — the action buttons and the
     // overflow button — so we never hijack the long-press of an expanded search field's
     // text box (it lives elsewhere in the toolbar) or the navigation icon (its own
-    // long-press opens the UI page). Posted so the action views exist; safe to call
-    // again whenever the menu is re-prepared.
-    fun applyToToolbar(toolbar: Toolbar) {
+    // long-press opens the UI page). When [onOverflowLongPress] is given, the overflow
+    // button (the one ImageView child; action buttons are ActionMenuItemViews) gets
+    // that long-press instead of a tooltip — the main page routes it to the UI page
+    // too. Posted so the action views exist; safe to call again whenever the menu is
+    // re-prepared.
+    fun applyToToolbar(toolbar: Toolbar, onOverflowLongPress: (() -> Unit)? = null) {
         toolbar.post {
             val menuView = toolbar.children.firstOrNull { it is ActionMenuView } as? ViewGroup
                 ?: return@post
             for (child in menuView.children) {
-                replace(child)
+                if (child is ImageView && onOverflowLongPress != null) {
+                    TooltipCompat.setTooltipText(child, null)
+                    child.setOnLongClickListener {
+                        onOverflowLongPress()
+                        true
+                    }
+                } else {
+                    replace(child)
+                }
             }
         }
     }
