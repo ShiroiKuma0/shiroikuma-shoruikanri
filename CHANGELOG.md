@@ -5,6 +5,39 @@ by Hai Zhang. Versions are `<upstream version>+<fork build>` — the upstream ve
 plus our build increment (e.g. `1.7.4+36`). This fork installs side-by-side with upstream under the
 app ID `shiroikuma.shoruikanri`.
 
+## 1.7.4+47
+
+### New since 1.7.4+46
+
+#### 🤖 Headless automation export
+
+- **A sister app can now run this app's export for you, without opening it.** 書類管理 answers the
+  白い熊 family's state-export contract, so 自由作業盤's 保存復元 project can back up every app on the
+  phone in one run: it fires a token-gated broadcast, the app exports itself in the background and
+  replies with the written path, the exact byte count, a human-readable size and the number of
+  categories.
+- **Two intents**, both exported and gated by a shared secret rather than a permission (the caller
+  can't hold one): `shiroikuma.shoruikanri.action.EXPORT_STATE` runs the export — with an optional
+  absolute **target directory** that overrides the configured one, and an optional **`items` list**
+  to export only some categories — and `…action.LIST_CATEGORIES` enumerates the categories so the
+  caller can offer a picker.
+- **Live progress with real numbers, never a percentage** — the export broadcasts `区分 3/8 —
+  App settings` as it goes (with the structured current / total / unit alongside), so the calling
+  task can show what is actually happening.
+- **The gate lives in the UI page's Export / Import section**, right below the existing rows: an
+  **Automation export** switch — **off until you turn it on**, and nothing answers before you do —
+  and an **Automation token** row that shows the secret abbreviated, **copies it whole on tap** and
+  regenerates it on demand. The token is kept in its own device-local store that belongs to no
+  export category, so it can never travel inside a backup ZIP.
+- **One export core, two callers** — the automation path runs exactly the same category ZIP the
+  Export / Import panel writes, so a headless backup is a normal, restorable one.
+- **Backup file names now follow the 白い熊 family convention**:
+  `shiroikuma-shoruikanri_2026-07-25_22-31-05.zip` — no version, no `-export` infix, no decoration,
+  and always exactly one ZIP per app, so every app's backups sort and read uniformly in one folder.
+  Backups written by earlier builds are still recognised as ours.
+
+Everything from 1.7.4+46 and earlier (below) is included in this build.
+
 ## 1.7.4+46
 
 ### New since 1.7.4+43
