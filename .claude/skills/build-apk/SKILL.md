@@ -40,8 +40,9 @@ description: Build the signed release APK with the buildApk Gradle task, then de
 
 1. **Note the output filename.** Read the current version and build number:
    - `grep -E 'VERSION_NAME|VERSION_CODE|BUILD_NUMBER' gradle.properties`
-   - The APK will be `shiroikuma-shoruikanri_<VERSION_NAME>+<BUILD_NUMBER>_arm64-v8a.apk`, using the `BUILD_NUMBER` value **before** the build (the task bumps it afterward).
-   - versionCode for that build = `VERSION_CODE * 10000 + BUILD_NUMBER`.
+   - The APK will be `shiroikuma-shoruikanri_<VERSION_NAME>+<NNN>_arm64-v8a.apk`, using the `BUILD_NUMBER` value **before** the build (the task bumps it afterward).
+   - **`<NNN>` is `BUILD_NUMBER` zero-padded to three digits** (`+001`, `+014`, `+050`) — the global `/after-build` rule, so APKs sort in build order. `gradle.properties` stores the number unpadded; `app/build.gradle` does the padding.
+   - versionCode for that build = `VERSION_CODE * 10000 + BUILD_NUMBER` (a number — never padded).
 
 2. **Build** (needs JDK 17+ — the default `java` on this machine is JDK 11):
    - `JAVA_HOME=/usr/lib/jvm/java-21-openjdk-amd64 ./gradlew buildApk < /dev/null`

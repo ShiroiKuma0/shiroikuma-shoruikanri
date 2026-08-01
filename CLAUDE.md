@@ -53,12 +53,18 @@ We base our version on upstream and add a fork increment (`BUILD_NUMBER`).
 
 - `VERSION_NAME` / `VERSION_CODE` in `gradle.properties` **track upstream** (currently `1.7.4` / `39`).
 - `BUILD_NUMBER` is **our** increment. It starts at `1` and bumps by `1` on every build with changes.
-- Fork `versionName` = `"<VERSION_NAME>+<BUILD_NUMBER>"` (e.g. `1.7.4+1`).
-- Fork `versionCode` = `VERSION_CODE * 10000 + BUILD_NUMBER` (e.g. `39 * 10000 + 1 = 390001`).
-- Output APK filename = `shiroikuma-shoruikanri_<VERSION_NAME>+<BUILD_NUMBER>_arm64-v8a.apk`
-  (e.g. `shiroikuma-shoruikanri_1.7.4+1_arm64-v8a.apk`).
+  It is stored **unpadded** in `gradle.properties` (`BUILD_NUMBER=50`) — the padding below is applied
+  when the version string is built.
+- The `+N` part is **always zero-padded to three digits** (`+001`, `+014`, `+050`), so APKs sort in
+  build order in a file listing. This is the global `/after-build` rule; it applies to every build.
+- Fork `versionName` = `"<VERSION_NAME>+<NNN>"` (e.g. `1.7.4+001`).
+- Fork `versionCode` = `VERSION_CODE * 10000 + BUILD_NUMBER` (e.g. `39 * 10000 + 1 = 390001`) — a
+  number, so it is **not** padded.
+- Output APK filename = `shiroikuma-shoruikanri_<VERSION_NAME>+<NNN>_arm64-v8a.apk`
+  (e.g. `shiroikuma-shoruikanri_1.7.4+001_arm64-v8a.apk`).
 
-So the first build is `+1` (`390001`), the next build with changes is `+2` (`390002`), and so on.
+So the first build is `+001` (`390001`), the next build with changes is `+002` (`390002`), and so on.
+Builds up to `1.7.4+49` predate the padding and keep their unpadded names.
 
 ### Building
 
@@ -84,7 +90,7 @@ When the user says a new upstream version is out, follow the **upstream-new-vers
 2. Advance `master` to the new upstream release.
 3. Rebase `custom` onto `master`, preserving every customization in the table above.
 4. Set `VERSION_NAME` / `VERSION_CODE` to the new upstream values and **reset `BUILD_NUMBER` to `1`**.
-5. Build the new `+1` version with `./gradlew buildApk`; continue further changes as `+2`, `+3`, …
+5. Build the new `+001` version with `./gradlew buildApk`; continue further changes as `+002`, `+003`, …
 
 ### HARD RULES (do not violate)
 

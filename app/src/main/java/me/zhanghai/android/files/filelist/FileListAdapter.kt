@@ -211,19 +211,14 @@ class FileListAdapter(
                     marginStart = (8 * density).toInt()
                 }
             }
-            FileViewType.LIST -> {
-                // 白い熊 fork: a long file name flows onto as many lines as it needs, so the
-                // whole name is always visible instead of being ellipsized.
-                holder.nameText.setSingleLine(false)
-                holder.nameText.maxLines = Int.MAX_VALUE
-                holder.nameText.ellipsize = null
-            }
-            FileViewType.WRAPPED -> {
-                // The file name may wrap to a second line.
-                holder.nameText.setSingleLine(false)
-                holder.nameText.maxLines = 2
-            }
             else -> {}
+        }
+        if (viewType != FileViewType.GRID) {
+            // 白い熊 fork: in every listing view a long file name flows onto as many lines as
+            // it needs, so the whole name is always visible instead of being ellipsized.
+            holder.nameText.setSingleLine(false)
+            holder.nameText.maxLines = Int.MAX_VALUE
+            holder.nameText.ellipsize = null
         }
         return holder.apply {
             itemLayout.apply {
@@ -329,8 +324,8 @@ class FileListAdapter(
                 }
             }
         }
-        // 白い熊 fork: configurable icon size and inter-file padding; the additional
-        // views always ellipsize the file name with trailing dots.
+        // 白い熊 fork: configurable icon size and inter-file padding; the row grows with a
+        // wrapped file name.
         if (viewType != FileViewType.GRID) {
             val density = holder.itemView.resources.displayMetrics.density
             val iconSizePx = (SkUi.fileIconSizeDp * density).toInt()
@@ -349,10 +344,6 @@ class FileListAdapter(
             val paddingPx = (SkUi.filePaddingDp * density).toInt()
             holder.itemLayout.updateLayoutParams { height = ViewGroup.LayoutParams.WRAP_CONTENT }
             holder.itemLayout.updatePadding(top = paddingPx, bottom = paddingPx)
-        }
-        if (viewType != FileViewType.LIST && viewType != FileViewType.GRID) {
-            holder.nameText.ellipsize = TextUtils.TruncateAt.END
-            holder.nameText.isSelected = false
         }
         if (payloads.isNotEmpty()) {
             return

@@ -9,10 +9,12 @@ apply plugin: 'kotlin-parcelize'
 apply from: '../signing.gradle'
 
 // Fork versioning: VERSION_NAME / VERSION_CODE in gradle.properties track upstream,
-// BUILD_NUMBER is our increment (bumped by the buildApk task after every build).
-def forkVersionName = "${project.property('VERSION_NAME')}+${project.property('BUILD_NUMBER')}"
-def forkVersionCode = project.property('VERSION_CODE').toInteger() * 10000 +
-        project.property('BUILD_NUMBER').toInteger()
+// BUILD_NUMBER is our increment (bumped by the buildApk task after every build). The "+N"
+// part is zero-padded to three digits so APKs sort in build order in a file listing.
+def forkBuildNumber = project.property('BUILD_NUMBER').toInteger()
+def forkVersionName =
+        "${project.property('VERSION_NAME')}+${String.format('%03d', forkBuildNumber)}"
+def forkVersionCode = project.property('VERSION_CODE').toInteger() * 10000 + forkBuildNumber
 
 android {
     namespace 'me.zhanghai.android.files'
