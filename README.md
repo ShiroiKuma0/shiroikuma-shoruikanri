@@ -16,7 +16,7 @@ mini-player**, a **custom open-with chooser**, **full settings export/import**, 
 
 Installs **side-by-side** with the official Material Files (app ID `shiroikuma.shoruikanri`).
 
-**📥 Latest release: [`1.7.4+47`](https://github.com/ShiroiKuma0/shiroikuma-shoruikanri/releases/latest)** — [all releases & APK downloads »](https://github.com/ShiroiKuma0/shiroikuma-shoruikanri/releases)
+**📥 Latest release: [`1.7.4+050`](https://github.com/ShiroiKuma0/shiroikuma-shoruikanri/releases/latest)** — [all releases & APK downloads »](https://github.com/ShiroiKuma0/shiroikuma-shoruikanri/releases)
 
 </div>
 
@@ -48,7 +48,9 @@ retune it: per-element **colours** (picker with swatches + hex), **fonts** (impo
 ## 🔭 Six listing views + per-folder styling
 
 **List, Grid, Compact, Column, Detailed** and **Wrapped** views — and each **folder remembers its own
-view**, restored as you navigate (Back included), defaulting to List. Style the grid to taste — image
+view**, restored as you navigate (Back included), defaulting to List. **File names are shown in
+full**: a long name wraps onto as many lines as it needs instead of losing its middle to a `…`, so
+build numbers, dates and episode numbers stay readable. Style the grid to taste — image
 size, padding down to zero, a name-over-photo overlay for **seamless photo walls**, or no names at
 all — and set **row/column separators** as a clean lattice. Every tweak can be a **global default**
 or a **per-folder override** from a sheet on the address line, remembered per path.

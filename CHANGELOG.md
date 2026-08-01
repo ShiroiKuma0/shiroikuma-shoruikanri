@@ -2,8 +2,37 @@
 
 All notable fork changes layered on top of [Material Files](https://github.com/zhanghai/MaterialFiles)
 by Hai Zhang. Versions are `<upstream version>+<fork build>` — the upstream version this fork tracks,
-plus our build increment (e.g. `1.7.4+36`). This fork installs side-by-side with upstream under the
-app ID `shiroikuma.shoruikanri`.
+plus our build increment (e.g. `1.7.4+050`; the counter is zero-padded to three digits from
+`1.7.4+050` onwards, so builds sort in order). This fork installs side-by-side with upstream under
+the app ID `shiroikuma.shoruikanri`.
+
+## 1.7.4+050
+
+### New since 1.7.4+47
+
+#### 🔭 File names are shown in full
+
+- **A long file name is never cut short any more.** In every listing view — **List, Compact,
+  Column, Detailed** and **Wrapped** — the name now flows onto as many lines as it needs instead of
+  being ellipsized on a single line, and the row grows to fit it. Names like
+  `shiroikuma-rindenwa_6.3.0-alpha.2026-07-30.g5c0ed6a3+002_arm64-v8a.apk` or a long video title,
+  which used to lose their middle to a `…` exactly where the version or the episode number sits,
+  are readable at a glance.
+- Wrapping **never invents a hyphen**: automatic hyphenation is off on the name, so every character
+  you see belongs to the file name.
+- **Wrapped** (the two-column view) loses its old two-line cap and shows the whole name too, and the
+  additional views no longer force a trailing `…`.
+- The **Grid** view is unchanged, and is now the only view that uses the **"File name ellipsize"**
+  preference (start / middle / end / marquee) — there is nothing left to ellipsize elsewhere.
+
+#### 📦 Packaging
+
+- **The fork build counter is zero-padded to three digits** — this build is `1.7.4+050`, not
+  `1.7.4+49`. Versions and APK file names now sort in build order in any file listing, matching the
+  convention used across the 白い熊 apps. `versionCode` is unaffected (`390050`), and releases up to
+  `1.7.4+49` keep the names they were published under.
+
+Everything from 1.7.4+47 and earlier (below) is included in this build.
 
 ## 1.7.4+47
 
