@@ -211,6 +211,13 @@ class FileListAdapter(
                     marginStart = (8 * density).toInt()
                 }
             }
+            FileViewType.LIST -> {
+                // 白い熊 fork: a long file name flows onto as many lines as it needs, so the
+                // whole name is always visible instead of being ellipsized.
+                holder.nameText.setSingleLine(false)
+                holder.nameText.maxLines = Int.MAX_VALUE
+                holder.nameText.ellipsize = null
+            }
             FileViewType.WRAPPED -> {
                 // The file name may wrap to a second line.
                 holder.nameText.setSingleLine(false)
