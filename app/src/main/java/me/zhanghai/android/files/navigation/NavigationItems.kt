@@ -360,7 +360,7 @@ private class BookmarkDirectoryItem(
 }
 
 private val menuItems: List<NavigationItem>
-    @Size(3)
+    @Size(4)
     get() = listOf(
         IntentMenuItem(
             R.drawable.shared_directory_icon_white_24dp, R.string.navigation_ftp_server,
@@ -373,7 +373,9 @@ private val menuItems: List<NavigationItem>
         IntentMenuItem(
             R.drawable.about_icon_white_24dp, R.string.navigation_about,
             AboutActivity::class.createIntent()
-        )
+        ),
+        // 白い熊 fork.
+        ExitAppItem()
     )
 
 private abstract class MenuItem(
@@ -394,5 +396,17 @@ private class IntentMenuItem(
     override fun onClick(listener: Listener) {
         listener.launchIntent(intent)
         listener.closeNavigationDrawer()
+    }
+}
+
+// 白い熊 fork: quit the app from the drawer instead of backing out of every tab.
+private class ExitAppItem : MenuItem(
+    R.drawable.sk_exit_icon_white_24dp, R.string.sk_navigation_exit_app
+) {
+    override val id: Long
+        get() = R.string.sk_navigation_exit_app.toLong()
+
+    override fun onClick(listener: Listener) {
+        listener.exitApp()
     }
 }

@@ -164,6 +164,14 @@ class NavigationFragment : Fragment(), NavigationItem.Listener {
         listener.closeNavigationDrawer()
     }
 
+    // 白い熊 fork: quit outright - finish every activity in this task (all tabs of this window)
+    // and drop it from recents, so the next launch starts fresh. A window opened with "New
+    // window" is its own task and survives, as do background services: a file job or the FTP
+    // server carries on with its own notification.
+    override fun exitApp() {
+        requireActivity().finishAndRemoveTask()
+    }
+
     interface Listener {
         val currentPath: Path
         fun navigateTo(path: Path)

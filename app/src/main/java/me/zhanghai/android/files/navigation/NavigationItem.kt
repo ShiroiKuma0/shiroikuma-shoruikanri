@@ -40,5 +40,8 @@ abstract class NavigationItem {
         fun navigateToRoot(path: Path)
         fun launchIntent(intent: Intent)
         fun closeNavigationDrawer()
+
+        // 白い熊 fork.
+        fun exitApp()
     }
 }
