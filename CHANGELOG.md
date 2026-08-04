@@ -6,6 +6,44 @@ plus our build increment (e.g. `1.7.4+050`; the counter is zero-padded to three 
 `1.7.4+050` onwards, so builds sort in order). This fork installs side-by-side with upstream under
 the app ID `shiroikuma.shoruikanri`.
 
+## 1.7.4+053
+
+### New since 1.7.4+050
+
+#### 📦 XAPK bundles, handled properly
+
+- **An XAPK now shows the app's own icon in the listing**, the way an APK does, instead of the blank
+  generic-file icon it used to get. The icon is read straight out of the bundle (its root
+  `icon.png`) — `PackageManager` cannot parse an XAPK, so the icon an APK gets could never have come
+  from there. A bundle without one simply keeps the plain icon.
+- **XAPKs browse and extract like the ZIPs they are.** Tap one to look inside at the base APK, the
+  split APKs and the OBB files, or extract it like any other archive — previously the app treated it
+  as an unrecognised blob and offered neither.
+- **One-tap install still works.** Set your split-APK installer as the open-with default for XAPKs
+  and a tap goes straight there; without a default, a tap opens the bundle for browsing. Either way
+  “Open with” from the long-press menu behaves as usual.
+- The type is recognised as its own kind of file, so an “always open with” choice made for XAPKs
+  binds to XAPKs alone — before, an XAPK counted as an unknown file, and setting a default for it
+  would have hijacked every other unrecognised file on the device.
+
+#### 🚪 Exit app
+
+- **A new “Exit app” entry at the bottom of the navigation drawer**, below “About”. It quits
+  outright — every tab of the window closes and the app leaves the recents list, so the next launch
+  starts fresh instead of restoring where you left the drawer open.
+- A window opened with **“New window”** is a separate task and stays open, and **background work is
+  never killed mid-operation**: a running copy/move job or the FTP server carries on under its own
+  notification.
+
+#### 🎨 Launcher icon
+
+- **The folder glyph on the launcher icon is 10% smaller** (90% of the masked icon, down from
+  full-bleed 100%), so it sits more comfortably inside the adaptive-icon mask and the launcher's own
+  shape. The themed (monochrome) icon and the legacy pre-Android-8 rasters were regenerated to
+  match.
+
+Everything from 1.7.4+050 and earlier (below) is included in this build.
+
 ## 1.7.4+050
 
 ### New since 1.7.4+47

@@ -16,7 +16,7 @@ mini-player**, a **custom open-with chooser**, **full settings export/import**, 
 
 Installs **side-by-side** with the official Material Files (app ID `shiroikuma.shoruikanri`).
 
-**📥 Latest release: [`1.7.4+050`](https://github.com/ShiroiKuma0/shiroikuma-shoruikanri/releases/latest)** — [all releases & APK downloads »](https://github.com/ShiroiKuma0/shiroikuma-shoruikanri/releases)
+**📥 Latest release: [`1.7.4+053`](https://github.com/ShiroiKuma0/shiroikuma-shoruikanri/releases/latest)** — [all releases & APK downloads »](https://github.com/ShiroiKuma0/shiroikuma-shoruikanri/releases)
 
 </div>
 
@@ -98,6 +98,11 @@ script, with one-tap share tiles.
 - **Paste from the top toolbar** — the pending paste sits top-right where Copy/Cut were, not in a
   bottom bar. **Back keeps your copy armed** (it just navigates the filesystem); long-press the
   paste icon to cancel a pending paste.
+- **XAPK bundles, handled properly** — an XAPK shows the app's own icon in the listing instead of a
+  blank file icon, and browses and extracts like the ZIP it actually is. Set a split-APK installer
+  as its open-with default and a tap goes straight there; without one, a tap opens the bundle.
+- **“Exit app” in the drawer** — quit outright instead of backing out tab by tab: every tab closes
+  and the app leaves recents, so the next launch starts fresh.
 - **FOSS & independent** — Firebase Analytics/Crashlytics stripped out, arm64-v8a, signed and
   released on its own, installed alongside the official app.
 
