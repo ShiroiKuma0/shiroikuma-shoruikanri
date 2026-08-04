@@ -22,6 +22,7 @@ import me.zhanghai.android.files.provider.root.isRunningAsRoot
 import me.zhanghai.android.files.provider.root.rootContext
 import me.zhanghai.android.files.settings.Settings
 import me.zhanghai.android.files.util.valueCompat
+import java.io.ByteArrayOutputStream
 import java.io.Closeable
 import java.io.IOException
 import java.io.InputStream
@@ -125,6 +126,53 @@ object ArchiveReader {
                 closeable.close()
             }
         }
+    }
+
+    // 白い熊 fork: read the content of a single entry, matched by name, in one pass over the
+    // archive. Used for the XAPK icon thumbnail, so it stays bounded: an entry larger than
+    // maxSize is not read at all, and null is returned when nothing matches.
+    @Throws(IOException::class)
+    fun readEntryBytes(
+        file: Path,
+        passwords: List<String>,
+        maxSize: Int,
+        matchesName: (String) -> Boolean
+    ): ByteArray? {
+        val charset = archiveFileNameCharset
+        val (archive, closeable) = openArchive(file, passwords)
+        return closeable.use {
+            var bytes: ByteArray? = null
+            while (true) {
+                val entry = archive.readEntry(charset) ?: break
+                if (entry.isDirectory || !matchesName(entry.name)) {
+                    continue
+                }
+                if (entry.size > maxSize) {
+                    break
+                }
+                bytes = archive.newDataInputStream().readBytesAtMost(maxSize)
+                break
+            }
+            bytes
+        }
+    }
+
+    /** @return the stream content, or null if it is longer than [maxSize]. */
+    @Throws(IOException::class)
+    private fun InputStream.readBytesAtMost(maxSize: Int): ByteArray? {
+        val outputStream = ByteArrayOutputStream()
+        val buffer = ByteArray(DEFAULT_BUFFER_SIZE)
+        while (true) {
+            val bytesRead = read(buffer)
+            if (bytesRead == -1) {
+                break
+            }
+            if (outputStream.size() + bytesRead > maxSize) {
+                return null
+            }
+            outputStream.write(buffer, 0, bytesRead)
+        }
+        return outputStream.toByteArray()
     }
 
     @Throws(IOException::class)

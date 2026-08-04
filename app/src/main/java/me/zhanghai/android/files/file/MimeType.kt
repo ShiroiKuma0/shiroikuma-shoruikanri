@@ -58,6 +58,9 @@ value class MimeType(val value: String) : Parcelable {
         val IMAGE_GIF = "image/gif".asMimeType()
         val IMAGE_SVG_XML = "image/svg+xml".asMimeType()
         val PDF = "application/pdf".asMimeType()
+        // 白い熊 fork: XAPK (a ZIP bundling a base APK, split APKs and OBBs) has no registered
+        // media type, so we mint our own to tell it apart from a plain ZIP or an APK.
+        val XAPK = "application/x-xapk".asMimeType()
         val TEXT_PLAIN = "text/plain".asMimeType()
         val GENERIC = "application/octet-stream".asMimeType()
 

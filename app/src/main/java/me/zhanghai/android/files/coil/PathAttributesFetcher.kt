@@ -30,6 +30,7 @@ import me.zhanghai.android.files.file.isImage
 import me.zhanghai.android.files.file.isMedia
 import me.zhanghai.android.files.file.isPdf
 import me.zhanghai.android.files.file.isVideo
+import me.zhanghai.android.files.file.isXapk
 import me.zhanghai.android.files.file.lastModifiedInstant
 import me.zhanghai.android.files.filelist.isRemotePath
 import me.zhanghai.android.files.provider.common.AndroidFileTypeDetector
@@ -109,6 +110,14 @@ class PathAttributesFetcher(
             mimeType.isApk && path.isGetPackageArchiveInfoCompatible -> {
                 try {
                     return appIconFetcherFactory.create(path, options, imageLoader).fetch()
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
+            }
+            // 白い熊 fork: an XAPK carries its icon inside the bundle.
+            mimeType.isXapk -> {
+                try {
+                    XapkIconFetcher(path, options).fetch()?.let { return it }
                 } catch (e: Exception) {
                     e.printStackTrace()
                 }

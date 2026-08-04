@@ -58,7 +58,10 @@ private val extensionToMimeTypeOverrideMap = mapOf(
     "log" to "text/plain",
     "prop" to "text/plain",
     "properties" to "text/plain",
-    "rc" to "text/plain"
+    "rc" to "text/plain",
+    // 白い熊 fork: XAPK, see MimeType.XAPK. Without this it would fall through to
+    // "application/octet-stream", which gets no icon thumbnail and no archive handling.
+    "xapk" to "application/x-xapk"
 ).mapValues { it.value.asMimeType() }
 
 fun MimeType.Companion.forSpecialPosixFileType(type: PosixFileType): MimeType? =
@@ -94,7 +97,10 @@ private val mimeTypeToIntentMimeTypeMap = listOf(
     "application/x-sh" to "text/x-shellscript",
     "application/x-shellscript" to "text/x-shellscript",
     // Allows matching generic
-    MimeType.GENERIC.value to MimeType.ANY.value
+    MimeType.GENERIC.value to MimeType.ANY.value,
+    // 白い熊 fork: no installer declares an intent filter for our made-up XAPK media type, so
+    // query and launch them with "*/*" instead - otherwise the open-with list comes up empty.
+    MimeType.XAPK.value to MimeType.ANY.value
 ).associate { it.first.asMimeType() to it.second.asMimeType() }
 
 val Collection<MimeType>.intentType: String
