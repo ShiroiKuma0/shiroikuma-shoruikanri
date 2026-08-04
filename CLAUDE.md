@@ -117,6 +117,19 @@ There are no product flavors and no unit/instrumented tests in this repository.
 
 ### Done
 
+- **XAPK support** (2026-08-04, shipped in `1.7.4+053`). XAPK bundles (a ZIP holding a base APK,
+  split APKs and OBBs) get their own fork media type `application/x-xapk` — minted in
+  `MimeTypeConversionExtensions.kt` because the extension is unregistered and would otherwise fall
+  through to `application/octet-stream`. Three consequences hang off it: `coil/XapkIconFetcher.kt`
+  pulls the bundle's root `icon.png` for the list icon (via `ArchiveReader.readEntryBytes`, a fork
+  helper that grabs one entry in a single pass and refuses anything over 4 MB), the type joins
+  `supportedArchiveMimeTypes` so bundles browse and extract like ZIPs, and `openXapk()` in
+  `FileListFragment` consults `SkOpenWith.getDefault` **before** the `isListable` branch so a
+  remembered split-APK installer still opens in one tap. `PackageManager` cannot parse an XAPK, so
+  the APK path (`AppIconFetcher` + install intent) must not be reused for it; the intent type is
+  aliased to `*/*` in `mimeTypeToIntentMimeTypeMap`, since no installer declares a filter for our
+  invented media type and the open-with list would otherwise come up empty.
+
 - **Tabs** (2026-06-12, commit `48b77f94`, shipped in `1.7.4+2`). `FileListActivity` is the tab
   host: a bottom tab strip (`TabLayout` + add button, layout `sk_file_list_activity.xml`) over a
   fragment container, one **full `FileListFragment` per tab** switched via `FragmentManager`

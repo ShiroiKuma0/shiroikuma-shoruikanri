@@ -8,6 +8,10 @@ package me.zhanghai.android.files.file
 val MimeType.isApk: Boolean
     get() = this == MimeType.APK
 
+// 白い熊 fork.
+val MimeType.isXapk: Boolean
+    get() = this == MimeType.XAPK
+
 val MimeType.isSupportedArchive: Boolean
     get() = this in supportedArchiveMimeTypes
 
@@ -18,6 +22,8 @@ private val supportedArchiveMimeTypes = mutableListOf(
     "application/zip",
     "application/zstd",
     "application/vnd.android.package-archive",
+    // 白い熊 fork: an XAPK is a ZIP, so let it be browsed and extracted like one.
+    "application/x-xapk",
     "application/vnd.debian.binary-package",
     "application/vnd.ms-cab-compressed",
     "application/vnd.rar",

@@ -80,6 +80,7 @@ import me.zhanghai.android.files.file.fileProviderUri
 import me.zhanghai.android.files.file.isApk
 import me.zhanghai.android.files.file.isAudio
 import me.zhanghai.android.files.file.isImage
+import me.zhanghai.android.files.file.isXapk
 import me.zhanghai.android.files.filejob.FileJobService
 import me.zhanghai.android.files.filelist.FileSortOptions.By
 import me.zhanghai.android.files.filelist.FileSortOptions.Order
@@ -1603,6 +1604,10 @@ class FileListFragment : Fragment(), BreadcrumbLayout.Listener, FileListAdapter.
             openApk(file)
             return
         }
+        if (file.mimeType.isXapk) {
+            openXapk(file)
+            return
+        }
         if (file.isListable) {
             navigateTo(file.listablePath)
             return
@@ -1622,6 +1627,21 @@ class FileListFragment : Fragment(), BreadcrumbLayout.Listener, FileListAdapter.
             return
         }
         AudioPlayerDialogFragment.show(file.path, this)
+    }
+
+    // 白い熊 fork: an XAPK is a ZIP of APKs, so a tap browses it like any other archive - unless
+    // a default was remembered in our open-with dialog (a split-APK installer, typically), which
+    // then wins and opens it in one tap. Mirrors how openApk() and openAudio() honor a default.
+    private fun openXapk(file: FileItem) {
+        if (SkOpenWith.getDefault(file.mimeType) != null) {
+            openFileWithIntent(file, false)
+            return
+        }
+        if (file.isListable) {
+            navigateTo(file.listablePath)
+            return
+        }
+        openFileWithIntent(file, false)
     }
 
     private fun openApk(file: FileItem) {
