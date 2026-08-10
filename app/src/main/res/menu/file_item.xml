@@ -7,6 +7,13 @@
 
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 
+    <!-- 白い熊 fork: this menu is also what a long press on the item pops up, so it carries
+         the (de)selection that the long press itself used to do — the grid views can hide the
+         whole name row, leaving neither the overflow button nor the icon to tap. -->
+    <item
+        android:id="@+id/action_select"
+        android:title="@string/sk_file_item_action_select" />
+
     <item
         android:id="@+id/action_open_with"
         android:title="@string/file_item_action_open_with" />
