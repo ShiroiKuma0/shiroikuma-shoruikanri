@@ -5,6 +5,8 @@
     <string name="sk_file_list_action_new_tab">New tab</string>
     <string name="sk_file_list_close_tab">Close tab</string>
     <string name="sk_file_item_action_open_in_new_tab">Open in new tab</string>
+    <string name="sk_file_item_action_select">Select</string>
+    <string name="sk_file_item_action_deselect">Deselect</string>
 
     <!-- Built-in audio mini-player -->
     <string name="sk_audio_player_play">Play</string>

@@ -5,6 +5,8 @@
     <string name="sk_file_list_action_new_tab">新しいタブ</string>
     <string name="sk_file_list_close_tab">タブを閉じる</string>
     <string name="sk_file_item_action_open_in_new_tab">新しいタブで開く</string>
+    <string name="sk_file_item_action_select">選択</string>
+    <string name="sk_file_item_action_deselect">選択解除</string>
 
     <!-- Built-in audio mini-player -->
     <string name="sk_audio_player_play">再生</string>

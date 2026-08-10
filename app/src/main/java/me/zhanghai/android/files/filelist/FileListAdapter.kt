@@ -243,10 +243,103 @@ class FileListAdapter(
                     )
                 }
             }
-            popupMenu = PopupMenu(menuButton.context, menuButton)
-                .apply { inflate(R.menu.file_item) }
-            menuButton.setOnClickListener { popupMenu.show() }
         }
+    }
+
+    // 白い熊 fork: the item menu is built on demand instead of once per view holder, so it can
+    // be anchored either on the overflow button or on the item itself — a long press pops up the
+    // very same menu, and in the grid views the whole name row (overflow button included) can be
+    // hidden, leaving the item as the only possible anchor.
+    private fun showPopupMenu(file: FileItem, anchor: View) {
+        val popupMenu = PopupMenu(anchor.context, anchor).apply { inflate(R.menu.file_item) }
+        val menu = popupMenu.menu
+        val path = file.path
+        val hasPickOptions = pickOptions != null
+        val isReadOnly = path.fileSystem.isReadOnly
+        val isArchivePath = path.isArchivePath
+        menu.findItem(R.id.action_select).apply {
+            isVisible = isFileSelectable(file)
+            setTitle(
+                if (file in selectedFiles) {
+                    R.string.sk_file_item_action_deselect
+                } else {
+                    R.string.sk_file_item_action_select
+                }
+            )
+        }
+        menu.findItem(R.id.action_open_in_new_tab).isVisible = !hasPickOptions && file.isListable
+        menu.findItem(R.id.action_cut).isVisible = !hasPickOptions && !isReadOnly
+        menu.findItem(R.id.action_copy).apply {
+            isVisible = !hasPickOptions
+            setTitle(if (isArchivePath) R.string.file_item_action_extract else R.string.copy)
+        }
+        menu.findItem(R.id.action_delete).isVisible = !isReadOnly
+        menu.findItem(R.id.action_rename).isVisible = !isReadOnly
+        menu.findItem(R.id.action_extract).isVisible = file.isArchiveFile
+        menu.findItem(R.id.action_archive).isVisible = !isArchivePath
+        menu.findItem(R.id.action_add_bookmark).isVisible = file.attributes.isDirectory
+        popupMenu.setOnMenuItemClickListener {
+            when (it.itemId) {
+                R.id.action_select -> {
+                    selectFile(file)
+                    true
+                }
+                R.id.action_open_with -> {
+                    listener.openFileWith(file)
+                    true
+                }
+                R.id.action_open_in_new_tab -> {
+                    listener.openInNewTab(file)
+                    true
+                }
+                R.id.action_cut -> {
+                    listener.cutFile(file)
+                    true
+                }
+                R.id.action_copy -> {
+                    listener.copyFile(file)
+                    true
+                }
+                R.id.action_delete -> {
+                    listener.confirmDeleteFile(file)
+                    true
+                }
+                R.id.action_rename -> {
+                    listener.showRenameFileDialog(file)
+                    true
+                }
+                R.id.action_extract -> {
+                    listener.extractFile(file)
+                    true
+                }
+                R.id.action_archive -> {
+                    listener.showCreateArchiveDialog(file)
+                    true
+                }
+                R.id.action_share -> {
+                    listener.shareFile(file)
+                    true
+                }
+                R.id.action_copy_path -> {
+                    listener.copyPath(file)
+                    true
+                }
+                R.id.action_add_bookmark -> {
+                    listener.addBookmark(file)
+                    true
+                }
+                R.id.action_create_shortcut -> {
+                    listener.createShortcut(file)
+                    true
+                }
+                R.id.action_properties -> {
+                    listener.showPropertiesDialog(file)
+                    true
+                }
+                else -> false
+            }
+        }
+        popupMenu.show()
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
@@ -259,13 +352,7 @@ class FileListAdapter(
         val isEnabled = isFileSelectable(file) || isDirectory
         holder.itemLayout.isEnabled = isEnabled
         holder.menuButton.isEnabled = isEnabled
-        val menu = holder.popupMenu.menu
         val path = file.path
-        val hasPickOptions = pickOptions != null
-        val isReadOnly = path.fileSystem.isReadOnly
-        menu.findItem(R.id.action_open_in_new_tab).isVisible = !hasPickOptions && file.isListable
-        menu.findItem(R.id.action_cut).isVisible = !hasPickOptions && !isReadOnly
-        menu.findItem(R.id.action_copy).isVisible = !hasPickOptions
         val checked = file in selectedFiles
         holder.itemLayout.isChecked = checked
         holder.nameText.apply {
@@ -358,15 +445,18 @@ class FileListAdapter(
                     selectFile(file)
                 }
             }
+            // 白い熊 fork: a long press pops up the item menu — everything the overflow
+            // ("hamburger") button offers, (de)selection included — instead of just toggling
+            // the selection. It anchors on the overflow button when that is actually on screen,
+            // and on the item itself otherwise (the grid views can hide the whole name row).
             setOnLongClickListener {
-                if (selectedFiles.isEmpty()) {
-                    selectFile(file)
-                } else {
-                    listener.openFile(file)
-                }
+                showPopupMenu(
+                    file, if (holder.menuButton.isShown) holder.menuButton else holder.itemLayout
+                )
                 true
             }
         }
+        holder.menuButton.setOnClickListener { showPopupMenu(file, it) }
         holder.iconLayout.setOnClickListener { selectFile(file) }
         val iconRes = file.mimeType.iconRes
         holder.iconImage.apply {
@@ -435,71 +525,6 @@ class FileListAdapter(
         holder.nameText.text = file.name
         // 白い熊 fork: the description line depends on the listing view.
         holder.descriptionText?.text = getDescriptionText(file, holder.itemView.context)
-        val isArchivePath = path.isArchivePath
-        menu.findItem(R.id.action_copy)
-            .setTitle(if (isArchivePath) R.string.file_item_action_extract else R.string.copy)
-        menu.findItem(R.id.action_delete).isVisible = !isReadOnly
-        menu.findItem(R.id.action_rename).isVisible = !isReadOnly
-        menu.findItem(R.id.action_extract).isVisible = file.isArchiveFile
-        menu.findItem(R.id.action_archive).isVisible = !isArchivePath
-        menu.findItem(R.id.action_add_bookmark).isVisible = isDirectory
-        holder.popupMenu.setOnMenuItemClickListener {
-            when (it.itemId) {
-                R.id.action_open_with -> {
-                    listener.openFileWith(file)
-                    true
-                }
-                R.id.action_open_in_new_tab -> {
-                    listener.openInNewTab(file)
-                    true
-                }
-                R.id.action_cut -> {
-                    listener.cutFile(file)
-                    true
-                }
-                R.id.action_copy -> {
-                    listener.copyFile(file)
-                    true
-                }
-                R.id.action_delete -> {
-                    listener.confirmDeleteFile(file)
-                    true
-                }
-                R.id.action_rename -> {
-                    listener.showRenameFileDialog(file)
-                    true
-                }
-                R.id.action_extract -> {
-                    listener.extractFile(file)
-                    true
-                }
-                R.id.action_archive -> {
-                    listener.showCreateArchiveDialog(file)
-                    true
-                }
-                R.id.action_share -> {
-                    listener.shareFile(file)
-                    true
-                }
-                R.id.action_copy_path -> {
-                    listener.copyPath(file)
-                    true
-                }
-                R.id.action_add_bookmark -> {
-                    listener.addBookmark(file)
-                    true
-                }
-                R.id.action_create_shortcut -> {
-                    listener.createShortcut(file)
-                    true
-                }
-                R.id.action_properties -> {
-                    listener.showPropertiesDialog(file)
-                    true
-                }
-                else -> false
-            }
-        }
     }
 
     // 白い熊 fork: per-view description content.
@@ -610,8 +635,6 @@ class FileListAdapter(
             null,
             binding.menuButton
         )
-
-        lateinit var popupMenu: PopupMenu
     }
 
     interface Listener {
