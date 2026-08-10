@@ -6,6 +6,46 @@ plus our build increment (e.g. `1.7.4+050`; the counter is zero-padded to three 
 `1.7.4+050` onwards, so builds sort in order). This fork installs side-by-side with upstream under
 the app ID `shiroikuma.shoruikanri`.
 
+## 1.7.4+056
+
+### New since 1.7.4+053
+
+#### 📤 A share dialog you arrange yourself
+
+- **Drag the rows of the share dialog into the order you want.** Long-press a row and drag it up or
+  down; where you drop it is where it stays, for that share and every share afterwards. Until now
+  the list was fixed — pinned apps first, then everything else alphabetically — so an app whose name
+  starts late in the alphabet sat at the bottom of a long scroll forever.
+- **Every row takes part**, not just the apps: the Termux script targets, the “AutoShare command…”
+  entry and “Add Termux script…” can all be dragged wherever they are most useful.
+- **A long press released without moving opens that row's own menu** instead — **Move to top**,
+  **Move to bottom**, **Reset order**, plus **Edit** and **Delete** on a Termux target. Moving a row
+  from the bottom of a long list to the top is one tap, no scroll-dragging. It is the same gesture
+  the drawer's favorites already use.
+- **Pin-to-top is retired** — dragging a row to the top is exactly what pinning did, and the two
+  would only have fought over the same list. **Existing pins are kept**: they still define the
+  starting arrangement, so the dialog opens looking just as it did until your first drag.
+- **Rearranging while sharing one kind of file never scrambles another.** The order is remembered
+  across all file types, but a dialog only ever lists the handlers of the type being shared, so
+  saving *merges*: an app that isn't on screen stays anchored behind the row it used to follow.
+- **A dragged Termux target moves everywhere it appears** — the script list itself is reordered, so
+  the system-share tiles and the one-tap target follow the order you see in the dialog. This
+  replaces the old “Move up” / “Move down” menu entries.
+- The order rides along with **settings export/import**, like the rest of the share settings.
+
+#### 👆 The full item menu on a long press
+
+- **Long-pressing a file now pops up its whole menu** — Open with, Open in new tab, Cut, Copy,
+  Delete, Rename, Extract, Share, Properties and the rest — instead of merely toggling the
+  selection. In the grid views, which can hide the entire name row and the overflow button with it,
+  the item itself had been the only thing left to touch and most actions were simply unreachable.
+- **Select / Deselect leads that menu**, so the toggle the long press used to do is still one tap
+  away — titled for whether the file is already selected, and hidden for items that cannot be
+  selected at all.
+- The menu anchors on the overflow button while it is on screen, and on the item itself otherwise.
+
+Everything from 1.7.4+053 and earlier (below) is included in this build.
+
 ## 1.7.4+053
 
 ### New since 1.7.4+050
