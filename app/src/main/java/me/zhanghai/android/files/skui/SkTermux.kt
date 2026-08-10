@@ -152,11 +152,10 @@ object SkTermux {
         }
     }
 
-    fun move(from: Int, to: Int) {
-        val list = scripts.toMutableList()
-        if (from in list.indices && to in list.indices && from != to) {
-            list.add(to, list.removeAt(from))
-            scripts = list
-        }
+    // Adopt the share dialog's manual row order, so the Direct-Share tiles and
+    // the one-tap target follow what the dialog shows.
+    fun reorder(newOrder: List<SkTermuxScript>) {
+        scripts = newOrder
     }
+
 }

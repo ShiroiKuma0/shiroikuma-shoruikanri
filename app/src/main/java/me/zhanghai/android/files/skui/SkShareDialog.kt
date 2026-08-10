@@ -1,8 +1,13 @@
 /*
  * 白い熊 fork (skui): the custom share dialog, replacing the system share
  * sheet. Same format as the open-with dialog: black, yellow-bordered, all
- * share handlers with icons. Long-press an app to pin/unpin it (pinned apps
- * sort to the top).
+ * share handlers with icons.
+ *
+ * The rows are manually sortable: long-press one and drag it where it belongs —
+ * the arrangement is remembered (SkShare.order) and used for every later share.
+ * A long-press released *without* moving opens the row menu instead (move to
+ * top/bottom, reset the order, plus edit/delete on a Termux target) — the same
+ * idiom as the drawer's favorites.
  *
  * Two integrations on top of the normal share targets:
  * - AutoShare: an "AutoShare command…" row opens AutoShare's own command
@@ -18,16 +23,22 @@ package me.zhanghai.android.files.skui
 import android.app.Activity
 import android.content.ComponentName
 import android.content.Intent
+import android.graphics.drawable.Drawable
 import android.net.Uri
 import android.text.InputType
 import android.view.Gravity
+import android.view.View
+import android.view.ViewGroup
 import android.widget.CheckBox
 import android.widget.EditText
 import android.widget.ImageView
 import android.widget.LinearLayout
-import android.widget.ScrollView
 import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
+import androidx.core.graphics.ColorUtils
+import androidx.recyclerview.widget.ItemTouchHelper
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import me.zhanghai.android.files.R
 import me.zhanghai.android.files.util.showToast
 import me.zhanghai.android.files.util.startActivitySafe
@@ -41,6 +52,11 @@ class SkShareDialog(
     private val density = activity.resources.displayMetrics.density
     private var dialog: AlertDialog? = null
 
+    // The rows, in the order they are shown — dragging rewrites this list.
+    private val entries = mutableListOf<Entry>()
+    private val adapter = EntryAdapter()
+    private var recyclerView: RecyclerView? = null
+
     private fun dp(value: Int): Int = (value * density).toInt()
 
     private fun isInstalled(packageName: String): Boolean =
@@ -52,88 +68,118 @@ class SkShareDialog(
         }
 
     init {
-        val packageManager = activity.packageManager
-        val resolveInfos = packageManager.queryIntentActivities(baseIntent, 0)
-            .filter { it.activityInfo.packageName != activity.packageName }
-        val pinned = SkShare.pinnedComponents
-        val (pinnedInfos, otherInfos) = resolveInfos
-            .sortedBy { it.loadLabel(packageManager).toString().lowercase() }
-            .partition {
-                ComponentName(it.activityInfo.packageName, it.activityInfo.name)
-                    .flattenToString() in pinned
-            }
+        entries += SkShare.sortByOrder(buildEntries()) { it.key }
 
-        val holder = LinearLayout(activity).apply {
-            orientation = LinearLayout.VERTICAL
-            setPadding(0, dp(8), 0, dp(8))
-        }
-
-        // Termux one-click script targets (only meaningful with real file paths).
-        val termuxIcon = appIconOrNull(TERMUX_PACKAGE)
-        if (termuxIcon != null && filePaths.isNotEmpty()) {
-            SkTermux.scripts.forEachIndexed { index, script ->
-                addRow(
-                    holder, script.label, termuxIcon, skColor(SkThemeSlot.ACCENT),
-                    onClick = { runTermuxScript(script) },
-                    onLongClick = { showTermuxScriptOptions(index, script) }
-                )
-            }
-            addRow(
-                holder, activity.getString(R.string.sk_termux_add), null,
-                skColor(SkThemeSlot.ACCENT),
-                onClick = { showTermuxScriptEditor(null, null) },
-                onLongClick = {}
-            )
-        }
-
-        // AutoShare commands: one tap into AutoShare's command chooser, then pick.
-        appIconOrNull(SkShare.AUTOSHARE_PACKAGE)?.let { autoShareIcon ->
-            addRow(
-                holder, activity.getString(R.string.sk_share_autoshare_command), autoShareIcon,
-                skColor(SkThemeSlot.ACCENT),
-                onClick = { launchAutoShareCommandChooser() },
-                onLongClick = {}
-            )
-        }
-
-        // Then the pinned apps, then everything else.
-        (pinnedInfos + otherInfos).forEach { resolveInfo ->
-            val component = ComponentName(
-                resolveInfo.activityInfo.packageName, resolveInfo.activityInfo.name
-            )
-            val isPinned = component.flattenToString() in pinned
-            addRow(
-                holder,
-                resolveInfo.loadLabel(packageManager).toString(),
-                resolveInfo.loadIcon(packageManager),
-                skColor(if (isPinned) SkThemeSlot.ACCENT else SkThemeSlot.TEXT),
-                onClick = {
-                    grantSharedUrisTo(component.packageName)
-                    dialog?.dismiss()
-                    activity.startActivitySafe(Intent(baseIntent).setComponent(component))
-                },
-                onLongClick = {
-                    SkShare.togglePinned(component.flattenToString())
-                    reopen()
-                }
-            )
-        }
-        if (resolveInfos.isEmpty()) {
-            holder.addView(
+        val content: View =
+            if (entries.isEmpty()) {
                 TextView(activity).apply {
                     text = activity.getString(R.string.sk_open_with_no_apps)
                     textSize = 15f
                     setTextColor(skColor(SkThemeSlot.TEXT_SECONDARY))
                     setPadding(dp(24), dp(12), dp(24), dp(12))
                 }
-            )
-        }
+            } else {
+                val list = RecyclerView(activity).apply {
+                    layoutManager = LinearLayoutManager(activity)
+                    adapter = this@SkShareDialog.adapter
+                    setPadding(0, dp(8), 0, dp(8))
+                    clipToPadding = false
+                }
+                ItemTouchHelper(DragCallback()).attachToRecyclerView(list)
+                recyclerView = list
+                list
+            }
 
         dialog = SkMaterialAlertDialogBuilder(activity)
             .setTitle(R.string.share)
-            .setView(ScrollView(activity).apply { addView(holder) })
+            .setView(content)
             .setNegativeButton(android.R.string.cancel, null)
             .show()
+    }
+
+    // --- Rows ---
+
+    // One row of the dialog. [key] identifies it across dialogs and app starts,
+    // so the manual order can be stored and re-applied.
+    private class Entry(
+        val key: String,
+        val label: String,
+        val icon: Drawable?,
+        val textColor: Int,
+        val onClick: () -> Unit,
+        // Row-specific entries of the long-press menu, after the move actions.
+        val extraActions: List<Pair<String, () -> Unit>> = emptyList()
+    )
+
+    private fun buildEntries(): List<Entry> {
+        val packageManager = activity.packageManager
+        val built = mutableListOf<Entry>()
+
+        // Termux one-click script targets (only meaningful with real file paths).
+        val termuxIcon = appIconOrNull(TERMUX_PACKAGE)
+        if (termuxIcon != null && filePaths.isNotEmpty()) {
+            SkTermux.scripts.forEach { script ->
+                built += Entry(
+                    key = termuxKey(script),
+                    label = script.label,
+                    icon = termuxIcon,
+                    textColor = skColor(SkThemeSlot.ACCENT),
+                    onClick = { runTermuxScript(script) },
+                    extraActions = listOf(
+                        activity.getString(R.string.sk_share_edit) to
+                            { showTermuxScriptEditor(script) },
+                        activity.getString(R.string.delete) to
+                            { removeTermuxScript(script) }
+                    )
+                )
+            }
+            built += Entry(
+                key = KEY_TERMUX_ADD,
+                label = activity.getString(R.string.sk_termux_add),
+                icon = null,
+                textColor = skColor(SkThemeSlot.ACCENT),
+                onClick = { showTermuxScriptEditor(null) }
+            )
+        }
+
+        // AutoShare commands: one tap into AutoShare's command chooser, then pick.
+        appIconOrNull(SkShare.AUTOSHARE_PACKAGE)?.let { autoShareIcon ->
+            built += Entry(
+                key = KEY_AUTOSHARE,
+                label = activity.getString(R.string.sk_share_autoshare_command),
+                icon = autoShareIcon,
+                textColor = skColor(SkThemeSlot.ACCENT),
+                onClick = { launchAutoShareCommandChooser() }
+            )
+        }
+
+        // Then the apps, in their default arrangement: the legacy pinned ones
+        // first, everything else alphabetically. A stored order overrides this.
+        val pinned = SkShare.pinnedComponents
+        val (pinnedInfos, otherInfos) = packageManager.queryIntentActivities(baseIntent, 0)
+            .filter { it.activityInfo.packageName != activity.packageName }
+            .sortedBy { it.loadLabel(packageManager).toString().lowercase() }
+            .partition {
+                ComponentName(it.activityInfo.packageName, it.activityInfo.name)
+                    .flattenToString() in pinned
+            }
+        (pinnedInfos + otherInfos).forEach { resolveInfo ->
+            val component = ComponentName(
+                resolveInfo.activityInfo.packageName, resolveInfo.activityInfo.name
+            )
+            built += Entry(
+                key = component.flattenToString(),
+                label = resolveInfo.loadLabel(packageManager).toString(),
+                icon = resolveInfo.loadIcon(packageManager),
+                textColor = skColor(SkThemeSlot.TEXT),
+                onClick = {
+                    grantSharedUrisTo(component.packageName)
+                    dialog?.dismiss()
+                    activity.startActivitySafe(Intent(baseIntent).setComponent(component))
+                }
+            )
+        }
+        return built
     }
 
     private fun appIconOrNull(packageName: String) =
@@ -148,7 +194,78 @@ class SkShareDialog(
         SkShareDialog(activity, baseIntent, filePaths)
     }
 
+    // --- Manual order ---
+
+    private fun moveEntry(from: Int, to: Int) {
+        if (from !in entries.indices || to !in entries.indices || from == to) {
+            return
+        }
+        entries.add(to, entries.removeAt(from))
+        adapter.notifyItemMoved(from, to)
+        recyclerView?.scrollToPosition(to)
+        persistOrder()
+    }
+
+    private fun persistOrder() {
+        SkShare.saveOrder(entries.map { it.key })
+        // The Termux script list also drives the Direct-Share tiles and the
+        // one-tap target, so keep it in the order the rows now show.
+        val scripts = SkTermux.scripts
+        val scriptsByKey = scripts.associateBy { termuxKey(it) }
+        val reordered = entries.mapNotNull { scriptsByKey[it.key] }
+        if (scriptsByKey.size == scripts.size && reordered.size == scripts.size &&
+            reordered != scripts) {
+            SkTermux.reorder(reordered)
+        }
+    }
+
+    // A long-press released without dragging: the row's own menu.
+    private fun showEntryMenu(entry: Entry) {
+        val index = entries.indexOf(entry)
+        if (index < 0) {
+            return
+        }
+        val labels = mutableListOf<CharSequence>()
+        val actions = mutableListOf<() -> Unit>()
+        if (index > 0) {
+            labels += activity.getString(R.string.sk_share_move_to_top)
+            actions += { moveEntry(index, 0) }
+        }
+        if (index < entries.size - 1) {
+            labels += activity.getString(R.string.sk_share_move_to_bottom)
+            actions += { moveEntry(index, entries.size - 1) }
+        }
+        entry.extraActions.forEach { (label, action) ->
+            labels += label
+            actions += action
+        }
+        if (SkShare.order.isNotEmpty()) {
+            labels += activity.getString(R.string.sk_share_reset_order)
+            actions += {
+                SkShare.clearOrder()
+                reopen()
+            }
+        }
+        if (labels.isEmpty()) {
+            return
+        }
+        SkMaterialAlertDialogBuilder(activity)
+            .setTitle(entry.label)
+            .setItems(labels.toTypedArray()) { _, which -> actions[which]() }
+            .setNegativeButton(android.R.string.cancel, null)
+            .show()
+    }
+
     // --- Termux ---
+
+    private fun termuxKey(script: SkTermuxScript): String = "termux:${script.scriptPath}"
+
+    // The stored scripts are re-parsed on every read, so a row's captured script
+    // has to be found again by value rather than by identity or by position.
+    private fun termuxIndexOf(script: SkTermuxScript): Int =
+        SkTermux.scripts.indexOfFirst {
+            it.scriptPath == script.scriptPath && it.label == script.label
+        }
 
     private fun runTermuxScript(script: SkTermuxScript) {
         if (!isInstalled(TERMUX_PACKAGE)) {
@@ -162,30 +279,15 @@ class SkShareDialog(
         }
     }
 
-    private fun showTermuxScriptOptions(index: Int, script: SkTermuxScript) {
-        val count = SkTermux.scripts.size
-        val labels = mutableListOf<CharSequence>()
-        val actions = mutableListOf<() -> Unit>()
-        if (index > 0) {
-            labels += activity.getString(R.string.sk_share_move_up)
-            actions += { SkTermux.move(index, index - 1); reopen() }
+    private fun removeTermuxScript(script: SkTermuxScript) {
+        val index = termuxIndexOf(script)
+        if (index >= 0) {
+            SkTermux.remove(index)
         }
-        if (index < count - 1) {
-            labels += activity.getString(R.string.sk_share_move_down)
-            actions += { SkTermux.move(index, index + 1); reopen() }
-        }
-        labels += activity.getString(R.string.sk_share_edit)
-        actions += { showTermuxScriptEditor(index, script) }
-        labels += activity.getString(R.string.delete)
-        actions += { SkTermux.remove(index); reopen() }
-        SkMaterialAlertDialogBuilder(activity)
-            .setTitle(script.label)
-            .setItems(labels.toTypedArray()) { _, which -> actions[which]() }
-            .setNegativeButton(android.R.string.cancel, null)
-            .show()
+        reopen()
     }
 
-    private fun showTermuxScriptEditor(index: Int?, script: SkTermuxScript?) {
+    private fun showTermuxScriptEditor(script: SkTermuxScript?) {
         val labelEdit = EditText(activity).apply {
             inputType = InputType.TYPE_CLASS_TEXT
             hint = activity.getString(R.string.sk_termux_label_hint)
@@ -225,7 +327,8 @@ class SkShareDialog(
                 }
                 if (path.isNotEmpty()) {
                     val newScript = SkTermuxScript(label, path, !terminalBox.isChecked)
-                    if (index == null) SkTermux.add(newScript) else SkTermux.update(index, newScript)
+                    val index = script?.let { termuxIndexOf(it) } ?: -1
+                    if (index >= 0) SkTermux.update(index, newScript) else SkTermux.add(newScript)
                 }
                 reopen()
             }
@@ -275,39 +378,108 @@ class SkShareDialog(
         }
     }
 
-    private fun addRow(
-        holder: LinearLayout,
-        label: String,
-        icon: android.graphics.drawable.Drawable?,
-        textColor: Int,
-        onClick: () -> Unit,
-        onLongClick: () -> Unit
-    ) {
-        val row = LinearLayout(activity).apply {
-            orientation = LinearLayout.HORIZONTAL
-            gravity = Gravity.CENTER_VERTICAL
-            setPadding(dp(24), dp(10), dp(24), dp(10))
-            setBackgroundResource(android.R.drawable.list_selector_background)
-        }
-        row.addView(
-            ImageView(activity).apply {
-                setImageDrawable(icon)
+    // --- List ---
+
+    private class EntryHolder(
+        itemView: View,
+        val iconView: ImageView,
+        val labelView: TextView
+    ) : RecyclerView.ViewHolder(itemView)
+
+    private inner class EntryAdapter : RecyclerView.Adapter<EntryHolder>() {
+        override fun getItemCount(): Int = entries.size
+
+        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): EntryHolder {
+            val iconView = ImageView(activity).apply {
                 layoutParams = LinearLayout.LayoutParams(dp(32), dp(32))
             }
-        )
-        row.addView(
-            TextView(activity).apply {
-                text = label
+            val labelView = TextView(activity).apply {
                 textSize = 16f
-                setTextColor(textColor)
                 setPaddingRelative(dp(16), 0, 0, 0)
             }
-        )
-        row.setOnClickListener { onClick() }
-        row.setOnLongClickListener {
-            onLongClick()
-            true
+            val row = LinearLayout(activity).apply {
+                layoutParams = RecyclerView.LayoutParams(
+                    ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT
+                )
+                orientation = LinearLayout.HORIZONTAL
+                gravity = Gravity.CENTER_VERTICAL
+                setPadding(dp(24), dp(10), dp(24), dp(10))
+                setBackgroundResource(android.R.drawable.list_selector_background)
+                addView(iconView)
+                addView(labelView)
+            }
+            return EntryHolder(row, iconView, labelView)
         }
-        holder.addView(row)
+
+        override fun onBindViewHolder(holder: EntryHolder, position: Int) {
+            val entry = entries[position]
+            holder.iconView.setImageDrawable(entry.icon)
+            holder.labelView.text = entry.label
+            holder.labelView.setTextColor(entry.textColor)
+            holder.itemView.setOnClickListener { entry.onClick() }
+        }
+    }
+
+    // Long-press to drag a row into place; a long-press released without moving
+    // opens the row menu instead (same as the drawer's favorites).
+    private inner class DragCallback : ItemTouchHelper.Callback() {
+        private var hasMoved = false
+        private var draggedEntry: Entry? = null
+
+        override fun isLongPressDragEnabled(): Boolean = true
+
+        override fun getMovementFlags(
+            recyclerView: RecyclerView,
+            viewHolder: RecyclerView.ViewHolder
+        ): Int = makeMovementFlags(ItemTouchHelper.UP or ItemTouchHelper.DOWN, 0)
+
+        override fun onMove(
+            recyclerView: RecyclerView,
+            viewHolder: RecyclerView.ViewHolder,
+            target: RecyclerView.ViewHolder
+        ): Boolean {
+            val fromPosition = viewHolder.bindingAdapterPosition
+            val toPosition = target.bindingAdapterPosition
+            if (fromPosition !in entries.indices || toPosition !in entries.indices) {
+                return false
+            }
+            entries.add(toPosition, entries.removeAt(fromPosition))
+            adapter.notifyItemMoved(fromPosition, toPosition)
+            hasMoved = true
+            return true
+        }
+
+        override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {}
+
+        override fun onSelectedChanged(viewHolder: RecyclerView.ViewHolder?, actionState: Int) {
+            super.onSelectedChanged(viewHolder, actionState)
+
+            if (actionState == ItemTouchHelper.ACTION_STATE_DRAG && viewHolder != null) {
+                hasMoved = false
+                draggedEntry = entries.getOrNull(viewHolder.bindingAdapterPosition)
+                viewHolder.itemView.setBackgroundColor(
+                    ColorUtils.setAlphaComponent(skColor(SkThemeSlot.ACCENT), 0x40)
+                )
+            }
+        }
+
+        override fun clearView(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder) {
+            super.clearView(recyclerView, viewHolder)
+
+            viewHolder.itemView.setBackgroundResource(android.R.drawable.list_selector_background)
+            val entry = draggedEntry ?: return
+            draggedEntry = null
+            if (hasMoved) {
+                hasMoved = false
+                persistOrder()
+            } else {
+                showEntryMenu(entry)
+            }
+        }
+    }
+
+    companion object {
+        private const val KEY_AUTOSHARE = "autoshare"
+        private const val KEY_TERMUX_ADD = "termux_add"
     }
 }
