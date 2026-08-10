@@ -16,7 +16,7 @@ mini-player**, a **custom open-with chooser**, **full settings export/import**, 
 
 Installs **side-by-side** with the official Material Files (app ID `shiroikuma.shoruikanri`).
 
-**📥 Latest release: [`1.7.4+053`](https://github.com/ShiroiKuma0/shiroikuma-shoruikanri/releases/latest)** — [all releases & APK downloads »](https://github.com/ShiroiKuma0/shiroikuma-shoruikanri/releases)
+**📥 Latest release: [`1.7.4+056`](https://github.com/ShiroiKuma0/shiroikuma-shoruikanri/releases/latest)** — [all releases & APK downloads »](https://github.com/ShiroiKuma0/shiroikuma-shoruikanri/releases)
 
 </div>
 
@@ -86,10 +86,12 @@ rather use another player, and the player's colours and fonts are tunable from t
 
 ## 📤 Share & Termux, your way
 
-A custom share dialog (pin your favourite apps to the top), an **AutoShare** command entry, and
-**one-click Termux script targets** that run a script on the selected file’s real path. It works the
-other way too: **share files from any app into 書類管理** and have them piped straight to a Termux
-script, with one-tap share tiles.
+A custom share dialog you arrange yourself: **long-press any row and drag it where you want it**,
+and that order is remembered for every future share — the app you actually use is one tap away
+instead of buried alphabetically. Alongside the normal apps it carries an **AutoShare** command
+entry and **one-click Termux script targets** that run a script on the selected file’s real path. It
+works the other way too: **share files from any app into 書類管理** and have them piped straight to a
+Termux script, with one-tap share tiles.
 
 ## 🔤 Power-user touches
 
@@ -103,6 +105,8 @@ script, with one-tap share tiles.
   as its open-with default and a tap goes straight there; without one, a tap opens the bundle.
 - **“Exit app” in the drawer** — quit outright instead of backing out tab by tab: every tab closes
   and the app leaves recents, so the next launch starts fresh.
+- **Long-press a file for its full menu** — the same menu the overflow button gives, Select /
+  Deselect included, so every action stays reachable in the grid views that hide the name row.
 - **FOSS & independent** — Firebase Analytics/Crashlytics stripped out, arm64-v8a, signed and
   released on its own, installed alongside the official app.
 
