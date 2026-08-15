@@ -26,6 +26,7 @@ import me.zhanghai.android.files.compat.use
 import me.zhanghai.android.files.file.MimeType
 import me.zhanghai.android.files.file.asMimeType
 import me.zhanghai.android.files.file.isApk
+import me.zhanghai.android.files.file.isEpub
 import me.zhanghai.android.files.file.isImage
 import me.zhanghai.android.files.file.isMedia
 import me.zhanghai.android.files.file.isPdf
@@ -118,6 +119,14 @@ class PathAttributesFetcher(
             mimeType.isXapk -> {
                 try {
                     XapkIconFetcher(path, options).fetch()?.let { return it }
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
+            }
+            // 白い熊 fork: an EPUB carries its cover inside the book.
+            mimeType.isEpub -> {
+                try {
+                    EpubCoverFetcher(path, options).fetch()?.let { return it }
                 } catch (e: Exception) {
                     e.printStackTrace()
                 }

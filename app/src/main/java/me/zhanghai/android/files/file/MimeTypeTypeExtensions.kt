@@ -12,6 +12,10 @@ val MimeType.isApk: Boolean
 val MimeType.isXapk: Boolean
     get() = this == MimeType.XAPK
 
+// 白い熊 fork.
+val MimeType.isEpub: Boolean
+    get() = this == MimeType.EPUB
+
 val MimeType.isSupportedArchive: Boolean
     get() = this in supportedArchiveMimeTypes
 

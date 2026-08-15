@@ -15,6 +15,7 @@ import me.zhanghai.android.files.file.MimeType
 import me.zhanghai.android.files.file.getBrokenSymbolicLinkName
 import me.zhanghai.android.files.file.getName
 import me.zhanghai.android.files.file.isApk
+import me.zhanghai.android.files.file.isEpub
 import me.zhanghai.android.files.file.isImage
 import me.zhanghai.android.files.file.isMedia
 import me.zhanghai.android.files.file.isPdf
@@ -73,6 +74,8 @@ val FileItem.supportsThumbnail: Boolean
             mimeType.isApk && path.isGetPackageArchiveInfoCompatible -> true
             // 白い熊 fork: the icon comes out of the bundle, so any provider will do.
             mimeType.isXapk -> true
+            // 白い熊 fork: likewise, the cover comes out of the book itself.
+            mimeType.isEpub -> true
             mimeType.isImage -> true
             mimeType.isMedia && path.isMediaMetadataRetrieverCompatible -> true
             mimeType.isPdf && (path.isLinuxPath || path.isDocumentPath) ->
