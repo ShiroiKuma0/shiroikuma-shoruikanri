@@ -6,6 +6,24 @@ plus our build increment (e.g. `1.7.4+050`; the counter is zero-padded to three 
 `1.7.4+050` onwards, so builds sort in order). This fork installs side-by-side with upstream under
 the app ID `shiroikuma.shoruikanri`.
 
+## 1.7.4+057
+
+### New since 1.7.4+056
+
+#### 📚 EPUB covers in the listing
+
+- **An EPUB is listed under its own cover.** Books used to share one generic ebook icon, so a folder
+  of them told you nothing until you read the filenames — while a PDF has always drawn its first
+  page. Now the cover is pulled out of the book itself and shown as its thumbnail, in every listing
+  view, at whatever thumbnail size that view uses.
+- **Covers are found however the book declares them** — the modern EPUB 3 marking, the older EPUB 2
+  one, and, for the many books that point at the *page* showing the cover rather than at the image,
+  the cover image itself. Books that declare no cover at all keep the familiar ebook icon.
+- **Wherever the book is stored.** The cover comes out of the file, so it needs nothing from the
+  storage underneath: SMB, SFTP, WebDAV and encrypted volumes show covers just like internal storage
+  and the SD card. (A PDF's first page still needs local or SAF storage.) Reading books over the
+  network for thumbnails stays governed by the existing setting.
+
 ## 1.7.4+056
 
 ### New since 1.7.4+053

@@ -16,7 +16,7 @@ mini-player**, a **custom open-with chooser**, **full settings export/import**, 
 
 Installs **side-by-side** with the official Material Files (app ID `shiroikuma.shoruikanri`).
 
-**📥 Latest release: [`1.7.4+056`](https://github.com/ShiroiKuma0/shiroikuma-shoruikanri/releases/latest)** — [all releases & APK downloads »](https://github.com/ShiroiKuma0/shiroikuma-shoruikanri/releases)
+**📥 Latest release: [`1.7.4+057`](https://github.com/ShiroiKuma0/shiroikuma-shoruikanri/releases/latest)** — [all releases & APK downloads »](https://github.com/ShiroiKuma0/shiroikuma-shoruikanri/releases)
 
 </div>
 
@@ -100,6 +100,9 @@ Termux script, with one-tap share tiles.
 - **Paste from the top toolbar** — the pending paste sits top-right where Copy/Cut were, not in a
   bottom bar. **Back keeps your copy armed** (it just navigates the filesystem); long-press the
   paste icon to cancel a pending paste.
+- **Books show their covers** — an EPUB is listed under its own cover instead of a generic ebook
+  icon, wherever it is stored, and a PDF has always shown its first page. A shelf of books looks
+  like a shelf of books.
 - **XAPK bundles, handled properly** — an XAPK shows the app's own icon in the listing instead of a
   blank file icon, and browses and extracts like the ZIP it actually is. Set a split-APK installer
   as its open-with default and a tap goes straight there; without one, a tap opens the bundle.
