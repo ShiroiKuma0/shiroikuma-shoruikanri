@@ -6,6 +6,24 @@ plus our build increment (e.g. `1.7.4+050`; the counter is zero-padded to three 
 `1.7.4+050` onwards, so builds sort in order). This fork installs side-by-side with upstream under
 the app ID `shiroikuma.shoruikanri`.
 
+## 1.7.4+060
+
+### New since 1.7.4+057
+
+#### ➕ The new-item dialog gets its frame
+
+- **Tapping “+” now opens a proper dialog.** The “File” and “Folder” entries used to float over the
+  listing with nothing around them — bare labels and round buttons whose black fill was invisible
+  against the black background, so they read as loose text dropped on top of the files rather than
+  as a menu. They are enclosed now, in a single black box with a yellow border.
+- **One frame around the whole thing**, labels and buttons together, rather than a border drawn
+  around each row: it is one dialog, and it looks like one. The corners and border weight are the
+  audio mini-player's, so the two things that float above the file list are the same shape.
+- **The “+” button stays outside it**, keeping its own ring — it is what opens the dialog, not a
+  part of it. The frame fades in and out with the entries as the button spins into “×”.
+- **It follows the theme.** The box takes its fill and border from the same two 白い熊 UI page
+  slots the button itself uses, so recolouring the new-item button recolours its dialog with it.
+
 ## 1.7.4+057
 
 ### New since 1.7.4+056

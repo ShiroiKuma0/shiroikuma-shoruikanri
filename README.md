@@ -16,7 +16,7 @@ mini-player**, a **custom open-with chooser**, **full settings export/import**, 
 
 Installs **side-by-side** with the official Material Files (app ID `shiroikuma.shoruikanri`).
 
-**📥 Latest release: [`1.7.4+057`](https://github.com/ShiroiKuma0/shiroikuma-shoruikanri/releases/latest)** — [all releases & APK downloads »](https://github.com/ShiroiKuma0/shiroikuma-shoruikanri/releases)
+**📥 Latest release: [`1.7.4+060`](https://github.com/ShiroiKuma0/shiroikuma-shoruikanri/releases/latest)** — [all releases & APK downloads »](https://github.com/ShiroiKuma0/shiroikuma-shoruikanri/releases)
 
 </div>
 
@@ -41,9 +41,10 @@ favorites. The whole tab set — paths and selection — **survives restarts, re
 ## 🎨 Black & yellow, themed to the pixel
 
 A pure-**black** background with pure-**yellow** text, icons and borders, everywhere — lists,
-dialogs, menus, toasts, the speed-dial button and the image viewer. A dedicated **UI page** lets you
-retune it: per-element **colours** (picker with swatches + hex), **fonts** (import your own
-`.ttf`/`.otf`, set family/weight/size), icon size and spacing — all with live previews.
+dialogs, menus, toasts, the image viewer, and the new-item button together with the framed dialog
+it opens. A dedicated **UI page** lets you retune it: per-element **colours** (picker with swatches +
+hex), **fonts** (import your own `.ttf`/`.otf`, set family/weight/size), icon size and spacing — all
+with live previews.
 
 ## 🔭 Six listing views + per-folder styling
 
