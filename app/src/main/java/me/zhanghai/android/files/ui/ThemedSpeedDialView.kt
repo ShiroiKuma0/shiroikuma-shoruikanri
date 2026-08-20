@@ -9,10 +9,13 @@ import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
 import android.animation.AnimatorSet
 import android.animation.ObjectAnimator
+import android.animation.ValueAnimator
 import android.content.Context
 import android.content.res.ColorStateList
+import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.drawable.Drawable
+import android.graphics.drawable.GradientDrawable
 import android.graphics.drawable.RotateDrawable
 import android.os.Bundle
 import android.os.Parcelable
@@ -33,6 +36,8 @@ import me.zhanghai.android.files.compat.createCompat
 import me.zhanghai.android.files.compat.drawableCompat
 import me.zhanghai.android.files.compat.foregroundCompat
 import me.zhanghai.android.files.compat.setTextAppearanceCompat
+import me.zhanghai.android.files.skui.SkThemeSlot
+import me.zhanghai.android.files.skui.skColor
 import me.zhanghai.android.files.util.ParcelableState
 import me.zhanghai.android.files.util.asColor
 import me.zhanghai.android.files.util.dpToDimensionPixelSize
@@ -47,6 +52,17 @@ class ThemedSpeedDialView : SpeedDialView {
     private var onChangeListener: OnChangeListener? = null
 
     private var mainFabAnimator: Animator? = null
+
+    // 白い熊 fork: the opened action items read as one dialog — a black box with a single
+    // yellow frame drawn around all of them, labels and mini buttons alike, like the audio
+    // mini-player's box. The main FAB stays outside it: it's the button that opens this.
+    private val skFrameDrawable = GradientDrawable().apply {
+        shape = GradientDrawable.RECTANGLE
+        cornerRadius = 12 * resources.displayMetrics.density
+    }
+
+    // 0 while closed, 1 while open — fades the frame in and out with the items.
+    private var skFrameFraction = 0f
 
     constructor(context: Context) : super(context)
 
@@ -107,10 +123,64 @@ class ThemedSpeedDialView : SpeedDialView {
                 onChangeListener?.onToggleChanged(isOpen)
             }
         })
+        applySkStyle()
     }
 
     override fun setOnChangeListener(onChangeListener: OnChangeListener?) {
         this.onChangeListener = onChangeListener
+    }
+
+    // 白い熊 fork: (re)read the configured slot colors into the dialog frame. Called again
+    // whenever the UI page changes a slot.
+    fun applySkStyle() {
+        skFrameDrawable.setColor(skColor(SkThemeSlot.FAB_BACKGROUND))
+        skFrameDrawable.setStroke(
+            resources.displayMetrics.density.toInt().coerceAtLeast(1),
+            skColor(SkThemeSlot.FAB_ICON)
+        )
+        invalidate()
+    }
+
+    override fun dispatchDraw(canvas: Canvas) {
+        drawSkFrame(canvas)
+
+        super.dispatchDraw(canvas)
+    }
+
+    // 白い熊 fork: one rounded frame around the union of every action item's label chip and
+    // mini button. The item views themselves are wider than their content — the mini fabs
+    // carry 20dp side margins — so the box is measured from the content views, not from the
+    // rows, and then padded out evenly.
+    private fun drawSkFrame(canvas: Canvas) {
+        if (skFrameFraction <= 0f) {
+            return
+        }
+        var left = Int.MAX_VALUE
+        var top = Int.MAX_VALUE
+        var right = Int.MIN_VALUE
+        var bottom = Int.MIN_VALUE
+        for (index in 0 until childCount) {
+            val itemView = getChildAt(index) as? FabWithLabelView ?: continue
+            if (itemView.visibility != VISIBLE) {
+                continue
+            }
+            for (contentView in arrayOf<View>(itemView.labelBackground, itemView.fab)) {
+                if (contentView.visibility != VISIBLE) {
+                    continue
+                }
+                left = minOf(left, itemView.left + contentView.left)
+                top = minOf(top, itemView.top + contentView.top)
+                right = maxOf(right, itemView.left + contentView.right)
+                bottom = maxOf(bottom, itemView.top + contentView.bottom)
+            }
+        }
+        if (left > right || top > bottom) {
+            return
+        }
+        val padding = context.dpToDimensionPixelSize(12)
+        skFrameDrawable.alpha = (255 * skFrameFraction).toInt()
+        skFrameDrawable.setBounds(left - padding, top - padding, right + padding, bottom + padding)
+        skFrameDrawable.draw(canvas)
     }
 
     private fun createMainFabAnimator(isOpen: Boolean): Animator =
@@ -126,7 +196,14 @@ class ThemedSpeedDialView : SpeedDialView {
                 ),
                 ObjectAnimator.ofInt(
                     mainFab.drawable, DRAWABLE_PROPERTY_LEVEL, if (isOpen) 10000 else 0
-                )
+                ),
+                // 白い熊 fork: fade the dialog frame in and out along with the items.
+                ValueAnimator.ofFloat(skFrameFraction, if (isOpen) 1f else 0f).apply {
+                    addUpdateListener {
+                        skFrameFraction = it.animatedValue as Float
+                        invalidate()
+                    }
+                }
             )
             duration = context.shortAnimTime.toLong()
             interpolator = FastOutSlowInInterpolator()
