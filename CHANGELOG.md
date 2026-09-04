@@ -6,6 +6,62 @@ plus our build increment (e.g. `1.7.4+050`; the counter is zero-padded to three 
 `1.7.4+050` onwards, so builds sort in order). This fork installs side-by-side with upstream under
 the app ID `shiroikuma.shoruikanri`.
 
+## 1.7.4+062
+
+### New since 1.7.4+060
+
+Built on upstream Material Files 1.7.4.
+
+#### 🔐 Backed up with its data, onto a clean phone
+
+- **白い熊 応用管理 can now back this app up *with* its settings, and put them back.** Without root
+  nothing can reach another app's data, so a wiped phone used to mean reinstalling and setting the
+  app up again from scratch. The APK and the data now travel together — the same result a rooted
+  full-app restore would give.
+- **It works where nothing has been configured yet**, which is the entire point of it. The backup
+  app proves who it is with its **package name, its uid and its pinned signing certificate**, so
+  there is no shared secret that had to be pasted in beforehand and therefore nothing to lose in
+  the wipe.
+- **The data moves through a file descriptor the caller opens**, not a folder path. That is what
+  puts the backup *inside* 応用管理's encrypted, checksummed archive instead of sitting beside it in
+  plaintext — and it means this app needs **no storage permission at all** on that route. All-files
+  access is a per-app toggle a freshly installed app has not been granted, so the older path-based
+  export would have failed on precisely the device a restore is for.
+- **A restore can no longer be lost between “done” and the restart.** The backup app force-stops
+  this one the instant a restore reports success, which can cut off a settings write that had not
+  yet reached disk — a restore that reported success and was quietly gone. Every store is now
+  flushed before the reply is sent.
+
+#### ⏹ A headless export can be stopped
+
+- **A long automated export can be cancelled from where it was started**, instead of running on to
+  the end after the panel had stopped listening and delivering a backup nobody was waiting for.
+- **A cancelled export leaves the backup folder exactly as it found it.** The archive is written
+  under a temporary name and only renamed once it is complete, so an export that is stopped — or
+  killed — no longer leaves behind a short file that is indistinguishable from a real backup until
+  the day someone tries to restore from it.
+- **Stopping is always safe.** A cancel that arrives when nothing is running, or after the export
+  already finished, does nothing at all rather than reporting an error.
+
+#### 🔓 Automation is on by default, with the token now optional
+
+- **Automation ships enabled**, so this app is ready for a sister app's backup run without anything
+  being switched on first — necessary for a phone being set up from scratch.
+- **The authorization token became opt-in.** A new 「Use authorization token?」 switch, off by
+  default, decides whether a caller must present one; the token row is hidden until it is asked
+  for, so a long secret is no longer sitting under a switch that is not using it.
+- **A token sent when none is required is ignored rather than rejected**, so a caller configured
+  long ago keeps working instead of failing for a reason that looks like nothing.
+
+#### 🧹 Fixes
+
+- **Fixed: a reply that could go unheard.** The app never declared which sister apps it needed to
+  see, which on modern Android can silently discard the reply to a completed export.
+- **Fixed: a stale retry could kill the app.** A second automation request arriving with an
+  already-finished job id could take the whole app down instead of being ignored.
+- **Fixed: two exports at once.** A second export request arriving while one is running is now
+  refused outright rather than both writing at the same time.
+
 ## 1.7.4+060
 
 ### New since 1.7.4+057
