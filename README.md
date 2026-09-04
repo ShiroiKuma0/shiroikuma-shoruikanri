@@ -11,12 +11,12 @@
 A fork of [Material Files](https://github.com/zhanghai/MaterialFiles) with **major additions**:
 in-app **gocryptfs** encrypted volumes (no FUSE, no root), **multi-folder tabs**, a full
 **black/yellow theme system**, **six listing views** with per-folder styling, a **built-in audio
-mini-player**, a **custom open-with chooser**, **full settings export/import**, and deep
-**Termux / share** integration.
+mini-player**, a **custom open-with chooser**, **full settings export/import** that can be
+**backed up with its data onto a clean phone**, and deep **Termux / share** integration.
 
 Installs **side-by-side** with the official Material Files (app ID `shiroikuma.shoruikanri`).
 
-**📥 Latest release: [`1.7.4+060`](https://github.com/ShiroiKuma0/shiroikuma-shoruikanri/releases/latest)** — [all releases & APK downloads »](https://github.com/ShiroiKuma0/shiroikuma-shoruikanri/releases)
+**📥 Latest release: [`1.7.4+062`](https://github.com/ShiroiKuma0/shiroikuma-shoruikanri/releases/latest)** — [all releases & APK downloads »](https://github.com/ShiroiKuma0/shiroikuma-shoruikanri/releases)
 
 </div>
 
@@ -71,11 +71,26 @@ tabs, share targets and open-with defaults — exports to a **single ZIP of plai
 the latest export shown right on the UI page. Import merges category-by-category — take a whole
 setup, or just the theme — and never wipes what it doesn't touch.
 
-And it runs **headlessly** too: with the **Automation export** switch on, a sister app's backup task
-can trigger the very same export through a **token-gated intent** — pick the target folder and the
-categories, watch **real counts** stream back as it writes (`区分 3/8 — App settings`, never a
-percentage), and get the path and exact size in reply. The token is copied from the UI page with one
-tap and never travels inside a backup.
+And it runs **headlessly** too: a sister app's backup task can trigger the very same export — pick
+the target folder and the categories, watch **real counts** stream back as it writes
+(`区分 3/8 — App settings`, never a percentage), and get the path and exact size in reply. A long
+export can be **stopped from where it was started**, and a cancelled one leaves the backup folder
+exactly as it found it. Automation ships **on**, with an optional **authorization token** for when
+you'd rather it were closed.
+
+## 🔐 Backed up with its data, onto a clean phone
+
+Restoring a wiped phone used to mean reinstalling this app and then setting it up again from
+scratch, because without root nothing can reach another app's data. Now **白い熊 応用管理 can back
+this app up *with* its settings and put them back** — the APK and the data together, the same result
+a rooted full-app restore would give.
+
+It works on a phone where **nothing has been configured yet**, which is the whole point: the backup
+app is identified by its **package name, its uid and its pinned signing certificate**, so there is
+no secret to have pasted beforehand and nothing to lose in the wipe. The data moves through a **file
+descriptor the caller opens** rather than a folder path — so it lands inside the encrypted, checksummed
+backup instead of beside it, and this app needs **no storage permission at all** on that route.
+
 
 ## 🎵 Built-in audio mini-player
 
