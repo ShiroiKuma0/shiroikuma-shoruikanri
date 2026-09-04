@@ -17,6 +17,7 @@ import me.zhanghai.android.files.hiddenapi.HiddenApi
 import me.zhanghai.android.files.provider.FileSystemProviders
 import me.zhanghai.android.files.settings.Settings
 import me.zhanghai.android.files.skui.SkShareShortcuts
+import me.zhanghai.android.files.skui.skAutomationDataNotificationTemplate
 import me.zhanghai.android.files.skui.SkUi
 import me.zhanghai.android.files.storage.FtpServerAuthenticator
 import me.zhanghai.android.files.storage.SftpServerAuthenticator
@@ -108,7 +109,9 @@ private fun createNotificationChannels() {
             listOf(
                 backgroundActivityStartNotificationTemplate.channelTemplate,
                 fileJobNotificationTemplate.channelTemplate,
-                ftpServerServiceNotificationTemplate.channelTemplate
+                ftpServerServiceNotificationTemplate.channelTemplate,
+                // 白い熊 fork: the automation data door's foreground service.
+                skAutomationDataNotificationTemplate.channelTemplate
             ).map { it.create(application) }
         )
     }

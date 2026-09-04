@@ -27,6 +27,7 @@ import org.json.JSONArray
 import org.json.JSONObject
 import java.io.ByteArrayOutputStream
 import java.io.File
+import java.io.IOException
 import java.io.OutputStream
 import java.net.URI
 import java.text.SimpleDateFormat
@@ -119,14 +120,29 @@ object SkEximport {
     // --- Export ---
 
     /**
+     * Thrown out of [export] when [export]'s `isCancelled` went up at a write boundary.
+     *
+     * It is an exception rather than an early `return` on purpose: a cancelled export must not
+     * close its ZIP tidily and hand back a short archive that looks complete. Unwinding is what
+     * lets every caller's `finally` delete the partial file it was writing.
+     */
+    class CancelledException : IOException("cancelled")
+
+    /**
      * Write a ZIP of the selected categories to [out]. Returns the category count. [onProgress]
      * (done, total, category label) fires after each written category — the automation bridge
      * ([SkStateExportReceiver]) forwards it as contract progress broadcasts; the panel omits it.
+     *
+     * [isCancelled] is polled at **write boundaries only** — between categories and between font
+     * files, never mid-write — so a cancelled export unwinds at a point where nothing is half
+     * serialized, and throws [CancelledException]. The panel passes none; the automation paths do
+     * (contract v2 §1's CANCEL_EXPORT, and §2a's `cancel` method).
      */
     fun export(
         cats: Set<Cat>,
         out: OutputStream,
-        onProgress: ((done: Int, total: Int, catLabel: String) -> Unit)? = null
+        onProgress: ((done: Int, total: Int, catLabel: String) -> Unit)? = null,
+        isCancelled: (() -> Boolean)? = null
     ): Int {
         var count = 0
         val total = Cat.entries.count { it in cats }
@@ -143,9 +159,12 @@ object SkEximport {
                 if (cat !in cats) {
                     continue
                 }
+                if (isCancelled?.invoke() == true) {
+                    throw CancelledException()
+                }
                 writeEntry(zip, "${cat.id}.json", exportCategory(cat).toString(2))
                 if (cat == Cat.UI_THEME) {
-                    exportFonts(zip)
+                    exportFonts(zip, isCancelled)
                 }
                 ++count
                 onProgress?.invoke(count, total, application.getString(cat.labelRes))
@@ -175,10 +194,15 @@ object SkEximport {
             Cat.OPEN_WITH -> prefsToJson(namedPrefs("sk_open_with"))
         }
 
-    private fun exportFonts(zip: ZipOutputStream) {
+    private fun exportFonts(zip: ZipOutputStream, isCancelled: (() -> Boolean)? = null) {
         skFontsDir().listFiles()?.forEach { file ->
             if (!file.isFile) {
                 return@forEach
+            }
+            // The one place this export can hold a real number of bytes, so the one place besides
+            // the category loop worth checking — between whole files, never inside one.
+            if (isCancelled?.invoke() == true) {
+                throw CancelledException()
             }
             zip.putNextEntry(ZipEntry("fonts/${file.name}"))
             zip.write(file.readBytes())
@@ -283,6 +307,33 @@ object SkEximport {
             }
             runCatching { File(skFontsDir(), safeName).writeBytes(bytes) }
         }
+    }
+
+    /**
+     * Force every prefs store [import] writes to out to disk, synchronously.
+     *
+     * [jsonToPrefs] commits with `apply()`, which updates memory at once and the file a moment
+     * later on a background thread. That is right for the panel — the user is still holding the
+     * app, and Android flushes pending `apply()`s at an orderly shutdown.
+     *
+     * It is **not** enough on the automation restore path. 応用管理 force-stops this app the
+     * instant it hears `OK` from an import, with `Process.killProcess` — a SIGKILL, where nothing
+     * gets flushed and there is no orderly shutdown to hook. The restore would report success and
+     * silently be gone. An empty `commit()` on each store blocks until that store's file is
+     * written, and because writes are serialized per store it carries the earlier `apply()`'s
+     * contents with it, so this is a fence rather than a second write.
+     */
+    fun flushToDisk() {
+        listOf(
+            namedPrefs("sk_ui"),
+            namedPrefs("sk_separators"),
+            namedPrefs("sk_grid_styles"),
+            namedPrefs("sk_termux"),
+            namedPrefs("sk_share"),
+            namedPrefs("sk_open_with"),
+            defaultSharedPreferences,
+            pathPrefs()
+        ).forEach { runCatching { it.edit().commit() } }
     }
 
     /** Restart the whole app so every setting is re-read from the imported prefs. */
