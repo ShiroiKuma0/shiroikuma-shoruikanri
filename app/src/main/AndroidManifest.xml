@@ -20,6 +20,8 @@
     <uses-permission android:name="com.termux.permission.RUN_COMMAND" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
+    <!-- 白い熊 fork: the automation data door's foreground service (contract v2 §2a). -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission
         android:name="android.permission.MANAGE_EXTERNAL_STORAGE"
@@ -34,6 +36,25 @@
         android:name="android.permission.WRITE_EXTERNAL_STORAGE"
         android:maxSdkVersion="32" />
     <uses-permission android:name="com.android.launcher.permission.INSTALL_SHORTCUT" />
+
+    <!--
+      ~ 白い熊 fork (contract v2 §2a): WITHOUT this, setPackage() on our reply broadcast fails
+      ~ silently on Android 11+ — the export runs, writes correctly, and is never heard of. This
+      ~ fork had NO <queries> element at all until 2026-09-04; its replies only ever arrived
+      ~ because it happens to hold QUERY_ALL_PACKAGES for its own open-with UI, which is a
+      ~ Play-restricted permission and not something the contract may lean on. BOTH callers are
+      ~ named: 応用管理 restores, but §1's 保存復元 batch is driven by 自由作業盤, so an app
+      ~ listing only 応用管理 is inaudible to the one that has been calling it all along.
+      ~
+      ~ It is load-bearing for the data door too, not just for the reply: getPackageInfo() and
+      ~ getPackagesForUid() are visibility-filtered as well, so a caller this app cannot see
+      ~ fails SkAutomationCallers' IDENTITY check and is refused as "signature unreadable" —
+      ~ a wrong <queries> looks like a signing-key problem rather than a visibility one.
+      -->
+    <queries>
+        <package android:name="shiroikuma.oyokanri" />
+        <package android:name="shiroikuma.jiyusagyoban" />
+    </queries>
 
     <!-- Crashlytics and Shizuku requires API 23. -->
     <uses-sdk tools:overrideLibrary="com.google.firebase,com.google.firebase.components,com.google.firebase.crashlytics,com.google.firebase.crashlytics.ndk,com.google.firebase.installations,com.google.firebase.sessions,rikka.shizuku.aidl,rikka.shizuku.api,rikka.shizuku.shared" />
@@ -537,9 +558,19 @@
 
         <!--
           ~ 白い熊 fork: the sister-app 保存復元 automation contract — a headless
-          ~ category-ZIP export (EXPORT_STATE) and the category enumeration
-          ~ (LIST_CATEGORIES) behind it. No android:permission: the caller (自由作業盤)
-          ~ cannot hold one, so the automation token is the gate.
+          ~ category-ZIP export (EXPORT_STATE), the category enumeration
+          ~ (LIST_CATEGORIES), and the stop 白い熊 presses from the panel that
+          ~ started it (CANCEL_EXPORT).
+          ~
+          ~ No android:permission, and in contract v2 that is deliberate rather than
+          ~ forced: this receiver is the UNAUTHENTICATED half of the surface — it only
+          ~ ever writes where it was told to and reports what it did. Everything that
+          ~ moves data through a caller-supplied descriptor lives behind
+          ~ SkAutomationProvider below, which knows who is calling.
+          ~
+          ~ CANCEL_EXPORT lives here rather than on the service because the service is
+          ~ (correctly) not exported and a third-party app cannot start it; the receiver
+          ~ signals the running export internally.
           -->
         <receiver
             android:name="me.zhanghai.android.files.skui.SkStateExportReceiver"
@@ -547,8 +578,46 @@
             <intent-filter>
                 <action android:name="${applicationId}.action.EXPORT_STATE" />
                 <action android:name="${applicationId}.action.LIST_CATEGORIES" />
+                <action android:name="${applicationId}.action.CANCEL_EXPORT" />
             </intent-filter>
         </receiver>
+
+        <!--
+          ~ 白い熊 fork (contract v2 §2a): the data door. 応用管理 backs this app up WITH
+          ~ its data and puts it back on a wiped phone, moving the bytes through a
+          ~ descriptor IT opened — never a path we resolve. Exported with no permission on
+          ~ purpose: a custom permission would have to be "normal" (any app may hold it) or
+          ~ "signature" (impossible — every app in this family has its own keystore), and
+          ~ neither buys anything SkAutomationCallers' name + uid + pinned-certificate check
+          ~ does not.
+          ~
+          ~ Declared AFTER AppProvider: this app builds its entire global state in
+          ~ AppProvider.onCreate(), and Android creates providers in manifest order.
+          -->
+        <provider
+            android:name="me.zhanghai.android.files.skui.SkAutomationProvider"
+            android:authorities="${applicationId}.automation"
+            android:exported="true" />
+
+        <service
+            android:name="me.zhanghai.android.files.skui.SkAutomationDataService"
+            android:exported="false"
+            android:foregroundServiceType="specialUse">
+            <property
+                android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
+                android:value="Automation data export/import" />
+        </service>
+
+        <!--
+          ~ Capability discovery, read with MATCH_UNINSTALLED_PACKAGES |
+          ~ MATCH_DISABLED_COMPONENTS. Manifest meta-data rather than a query intent
+          ~ because a FROZEN app cannot be asked anything, and 白い熊 freezes aggressively —
+          ~ 応用管理 must still answer "can this app be backed up" for a disabled package.
+          ~ An app without these is simply not offered for data backup or restore.
+          -->
+        <meta-data android:name="shiroikuma.automation.contract" android:value="2" />
+        <meta-data android:name="shiroikuma.automation.format" android:value="1" />
+        <meta-data android:name="shiroikuma.automation.min_format" android:value="1" />
 
         <meta-data
             android:name="firebase_crashlytics_collection_enabled"

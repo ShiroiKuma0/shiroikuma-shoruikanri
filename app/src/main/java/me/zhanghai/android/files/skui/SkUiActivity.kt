@@ -107,12 +107,25 @@ class SkUiActivity : AppActivity() {
             if (eximportWarn) WARN_COLOR else null
         ) { openEximportSheet() }
         // …and, right below the export rows, the automation gate: the same
-        // export run headlessly by a sister app's 保存復元 task.
+        // export run headlessly by a sister app's 保存復元 task, plus (contract
+        // v2) the data door 応用管理 uses to back this app up with its data.
+        // Three rows, in the order every sister app shows them.
         addSwitchRow(
             R.string.sk_automation_enabled, SkAutomation.isEnabled, rowL1Px,
             R.string.sk_automation_enabled_desc
         ) { SkAutomation.isEnabled = it }
-        addAutomationTokenRow(rowL1Px)
+        addSwitchRow(
+            R.string.sk_automation_require_token, SkAutomation.isTokenRequired, rowL1Px,
+            R.string.sk_automation_require_token_desc
+        ) {
+            SkAutomation.isTokenRequired = it
+            buildRows()
+        }
+        // Hidden while the token is not being asked for: a 48-character secret sitting under an
+        // off switch invites 白い熊 to paste it somewhere it will do nothing.
+        if (SkAutomation.isTokenRequired) {
+            addAutomationTokenRow(rowL1Px)
+        }
 
         // Foundation — the colors everything else inherits from
         addSection(R.string.sk_ui_group_foundation)
