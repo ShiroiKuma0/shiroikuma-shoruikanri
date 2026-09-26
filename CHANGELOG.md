@@ -2,9 +2,44 @@
 
 All notable fork changes layered on top of [Material Files](https://github.com/zhanghai/MaterialFiles)
 by Hai Zhang. Versions are `<upstream version>+<fork build>` — the upstream version this fork tracks,
-plus our build increment (e.g. `1.7.4+050`; the counter is zero-padded to three digits from
+plus our build increment (e.g. `1.7.5+001`; the counter is zero-padded to three digits from
 `1.7.4+050` onwards, so builds sort in order). This fork installs side-by-side with upstream under
 the app ID `shiroikuma.shoruikanri`.
+
+## 1.7.5+001 — 2026-09-26
+
+### New since 1.7.4+062
+
+Built on upstream Material Files **1.7.5** — the whole fork is now rebased onto it. No fork feature
+changed in this build; everything below is what arrives from upstream, and how the fork carries it.
+
+#### ⬆️ From upstream 1.7.5
+
+- **Shizuku support.** Root-level file access can now go through Shizuku, replacing the old
+  Sui-only file service — so rooted-style access works on phones that run Shizuku without Sui.
+- **Stronger ZIP encryption.** Password-protected ZIP archives are now created with **AES-256**
+  instead of the weak legacy ZipCrypto.
+- **Background file operations use the `specialUse` foreground-service type**, so a long copy or
+  move over a slow network share is no longer cut off by Android's six-hour `dataSync` limit.
+- **Targets Android 16 (API 36)**, up from API 34 in the previous fork line — the app is now drawn
+  edge to edge under the status and navigation bars.
+- **Text editor: saving no longer throws the cursor back to the start.**
+- **Fixes:** the Shizuku service is now properly shut down; root access for `Android/obb` works;
+  the regular toolbar can no longer grab focus while the selection toolbar is showing; radio-button
+  text is aligned again.
+- **New Danish and Galician translations**, plus refreshed ones across other languages.
+- Updated libraries throughout (Material Components 1.14, libarchive, NDK 30).
+
+#### 🧷 How the fork carries it
+
+- **Still fully FOSS.** Upstream moved its Firebase Analytics/Crashlytics into a new initializer;
+  the fork strips it again — no Google services, no crash reporting, nothing phoning home.
+- **The in-app name stays 白い熊 書類管理** in the two new languages too.
+- **Every fork feature rides along unchanged** — tabs, the 白い熊 UI theming, the custom open-with
+  and share dialogs, the audio mini-player, XAPK support, EPUB covers, Export/Import and the
+  保存復元/応用管理 automation contract v2.
+- **Version line restarts:** `1.7.5+001`, version code `400001` — above every `1.7.4` build, so it
+  installs as a normal upgrade.
 
 ## 1.7.4+062
 
