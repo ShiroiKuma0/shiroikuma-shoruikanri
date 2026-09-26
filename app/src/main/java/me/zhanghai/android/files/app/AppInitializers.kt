@@ -33,7 +33,6 @@ import me.zhanghai.android.files.provider.smb.client.Client as SmbClient
 import me.zhanghai.android.files.provider.webdav.client.Client as WebDavClient
 
 val appInitializers = listOf(
-    ::initializeFirebase,
     ::disableHiddenApiChecks,
     ::initializeWebViewDebugging,
     ::initializeCoil,
@@ -46,9 +45,6 @@ val appInitializers = listOf(
     ::initializeNightMode,
     ::createNotificationChannels
 )
-
-private fun initializeFirebase() {
-}
 
 private fun disableHiddenApiChecks() {
     HiddenApi.disableHiddenApiChecks()
