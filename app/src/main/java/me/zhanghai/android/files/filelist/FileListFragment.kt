@@ -1618,7 +1618,30 @@ class FileListFragment : Fragment(), BreadcrumbLayout.Listener, FileListAdapter.
             openAudio(file)
             return
         }
+        if (file.mimeType.isImage) {
+            openImage(file)
+            return
+        }
         openFileWithIntent(file, false)
+    }
+
+    // 白い熊 fork: show images in our own viewer (swipe through the folder, pinch in for the
+    // grid) instead of whatever the system resolves image/* to, unless a different default was
+    // set through our open-with dialog.
+    private fun openImage(file: FileItem) {
+        val path = file.path
+        if (path.isArchivePath || SkOpenWith.getDefault(file.mimeType) != null) {
+            openFileWithIntent(file, false)
+            return
+        }
+        val intent = path.fileProviderUri.createViewIntent(file.mimeType)
+            .addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
+            .apply {
+                extraPath = path
+                maybeAddImageViewerActivityExtras(this, path, file.mimeType)
+            }
+            .setClass(requireContext(), ImageViewerActivity::class.java)
+        startActivitySafe(intent)
     }
 
     // 白い熊 fork: play audio in our built-in mini-player unless a different default was

@@ -196,4 +196,5 @@
     <string name="sk_inbound_choose_target">Termux スクリプトへ送信</string>
     <string name="sk_inbound_running_format">「%s」へ送信中…</string>
     <string name="sk_inbound_resolve_failed">共有ファイルを読み取れませんでした</string>
+    <string name="sk_image_viewer_grid_subtitle">%1$d 枚の画像</string>
 </resources>
