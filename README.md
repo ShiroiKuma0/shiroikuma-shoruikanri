@@ -10,13 +10,13 @@
 
 A fork of [Material Files](https://github.com/zhanghai/MaterialFiles) with **major additions**:
 in-app **gocryptfs** encrypted volumes (no FUSE, no root), **multi-folder tabs**, a full
-**black/yellow theme system**, **six listing views** with per-folder styling, a **built-in audio
-mini-player**, a **custom open-with chooser**, **full settings export/import** that can be
+**black/yellow theme system**, **six listing views** with per-folder styling, an **image viewer that
+pinches out into a zoomable wall of the whole folder**, a **built-in audio mini-player**, a **custom open-with chooser**, **full settings export/import** that can be
 **backed up with its data onto a clean phone**, and deep **Termux / share** integration.
 
 Installs **side-by-side** with the official Material Files (app ID `shiroikuma.shoruikanri`).
 
-**📥 Latest release: [`1.7.5+001`](https://github.com/ShiroiKuma0/shiroikuma-shoruikanri/releases/latest)** — [all releases & APK downloads »](https://github.com/ShiroiKuma0/shiroikuma-shoruikanri/releases)
+**📥 Latest release: [`1.7.5+003`](https://github.com/ShiroiKuma0/shiroikuma-shoruikanri/releases/latest)** — [all releases & APK downloads »](https://github.com/ShiroiKuma0/shiroikuma-shoruikanri/releases)
 
 </div>
 
@@ -91,6 +91,16 @@ no secret to have pasted beforehand and nothing to lose in the wipe. The data mo
 descriptor the caller opens** rather than a folder path — so it lands inside the encrypted, checksummed
 backup instead of beside it, and this app needs **no storage permission at all** on that route.
 
+
+## 🖼 Images: flick through, then pinch out to the whole folder
+
+Tap a PNG or JPEG and it opens in the **built-in viewer**, not whatever gallery the phone defaults
+to — so a flick left or right moves to the **next image in this folder**, in the list's own order.
+Pinch in and the picture shrinks into a **wall of every image in the folder**: zoom it smoothly
+anywhere from one image to the whole lot, so you can sit at one-and-a-bit images with the
+neighbour peeking in, and **drag the wall in any direction**. The wall reshapes itself to the
+screen — a strip of a few pictures, or rows of many on a big unfolded display. Tap any image (or
+pinch back out) to see it alone again.
 
 ## 🎵 Built-in audio mini-player
 

@@ -6,6 +6,37 @@ plus our build increment (e.g. `1.7.5+001`; the counter is zero-padded to three 
 `1.7.4+050` onwards, so builds sort in order). This fork installs side-by-side with upstream under
 the app ID `shiroikuma.shoruikanri`.
 
+## 1.7.5+003 — 2026-10-06
+
+### New since 1.7.5+001
+
+Built on upstream Material Files **1.7.5**.
+
+#### 🖼 Image viewer
+
+- **Images open in the built-in viewer.** Tapping a PNG, JPEG or other image no longer hands it to
+  the system's default image app (on Huawei, Gallery — where a flick moved through Gallery's own
+  albums instead of the folder). It now opens in 書類管理's own viewer, which pages through **every
+  image of the current folder, in the list's sort order**, with a left/right flick. A default you
+  set for that image type in the open-with dialog still wins, and images inside archives still go
+  the old route.
+- **Pinch in to a zoomable wall of the whole folder.** On an image at normal zoom, pinching in
+  shrinks it into a wall of all the folder's images, starting at three-quarter size so the
+  neighbours already peek in — and the same pinch keeps zooming without lifting a finger.
+  - **Continuous zoom** anywhere between "one image fills the screen" and "the whole folder fits":
+    one image and part of the next, two and a bit, and so on.
+  - **Drag and fling in any direction**; the pinch's midpoint pans too.
+  - **The layout fits the screen.** Images are placed once, in folder order, with the column count
+    chosen so the fully zoomed-out wall matches the screen's shape — a single strip for a few
+    images on a wide screen, rows for many. Cells take the shape of the image you started from.
+    Rotating or unfolding re-lays the wall around the image in the middle.
+  - **Sharp at every zoom, light on memory.** Each image is decoded at roughly its on-screen size,
+    refreshed sharper as you zoom in (the old copy stays until the new one lands), and images far
+    off screen are released.
+  - **Back to one image:** tap an image, pinch out past one-image size, or press back. Double-tap
+    zooms to the tapped image, or back out to the whole folder. The image you came from is outlined
+    in the accent colour, and the toolbar shows how many images the folder holds.
+
 ## 1.7.5+001 — 2026-09-26
 
 ### New since 1.7.4+062
