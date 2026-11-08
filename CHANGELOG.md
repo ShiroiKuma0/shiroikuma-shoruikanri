@@ -6,6 +6,36 @@ plus our build increment (e.g. `1.7.5+001`; the counter is zero-padded to three 
 `1.7.4+050` onwards, so builds sort in order). This fork installs side-by-side with upstream under
 the app ID `shiroikuma.shoruikanri`.
 
+## 1.7.5+005 — 2026-11-08
+
+### New since 1.7.5+003
+
+Built on upstream Material Files **1.7.5**.
+
+#### 📦 APKS bundles
+
+- **APKS bundles show the app's own icon.** An `.apks` file (the bundletool / SAI format: a ZIP of
+  `base.apk` plus split APKs) used to be listed with a blank file icon. 書類管理 now streams
+  `base.apk` out of the bundle into a temporary file in its cache, reads the launcher icon from it
+  the same way it does for a plain APK, and deletes the file again — so the icon works in every
+  storage location, and large bundles never sit in memory.
+- **A tap still opens the installer.** The bundle gets a type of its own only for the icon: it is
+  not browsed as a ZIP, and it opens exactly as before — as a generic file, so the split-APK
+  installer remembered for that (or the system's choice) opens it in one tap, and "Open with" works
+  as it did.
+
+#### 🎨 UI page
+
+- **Every row you tap to do something is an outlined pill.** A new thick **Settings** pill with ›
+  sits right under the page title and opens the app's own settings; **Export / import** is a thick
+  pill with ›, its status (the latest export, or the warning in red) beneath it. Only the pill is
+  the touch target. Rows with their own control — switches, colour swatches, sliders, values —
+  stay plain rows.
+- **Minimal row padding.** Rows are only as tall as their content: no 48 dp minimum height, 2 dp
+  above and below (was 4 dp), switches without a minimum height, no extra gap under the font
+  sample lines, and a slimmer Regenerate button on the token row. Headings and the previews are
+  unchanged.
+
 ## 1.7.5+003 — 2026-10-06
 
 ### New since 1.7.5+001
