@@ -7,8 +7,11 @@
 
 package me.zhanghai.android.files.skui
 
+import android.content.res.ColorStateList
+import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.GradientDrawable
+import android.graphics.drawable.RippleDrawable
 import android.net.Uri
 import android.os.Bundle
 import android.text.InputType
@@ -31,6 +34,8 @@ import me.zhanghai.android.files.file.MimeType
 import me.zhanghai.android.files.filelist.FileListActivity
 import me.zhanghai.android.files.filelist.FileViewType
 import me.zhanghai.android.files.settings.Settings
+import me.zhanghai.android.files.settings.SettingsActivity
+import me.zhanghai.android.files.util.createIntent
 import me.zhanghai.android.files.util.primaryText
 import me.zhanghai.android.files.util.showToast
 import me.zhanghai.android.files.util.valueCompat
@@ -97,14 +102,20 @@ class SkUiActivity : AppActivity() {
         binding.toolbar.setTitleTextColor(skColor(SkThemeSlot.TOOLBAR_TITLE))
         binding.toolbar.navigationIcon?.setTint(skColor(SkThemeSlot.TOOLBAR_ICONS))
 
+        // The link to the app's own settings, first and thick, right under the
+        // page title (black-yellow-theme: every pressable row is a pill).
+        addActionRow(
+            getString(R.string.settings_title), null, null, rowL1Px, main = true, opens = true
+        ) { startActivity(SettingsActivity::class.createIntent()) }
+
         // Export / Import — carry every setting between installs (the Kōjiki
-        // flow); the row's value is the latest export found in the export
-        // directory, queried on every page open.
+        // flow); the explanation beneath is the latest export found in the
+        // export directory, queried on every page open.
         addSection(R.string.sk_eximport_title)
         val (eximportStatus, eximportWarn) = eximportPageStatus()
-        addValueRow(
-            R.string.sk_eximport_open, eximportStatus, rowL1Px,
-            if (eximportWarn) WARN_COLOR else null
+        addActionRow(
+            getString(R.string.sk_eximport_open), eximportStatus,
+            if (eximportWarn) WARN_COLOR else null, rowL1Px, main = true, opens = true
         ) { openEximportSheet() }
         // …and, right below the export rows, the automation gate: the same
         // export run headlessly by a sister app's 保存復元 task, plus (contract
@@ -438,12 +449,14 @@ class SkUiActivity : AppActivity() {
         )
     }
 
+    // Every row only as tall as its content: no 48 dp minimum, 2 dp above and
+    // below (black-yellow-theme: row padding minimal).
     private fun makeRow(indent: Int): LinearLayout =
         LinearLayout(this).apply {
             orientation = LinearLayout.HORIZONTAL
             gravity = Gravity.CENTER_VERTICAL
-            minimumHeight = dp(48)
-            setPaddingRelative(indent, dp(4), dp(16), dp(4))
+            minimumHeight = 0
+            setPaddingRelative(indent, dp(2), dp(16), dp(2))
             setBackgroundResource(android.R.drawable.list_selector_background)
         }
 
@@ -544,6 +557,83 @@ class SkUiActivity : AppActivity() {
         binding.holder.addView(row)
     }
 
+    // An action / navigation row: a full-width outlined pill holding the label
+    // (› when it opens something; 3 dp and bold for the main action of its
+    // section, else 1.25 dp), its explanation beneath in the secondary color.
+    // Only the pill is the touch target.
+    private fun addActionRow(
+        labelText: String,
+        summary: String?,
+        summaryColor: Int?,
+        indent: Int,
+        main: Boolean,
+        opens: Boolean,
+        onClick: () -> Unit
+    ) {
+        val ink = skColor(SkThemeSlot.ACCENT)
+        val row = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            setPaddingRelative(indent, dp(3), dp(16), dp(3))
+        }
+        val pill = LinearLayout(this).apply {
+            orientation = LinearLayout.HORIZONTAL
+            gravity = Gravity.CENTER_VERTICAL
+            setPaddingRelative(dp(18), dp(9), dp(16), dp(9))
+            val frame = GradientDrawable().apply {
+                setColor(Color.TRANSPARENT)
+                setStroke(
+                    maxOf(1, Math.round((if (main) 3f else 1.25f) * densityPx)), ink
+                )
+                cornerRadius = dp(50).toFloat()
+            }
+            background = RippleDrawable(
+                ColorStateList.valueOf((ink and 0x00FFFFFF) or 0x33000000), frame, null
+            )
+            setOnClickListener { onClick() }
+        }
+        pill.addView(
+            TextView(this).apply {
+                text = labelText
+                textSize = 16f
+                setTextColor(ink)
+                if (main) setTypeface(typeface, android.graphics.Typeface.BOLD)
+                layoutParams =
+                    LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f)
+            }
+        )
+        if (opens) {
+            pill.addView(
+                TextView(this).apply {
+                    text = "\u203A"
+                    textSize = 22f
+                    includeFontPadding = false
+                    setTextColor(ink)
+                    if (main) setTypeface(typeface, android.graphics.Typeface.BOLD)
+                    layoutParams = LinearLayout.LayoutParams(
+                        LinearLayout.LayoutParams.WRAP_CONTENT,
+                        LinearLayout.LayoutParams.WRAP_CONTENT
+                    ).apply { marginStart = dp(10) }
+                }
+            )
+        }
+        row.addView(
+            pill, LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT
+            )
+        )
+        if (!summary.isNullOrEmpty()) {
+            row.addView(
+                TextView(this).apply {
+                    text = summary
+                    textSize = 13f
+                    setTextColor(summaryColor ?: skColor(SkThemeSlot.TEXT_SECONDARY))
+                    setPaddingRelative(dp(18), dp(3), 0, 0)
+                }
+            )
+        }
+        binding.holder.addView(row)
+    }
+
     private fun addSwitchRow(
         @StringRes labelRes: Int,
         checked: Boolean,
@@ -553,7 +643,11 @@ class SkUiActivity : AppActivity() {
     ) {
         val row = makeRow(indent)
         row.addView(makeLabelColumn(labelRes, descriptionRes))
-        val switch = SwitchCompat(this).apply { isChecked = checked }
+        val switch = SwitchCompat(this).apply {
+            isChecked = checked
+            minHeight = 0
+            minimumHeight = 0
+        }
         row.addView(switch)
         switch.setOnCheckedChangeListener { _, isChecked -> onToggle(isChecked) }
         row.setOnClickListener { switch.toggle() }
@@ -578,7 +672,7 @@ class SkUiActivity : AppActivity() {
                 textSize = 14f
                 setTypeface(typeface, android.graphics.Typeface.BOLD)
                 setTextColor(skColor(SkThemeSlot.ACCENT))
-                setPaddingRelative(dp(16), dp(8), dp(4), dp(8))
+                setPaddingRelative(dp(16), dp(2), dp(4), dp(2))
                 setBackgroundResource(android.R.drawable.list_selector_background)
                 setOnClickListener { confirmRegenerateToken(valueView) }
             }
@@ -671,7 +765,7 @@ class SkUiActivity : AppActivity() {
 
         // Font size + live sample
         val sample = TextView(this).apply {
-            setPaddingRelative(subIndent, dp(2), dp(16), dp(10))
+            setPaddingRelative(subIndent, dp(2), dp(16), dp(2))
         }
 
         val sizeRow = makeRow(subIndent)

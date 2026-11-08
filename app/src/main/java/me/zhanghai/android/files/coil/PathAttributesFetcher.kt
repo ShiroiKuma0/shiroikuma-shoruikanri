@@ -26,6 +26,7 @@ import me.zhanghai.android.files.compat.use
 import me.zhanghai.android.files.file.MimeType
 import me.zhanghai.android.files.file.asMimeType
 import me.zhanghai.android.files.file.isApk
+import me.zhanghai.android.files.file.isApks
 import me.zhanghai.android.files.file.isEpub
 import me.zhanghai.android.files.file.isImage
 import me.zhanghai.android.files.file.isMedia
@@ -68,6 +69,7 @@ class PathAttributesFetcher(
     private val options: Options,
     private val imageLoader: ImageLoader,
     private val appIconFetcherFactory: AppIconFetcher.Factory<Path>,
+    private val apksIconFetcherFactory: ApksIconFetcherFactory,
     private val videoFrameFetcherFactory: VideoFrameFetcher.Factory<Path>,
     private val pdfPageFetcherFactory: PdfPageFetcher.Factory<Path>
 ) : Fetcher {
@@ -119,6 +121,14 @@ class PathAttributesFetcher(
             mimeType.isXapk -> {
                 try {
                     XapkIconFetcher(path, options).fetch()?.let { return it }
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
+            }
+            // 白い熊 fork: an APKS carries its icon inside base.apk.
+            mimeType.isApks -> {
+                try {
+                    return apksIconFetcherFactory.create(path, options, imageLoader).fetch()
                 } catch (e: Exception) {
                     e.printStackTrace()
                 }
@@ -191,6 +201,10 @@ class PathAttributesFetcher(
             }
         }
 
+        private val apksIconFetcherFactory = ApksIconFetcherFactory(
+            context.getDimensionPixelSize(R.dimen.large_icon_size), context
+        )
+
         private val videoFrameFetcherFactory = object : VideoFrameFetcher.Factory<Path>() {
             override fun MediaMetadataRetriever.setDataSource(data: Path) {
                 appSetDataSource(data)
@@ -214,8 +228,8 @@ class PathAttributesFetcher(
             imageLoader: ImageLoader
         ): Fetcher =
             PathAttributesFetcher(
-                data, options, imageLoader, appIconFetcherFactory, videoFrameFetcherFactory,
-                pdfPageFetcherFactory
+                data, options, imageLoader, appIconFetcherFactory, apksIconFetcherFactory,
+                videoFrameFetcherFactory, pdfPageFetcherFactory
             )
     }
 }

@@ -37,7 +37,7 @@ import me.zhanghai.android.files.file.fileSize
 import me.zhanghai.android.files.file.formatShort
 import me.zhanghai.android.files.file.iconRes
 import me.zhanghai.android.files.file.isApk
-import me.zhanghai.android.files.file.isXapk
+import me.zhanghai.android.files.file.isApkBundle
 import me.zhanghai.android.files.provider.archive.isArchivePath
 import me.zhanghai.android.files.provider.common.PosixFileAttributes
 import me.zhanghai.android.files.provider.common.isEncrypted
@@ -466,9 +466,9 @@ class FileListAdapter(
         holder.directoryThumbnailImage?.isVisible = isDirectory
         holder.thumbnailOutlineView?.isVisible = !isDirectory
         val supportsThumbnail = file.supportsThumbnail
-        // 白い熊 fork: XAPK icons go into the icon slot too, so they look like APK icons.
+        // 白い熊 fork: XAPK and APKS icons go into the icon slot too, so they look like APK icons.
         val shouldLoadThumbnailIcon = supportsThumbnail && holder.thumbnailIconImage != null &&
-            (file.mimeType.isApk || file.mimeType.isXapk)
+            (file.mimeType.isApk || file.mimeType.isApkBundle)
         val attributes = file.attributes
         holder.thumbnailIconImage?.apply {
             dispose()

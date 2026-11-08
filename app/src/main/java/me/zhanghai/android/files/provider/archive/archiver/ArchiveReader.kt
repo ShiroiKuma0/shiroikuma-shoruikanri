@@ -24,6 +24,7 @@ import me.zhanghai.android.files.settings.Settings
 import me.zhanghai.android.files.util.valueCompat
 import java.io.ByteArrayOutputStream
 import java.io.Closeable
+import java.io.File
 import java.io.IOException
 import java.io.InputStream
 import java.nio.charset.Charset
@@ -154,6 +155,31 @@ object ArchiveReader {
                 break
             }
             bytes
+        }
+    }
+
+    // 白い熊 fork: stream a single entry, matched by name, into a file in one pass over the
+    // archive. Used for the APKS icon thumbnail, whose base.apk is too large to hold in memory.
+    // Returns false when nothing matches.
+    @Throws(IOException::class)
+    fun copyEntryTo(
+        file: Path,
+        passwords: List<String>,
+        target: File,
+        matchesName: (String) -> Boolean
+    ): Boolean {
+        val charset = archiveFileNameCharset
+        val (archive, closeable) = openArchive(file, passwords)
+        return closeable.use {
+            while (true) {
+                val entry = archive.readEntry(charset) ?: break
+                if (entry.isDirectory || !matchesName(entry.name)) {
+                    continue
+                }
+                target.outputStream().use { archive.newDataInputStream().copyTo(it) }
+                return@use true
+            }
+            false
         }
     }
 

@@ -19,7 +19,7 @@ import me.zhanghai.android.files.file.isEpub
 import me.zhanghai.android.files.file.isImage
 import me.zhanghai.android.files.file.isMedia
 import me.zhanghai.android.files.file.isPdf
-import me.zhanghai.android.files.file.isXapk
+import me.zhanghai.android.files.file.isApkBundle
 import me.zhanghai.android.files.provider.archive.createArchiveRootPath
 import me.zhanghai.android.files.provider.document.documentSupportsThumbnail
 import me.zhanghai.android.files.provider.document.isDocumentPath
@@ -73,7 +73,7 @@ val FileItem.supportsThumbnail: Boolean
         return when {
             mimeType.isApk && path.isGetPackageArchiveInfoCompatible -> true
             // 白い熊 fork: the icon comes out of the bundle, so any provider will do.
-            mimeType.isXapk -> true
+            mimeType.isApkBundle -> true
             // 白い熊 fork: likewise, the cover comes out of the book itself.
             mimeType.isEpub -> true
             mimeType.isImage -> true

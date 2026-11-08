@@ -46,6 +46,8 @@ private val mimeTypeToIconMap = mapOf(
     "application/vnd.android.package-archive" to MimeTypeIcon.APK,
     // 白い熊 fork: XAPK, see MimeType.XAPK.
     "application/x-xapk" to MimeTypeIcon.APK,
+    // 白い熊 fork: APKS, see MimeType.APKS.
+    "application/x-apks" to MimeTypeIcon.APK,
     "application/gzip" to MimeTypeIcon.ARCHIVE,
     // Not in IANA list, but Mozilla and Wikipedia say so.
     "application/java-archive" to MimeTypeIcon.ARCHIVE,

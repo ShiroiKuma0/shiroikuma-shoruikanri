@@ -80,6 +80,7 @@ import me.zhanghai.android.files.file.fileProviderUri
 import me.zhanghai.android.files.file.isApk
 import me.zhanghai.android.files.file.isAudio
 import me.zhanghai.android.files.file.isImage
+import me.zhanghai.android.files.file.isApks
 import me.zhanghai.android.files.file.isXapk
 import me.zhanghai.android.files.filejob.FileJobService
 import me.zhanghai.android.files.filelist.FileSortOptions.By
@@ -1712,7 +1713,9 @@ class FileListFragment : Fragment(), BreadcrumbLayout.Listener, FileListAdapter.
 
     private fun openFileWithIntent(file: FileItem, withChooser: Boolean) {
         val path = file.path
-        val mimeType = file.mimeType
+        // 白い熊 fork: an APKS opens exactly as before it had a type of its own - as a generic
+        // file, so the split-APK installer remembered for that (or the system's pick) opens it.
+        val mimeType = if (file.mimeType.isApks) MimeType.GENERIC else file.mimeType
         if (path.isArchivePath) {
             FileJobService.open(path, mimeType, withChooser, requireContext())
         } else {

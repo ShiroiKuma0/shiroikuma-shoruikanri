@@ -63,6 +63,10 @@ value class MimeType(val value: String) : Parcelable {
         // 白い熊 fork: XAPK (a ZIP bundling a base APK, split APKs and OBBs) has no registered
         // media type, so we mint our own to tell it apart from a plain ZIP or an APK.
         val XAPK = "application/x-xapk".asMimeType()
+        // 白い熊 fork: likewise APKS (bundletool / SAI: a ZIP of base.apk plus split APKs) -
+        // only for its icon; it is opened as the generic type it was before, see
+        // FileListFragment.openFileWithIntent.
+        val APKS = "application/x-apks".asMimeType()
         val TEXT_PLAIN = "text/plain".asMimeType()
         val GENERIC = "application/octet-stream".asMimeType()
 
