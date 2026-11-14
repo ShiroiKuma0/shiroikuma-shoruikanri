@@ -6,6 +6,37 @@ plus our build increment (e.g. `1.7.5+001`; the counter is zero-padded to three 
 `1.7.4+050` onwards, so builds sort in order). This fork installs side-by-side with upstream under
 the app ID `shiroikuma.shoruikanri`.
 
+## 1.7.5+007 — 2026-11-14
+
+### New since 1.7.5+005
+
+Built on upstream Material Files **1.7.5**.
+
+#### 🛡 Package files: scan before installing
+
+- **A tap on a package file can go to a VirusTotal scan first.** With 白い熊 応用管理 installed, a
+  tap on an APK, XAPK, APKS or APKM hands the file to its VirusTotal report screen, whose Install
+  button then passes it on to the installer. Local files are handed over with their real path;
+  files inside archives and on remote storage go as a content URI.
+- **Three modes, set on the UI page** under the new **APK files** section, “On tapping an APK”:
+  **Scan first** (the default), **Install directly** (exactly the behaviour from before, including
+  a remembered “Open with” default) and **Ask** (a dialog offering Scan or Install each time).
+- **Falls back by itself.** If the scanner is not installed, is an older build, or has its
+  VirusTotal screen switched off, a tap behaves as Install directly.
+- **“Scan with VirusTotal” in the file menu** — shown only on package files and only while the
+  scanner is available.
+- **The mode travels with Export / import** as its own category, “APK tap routing”.
+
+#### 📦 APKM bundles
+
+- **APKM bundles are recognised.** An `.apkm` file (APKMirror's bundle: a ZIP of `base.apk` plus
+  split APKs) gets the app's own icon and opens exactly as an APKS does — it is not browsed as a
+  ZIP.
+
+#### 🔧 Fixes & wording
+
+- “Staging folder” on the UI page now reads “Staging directory”.
+
 ## 1.7.5+005 — 2026-11-08
 
 ### New since 1.7.5+003

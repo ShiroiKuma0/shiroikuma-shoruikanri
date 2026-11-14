@@ -16,7 +16,7 @@ pinches out into a zoomable wall of the whole folder**, a **built-in audio mini-
 
 Installs **side-by-side** with the official Material Files (app ID `shiroikuma.shoruikanri`).
 
-**📥 Latest release: [`1.7.5+005`](https://github.com/ShiroiKuma0/shiroikuma-shoruikanri/releases/latest)** — [all releases & APK downloads »](https://github.com/ShiroiKuma0/shiroikuma-shoruikanri/releases)
+**📥 Latest release: [`1.7.5+007`](https://github.com/ShiroiKuma0/shiroikuma-shoruikanri/releases/latest)** — [all releases & APK downloads »](https://github.com/ShiroiKuma0/shiroikuma-shoruikanri/releases)
 
 </div>
 
@@ -132,8 +132,12 @@ Termux script, with one-tap share tiles.
 - **XAPK bundles, handled properly** — an XAPK shows the app's own icon in the listing instead of a
   blank file icon, and browses and extracts like the ZIP it actually is. Set a split-APK installer
   as its open-with default and a tap goes straight there; without one, a tap opens the bundle.
-- **APKS bundles show their app icon too** — the icon is read out of the bundle's base APK, and a
-  tap still hands the bundle to your split-APK installer.
+- **APKS and APKM bundles show their app icon too** — the icon is read out of the bundle's base
+  APK, and a tap still hands the bundle to your split-APK installer.
+- **Scan a package before installing it** — with 白い熊 応用管理 installed, a tap on an APK, XAPK,
+  APKS or APKM opens its VirusTotal report first, and its Install button carries on from there.
+  Choose Scan first, Install directly or Ask on the UI page; “Scan with VirusTotal” is also in
+  the file menu.
 - **“Exit app” in the drawer** — quit outright instead of backing out tab by tab: every tab closes
   and the app leaves recents, so the next launch starts fresh.
 - **Long-press a file for its full menu** — the same menu the overflow button gives, Select /
