@@ -80,7 +80,7 @@ import me.zhanghai.android.files.file.fileProviderUri
 import me.zhanghai.android.files.file.isApk
 import me.zhanghai.android.files.file.isAudio
 import me.zhanghai.android.files.file.isImage
-import me.zhanghai.android.files.file.isApks
+import me.zhanghai.android.files.file.isApksLike
 import me.zhanghai.android.files.file.isXapk
 import me.zhanghai.android.files.filejob.FileJobService
 import me.zhanghai.android.files.filelist.FileSortOptions.By
@@ -96,6 +96,7 @@ import me.zhanghai.android.files.provider.gocryptfs.isGocryptfsPath
 import me.zhanghai.android.files.provider.linux.isLinuxPath
 import me.zhanghai.android.files.settings.Settings
 import me.zhanghai.android.files.skui.SkGridStyleSheet
+import me.zhanghai.android.files.skui.SkApkRoute
 import me.zhanghai.android.files.skui.SkMaterialAlertDialogBuilder
 import me.zhanghai.android.files.skui.SkOpenWith
 import me.zhanghai.android.files.skui.SkOpenWithDialog
@@ -1603,12 +1604,18 @@ class FileListFragment : Fragment(), BreadcrumbLayout.Listener, FileListAdapter.
             }
             return
         }
+        // 白い熊 fork: a package file goes to the VirusTotal scanner first, by SkApkRoute's
+        // mode; the lambdas are what each type did before (and still does in INSTALL mode).
         if (file.mimeType.isApk) {
-            openApk(file)
+            routePackageFile(file) { openApk(file) }
             return
         }
         if (file.mimeType.isXapk) {
-            openXapk(file)
+            routePackageFile(file) { openXapk(file) }
+            return
+        }
+        if (file.mimeType.isApksLike) {
+            routePackageFile(file) { openFileWithIntent(file, false) }
             return
         }
         if (file.isListable) {
@@ -1670,6 +1677,46 @@ class FileListFragment : Fragment(), BreadcrumbLayout.Listener, FileListAdapter.
         openFileWithIntent(file, false)
     }
 
+    // 白い熊 fork: SkApkRoute decides what a tap on a package file does — consulted before any
+    // remembered open-with default, which [install] (the pre-routing behaviour) still honors.
+    // Whenever the scanner does not resolve, this is exactly [install].
+    private fun routePackageFile(file: FileItem, install: () -> Unit) {
+        when (SkApkRoute.mode) {
+            SkApkRoute.Mode.SCAN -> if (!startScan(file)) install()
+            SkApkRoute.Mode.INSTALL -> install()
+            SkApkRoute.Mode.ASK -> {
+                if (!SkApkRoute.isScannerAvailable(requireContext())) {
+                    install()
+                    return
+                }
+                SkMaterialAlertDialogBuilder(requireContext())
+                    .setTitle(file.name)
+                    .setMessage(R.string.sk_apk_route_ask_message)
+                    .setPositiveButton(R.string.sk_apk_route_ask_scan) { _, _ ->
+                        if (!startScan(file)) install()
+                    }
+                    .setNegativeButton(R.string.sk_apk_route_ask_install) { _, _ -> install() }
+                    .show()
+            }
+        }
+    }
+
+    // 白い熊 fork: send [file] to 応用管理's VirusTotal report screen. False when the scanner
+    // does not resolve, so the caller can fall back.
+    private fun startScan(file: FileItem): Boolean {
+        val intent = SkApkRoute.createScanIntent(requireContext(), file.path, file.mimeType)
+            ?: return false
+        startActivitySafe(intent)
+        return true
+    }
+
+    // 白い熊 fork: the file item menu's "Scan with VirusTotal".
+    override fun scanFile(file: FileItem) {
+        if (!startScan(file)) {
+            showToast(R.string.sk_apk_route_scanner_missing)
+        }
+    }
+
     private fun openApk(file: FileItem) {
         // 白い熊 fork: a default remembered in our open-with dialog takes precedence
         // over the install/view handling.
@@ -1715,7 +1762,8 @@ class FileListFragment : Fragment(), BreadcrumbLayout.Listener, FileListAdapter.
         val path = file.path
         // 白い熊 fork: an APKS opens exactly as before it had a type of its own - as a generic
         // file, so the split-APK installer remembered for that (or the system's pick) opens it.
-        val mimeType = if (file.mimeType.isApks) MimeType.GENERIC else file.mimeType
+        // (The same goes for an APKM.)
+        val mimeType = if (file.mimeType.isApksLike) MimeType.GENERIC else file.mimeType
         if (path.isArchivePath) {
             FileJobService.open(path, mimeType, withChooser, requireContext())
         } else {

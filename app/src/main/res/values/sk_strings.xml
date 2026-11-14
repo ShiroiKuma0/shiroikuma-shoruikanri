@@ -79,7 +79,7 @@
     <string name="sk_ui_group_speed_dial">New-item button</string>
     <string name="sk_ui_group_share">Share → Termux</string>
     <string name="sk_ui_share_one_target">One-tap share (single target; off = chooser)</string>
-    <string name="sk_ui_share_staging_dir">Staging folder</string>
+    <string name="sk_ui_share_staging_dir">Staging directory</string>
     <string name="sk_ui_share_staging_dir_help">When something is shared to a Termux target without a readable real path, it\'s copied here first, then passed to the script. Termux reads /storage/emulated/0/… directly.</string>
     <string name="sk_ui_reset_default">Default</string>
 
@@ -221,4 +221,17 @@
     <string name="sk_share_slot_4" translatable="false">白い熊 Termux ④</string>
     <string name="sk_share_slot_5" translatable="false">白い熊 Termux ⑤</string>
     <string name="sk_image_viewer_grid_subtitle">%1$d images</string>
+
+    <!-- 白い熊 fork: APK tap routing to 応用管理's VirusTotal scan (SkApkRoute). -->
+    <string name="sk_file_item_action_scan_virustotal">Scan with VirusTotal</string>
+    <string name="sk_apk_route_scan">Scan first</string>
+    <string name="sk_apk_route_install">Install directly</string>
+    <string name="sk_apk_route_ask">Ask</string>
+    <string name="sk_apk_route_ask_message">Scan this package with VirusTotal first, or install it directly?</string>
+    <string name="sk_apk_route_ask_scan">Scan</string>
+    <string name="sk_apk_route_ask_install">Install</string>
+    <string name="sk_apk_route_scanner_missing">応用管理’s VirusTotal scanner is not available.</string>
+    <string name="sk_ui_group_apk">APK files</string>
+    <string name="sk_ui_apk_route">On tapping an APK</string>
+    <string name="sk_eximport_cat_apk_route">APK tap routing</string>
 </resources>

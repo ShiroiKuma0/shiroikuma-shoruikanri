@@ -26,7 +26,7 @@ import me.zhanghai.android.files.compat.use
 import me.zhanghai.android.files.file.MimeType
 import me.zhanghai.android.files.file.asMimeType
 import me.zhanghai.android.files.file.isApk
-import me.zhanghai.android.files.file.isApks
+import me.zhanghai.android.files.file.isApksLike
 import me.zhanghai.android.files.file.isEpub
 import me.zhanghai.android.files.file.isImage
 import me.zhanghai.android.files.file.isMedia
@@ -125,8 +125,8 @@ class PathAttributesFetcher(
                     e.printStackTrace()
                 }
             }
-            // 白い熊 fork: an APKS carries its icon inside base.apk.
-            mimeType.isApks -> {
+            // 白い熊 fork: an APKS (or APKM) carries its icon inside base.apk.
+            mimeType.isApksLike -> {
                 try {
                     return apksIconFetcherFactory.create(path, options, imageLoader).fetch()
                 } catch (e: Exception) {

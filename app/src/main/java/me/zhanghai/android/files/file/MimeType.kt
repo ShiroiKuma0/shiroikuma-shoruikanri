@@ -67,6 +67,9 @@ value class MimeType(val value: String) : Parcelable {
         // only for its icon; it is opened as the generic type it was before, see
         // FileListFragment.openFileWithIntent.
         val APKS = "application/x-apks".asMimeType()
+        // 白い熊 fork: likewise APKM (APKMirror: a ZIP of base.apk plus split APKs, opened and
+        // given its icon exactly as an APKS is).
+        val APKM = "application/x-apkm".asMimeType()
         val TEXT_PLAIN = "text/plain".asMimeType()
         val GENERIC = "application/octet-stream".asMimeType()
 

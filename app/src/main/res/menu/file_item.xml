@@ -18,6 +18,11 @@
         android:id="@+id/action_open_with"
         android:title="@string/file_item_action_open_with" />
 
+    <!-- 白い熊 fork: package files only, and only while 応用管理's scanner resolves. -->
+    <item
+        android:id="@+id/action_sk_scan_virustotal"
+        android:title="@string/sk_file_item_action_scan_virustotal" />
+
     <item
         android:id="@+id/action_open_in_new_tab"
         android:title="@string/sk_file_item_action_open_in_new_tab" />

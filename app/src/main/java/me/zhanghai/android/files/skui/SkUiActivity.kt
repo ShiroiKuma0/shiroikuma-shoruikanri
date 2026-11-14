@@ -307,6 +307,28 @@ class SkUiActivity : AppActivity() {
         addValueRow(R.string.sk_ui_share_staging_dir, SkTermux.stagingDir, rowL1Px) { valueView ->
             showStagingDirDialog(valueView)
         }
+
+        // APK files: what a tap on an APK / XAPK / APKS / APKM does (SkApkRoute).
+        addSection(R.string.sk_ui_group_apk)
+        addValueRow(
+            R.string.sk_ui_apk_route, getString(SkApkRoute.mode.labelRes), rowL1Px
+        ) { valueView -> showApkRouteDialog(valueView) }
+    }
+
+    private fun showApkRouteDialog(valueView: TextView) {
+        val modes = SkApkRoute.Mode.entries
+        SkMaterialAlertDialogBuilder(this)
+            .setTitle(R.string.sk_ui_apk_route)
+            .setSingleChoiceItems(
+                modes.map { getString(it.labelRes) }.toTypedArray(),
+                modes.indexOf(SkApkRoute.mode)
+            ) { dialog, which ->
+                SkApkRoute.mode = modes[which]
+                valueView.text = getString(SkApkRoute.mode.labelRes)
+                dialog.dismiss()
+            }
+            .setNegativeButton(android.R.string.cancel, null)
+            .show()
     }
 
     // The Export/Import row's page status: the latest export found in the

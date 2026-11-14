@@ -113,7 +113,7 @@ There are no product flavors and no unit/instrumented tests in this repository.
 
 ## Development Backlog
 
-1. **Dual-pane mode** — two side-by-side panes on the tab foundation, MC-style.
+Nothing open. (Dual-pane mode was dropped by 白い熊 on 2026-11-14.)
 
 ### Done
 

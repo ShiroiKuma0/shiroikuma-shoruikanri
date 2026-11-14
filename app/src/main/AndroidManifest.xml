@@ -57,6 +57,8 @@
     <queries>
         <package android:name="shiroikuma.oyokanri" />
         <package android:name="shiroikuma.jiyusagyoban" />
+        <!-- 白い熊 fork: the installer at the end of the APK-vetting chain (SkApkRoute). -->
+        <package android:name="shiroikuma.universalinstaller" />
     </queries>
 
     <!-- Shizuku requires API 24. -->

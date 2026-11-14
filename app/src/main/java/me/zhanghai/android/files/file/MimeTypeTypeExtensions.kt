@@ -16,9 +16,17 @@ val MimeType.isXapk: Boolean
 val MimeType.isApks: Boolean
     get() = this == MimeType.APKS
 
-// 白い熊 fork: a ZIP of APKs (XAPK or APKS), shown with the app icon.
+// 白い熊 fork.
+val MimeType.isApkm: Boolean
+    get() = this == MimeType.APKM
+
+// 白い熊 fork: an APKS or an APKM — both a ZIP of base.apk plus splits, handled alike.
+val MimeType.isApksLike: Boolean
+    get() = isApks || isApkm
+
+// 白い熊 fork: a ZIP of APKs (XAPK, APKS or APKM), shown with the app icon.
 val MimeType.isApkBundle: Boolean
-    get() = isXapk || isApks
+    get() = isXapk || isApksLike
 
 // 白い熊 fork.
 val MimeType.isEpub: Boolean

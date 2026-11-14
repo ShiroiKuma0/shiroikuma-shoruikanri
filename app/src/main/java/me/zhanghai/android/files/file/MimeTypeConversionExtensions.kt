@@ -63,7 +63,9 @@ private val extensionToMimeTypeOverrideMap = mapOf(
     // "application/octet-stream", which gets no icon thumbnail and no archive handling.
     "xapk" to "application/x-xapk",
     // 白い熊 fork: APKS, see MimeType.APKS.
-    "apks" to "application/x-apks"
+    "apks" to "application/x-apks",
+    // 白い熊 fork: APKM, see MimeType.APKM.
+    "apkm" to "application/x-apkm"
 ).mapValues { it.value.asMimeType() }
 
 fun MimeType.Companion.forSpecialPosixFileType(type: PosixFileType): MimeType? =

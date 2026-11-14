@@ -38,6 +38,7 @@ import me.zhanghai.android.files.file.formatShort
 import me.zhanghai.android.files.file.iconRes
 import me.zhanghai.android.files.file.isApk
 import me.zhanghai.android.files.file.isApkBundle
+import me.zhanghai.android.files.skui.SkApkRoute
 import me.zhanghai.android.files.provider.archive.isArchivePath
 import me.zhanghai.android.files.provider.common.PosixFileAttributes
 import me.zhanghai.android.files.provider.common.isEncrypted
@@ -267,6 +268,10 @@ class FileListAdapter(
                 }
             )
         }
+        // 白い熊 fork: hand a package file to 応用管理's VirusTotal scan.
+        menu.findItem(R.id.action_sk_scan_virustotal).isVisible = !hasPickOptions &&
+            SkApkRoute.isPackageFile(file.mimeType) &&
+            SkApkRoute.isScannerAvailable(anchor.context)
         menu.findItem(R.id.action_open_in_new_tab).isVisible = !hasPickOptions && file.isListable
         menu.findItem(R.id.action_cut).isVisible = !hasPickOptions && !isReadOnly
         menu.findItem(R.id.action_copy).apply {
@@ -286,6 +291,10 @@ class FileListAdapter(
                 }
                 R.id.action_open_with -> {
                     listener.openFileWith(file)
+                    true
+                }
+                R.id.action_sk_scan_virustotal -> {
+                    listener.scanFile(file)
                     true
                 }
                 R.id.action_open_in_new_tab -> {
@@ -644,6 +653,8 @@ class FileListAdapter(
         fun openFile(file: FileItem)
         fun openFileWith(file: FileItem)
         fun openInNewTab(file: FileItem)
+        // 白い熊 fork.
+        fun scanFile(file: FileItem)
         fun cutFile(file: FileItem)
         fun copyFile(file: FileItem)
         fun confirmDeleteFile(file: FileItem)

@@ -74,7 +74,9 @@ object SkEximport {
         FOLDER_VIEWS("folder_views", R.string.sk_eximport_cat_folders),
         OPEN_TABS("open_tabs", R.string.sk_eximport_cat_tabs),
         SHARE("share", R.string.sk_eximport_cat_share),
-        OPEN_WITH("open_with", R.string.sk_eximport_cat_open_with);
+        OPEN_WITH("open_with", R.string.sk_eximport_cat_open_with),
+        // 白い熊 fork: the APK tap routing (SkApkRoute).
+        APK_ROUTE("apk_route", R.string.sk_eximport_cat_apk_route);
 
         companion object {
             fun byId(id: String): Cat? = entries.firstOrNull { it.id == id }
@@ -192,6 +194,7 @@ object SkEximport {
                     .put("termux", prefsToJson(namedPrefs("sk_termux")))
                     .put("share", prefsToJson(namedPrefs("sk_share")))
             Cat.OPEN_WITH -> prefsToJson(namedPrefs("sk_open_with"))
+            Cat.APK_ROUTE -> prefsToJson(namedPrefs(SkApkRoute.PREFS_NAME))
         }
 
     private fun exportFonts(zip: ZipOutputStream, isCancelled: (() -> Boolean)? = null) {
@@ -293,6 +296,7 @@ object SkEximport {
                 jsonToPrefs(namedPrefs("sk_termux"), json.optJSONObject("termux")) +
                     jsonToPrefs(namedPrefs("sk_share"), json.optJSONObject("share"))
             Cat.OPEN_WITH -> jsonToPrefs(namedPrefs("sk_open_with"), json)
+            Cat.APK_ROUTE -> jsonToPrefs(namedPrefs(SkApkRoute.PREFS_NAME), json)
         }
 
     private fun importFonts(files: Map<String, ByteArray>) {
@@ -331,6 +335,7 @@ object SkEximport {
             namedPrefs("sk_termux"),
             namedPrefs("sk_share"),
             namedPrefs("sk_open_with"),
+            namedPrefs(SkApkRoute.PREFS_NAME),
             defaultSharedPreferences,
             pathPrefs()
         ).forEach { runCatching { it.edit().commit() } }
