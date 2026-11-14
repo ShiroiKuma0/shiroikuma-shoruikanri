@@ -6,6 +6,42 @@ plus our build increment (e.g. `1.7.5+001`; the counter is zero-padded to three 
 `1.7.4+050` onwards, so builds sort in order). This fork installs side-by-side with upstream under
 the app ID `shiroikuma.shoruikanri`.
 
+## 1.7.5+009 — 2026-11-14
+
+### New since 1.7.5+008
+
+Built on upstream Material Files **1.7.5**.
+
+#### 🎨 UI & theming — the black-yellow theme, everywhere
+
+- **Every button is a pill.** Fully round, an accent frame, the background showing through — never
+  filled and never bare text. The main action of a block has a thick 3 dp frame and bold text;
+  every other action a thin 1.25 dp frame and normal weight.
+- **Dialog buttons are pills in every dialog of the app.** The positive button (OK, Save, Delete,
+  Rename…) is the main pill; Cancel and neutral buttons are thin pills. Button text is no longer
+  all caps.
+- **The speed dial's “File” and “Directory” are two pills**, each around its label and icon, in
+  place of one box around both. The whole pill is tappable, not only the label and the icon.
+- **Other buttons follow:** the Save / Cancel / Remove bar of the FTP, SFTP, SMB and WebDAV server
+  screens (Save is the main pill) and the Remount button of the file-job error dialog.
+- **Switches are outlined pills with a solid dot** — on the right and in the accent when on, on the
+  left and in an opaque darker yellow (`#8C8C00`) when off. Nothing is filled in either state. They
+  replace the stock switch on the 白い熊 UI page, in the per-directory style sheet and in the app's
+  settings screens. The off colour is a new settable slot, **Switch, off**, under Foundation.
+- **白い熊 UI page:** action pills are as wide as their label instead of spanning the line, and
+  **Regenerate** beside the automation token is a pill instead of bold text.
+- **Sheets:** **Reset to defaults** in the per-directory style sheet and **Open as…** in the
+  open-with dialog are pills. In Export / Import the main action (Export, OK, Restart now) is thick
+  and bold, the others thin.
+- Ripples inside pills now fill the whole pill instead of only its frame.
+
+#### ✏️ Wording
+
+- **“Directory” instead of “folder”** in every English string: New directory, Directories first,
+  Only for this directory, Parent Directory, Default directory, Standard directories, Bookmark
+  directories, Root directory, Per-directory view & sort, and the copy / move / merge / delete
+  messages.
+
 ## 1.7.5+008 — 2026-11-14
 
 ### New since 1.7.5+007

@@ -9,14 +9,14 @@
 **A black-and-yellow, tab-driven file manager — with encrypted gocryptfs volumes built right in.**
 
 A fork of [Material Files](https://github.com/zhanghai/MaterialFiles) with **major additions**:
-in-app **gocryptfs** encrypted volumes (no FUSE, no root), **multi-folder tabs**, a full
-**black/yellow theme system**, **six listing views** with per-folder styling, an **image viewer that
-pinches out into a zoomable wall of the whole folder**, a **built-in audio mini-player**, a **custom open-with chooser**, **full settings export/import** that can be
+in-app **gocryptfs** encrypted volumes (no FUSE, no root), **multi-directory tabs**, a full
+**black/yellow theme system**, **six listing views** with per-directory styling, an **image viewer that
+pinches out into a zoomable wall of the whole directory**, a **built-in audio mini-player**, a **custom open-with chooser**, **full settings export/import** that can be
 **backed up with its data onto a clean phone**, and deep **Termux / share** integration.
 
 Installs **side-by-side** with the official Material Files (app ID `shiroikuma.shoruikanri`).
 
-**📥 Latest release: [`1.7.5+008`](https://github.com/ShiroiKuma0/shiroikuma-shoruikanri/releases/latest)** — [all releases & APK downloads »](https://github.com/ShiroiKuma0/shiroikuma-shoruikanri/releases)
+**📥 Latest release: [`1.7.5+009`](https://github.com/ShiroiKuma0/shiroikuma-shoruikanri/releases/latest)** — [all releases & APK downloads »](https://github.com/ShiroiKuma0/shiroikuma-shoruikanri/releases)
 
 </div>
 
@@ -26,16 +26,16 @@ Installs **side-by-side** with the official Material Files (app ID `shiroikuma.s
 
 ## 🔒 Encrypted gocryptfs volumes, in-app
 
-Open, browse, read and write **gocryptfs** encrypted volumes like any other folder — **no FUSE, no
+Open, browse, read and write **gocryptfs** encrypted volumes like any other directory — **no FUSE, no
 root**. A JNI-backed file provider over `libgocryptfs` does the crypto in-process. On any cipher
 directory a padlock appears next to the address bar: tap it, enter the password, and you’re inside
 the decrypted tree; a closing padlock locks the volume again. Your encrypted documents stay encrypted
 on disk and never leave the device.
 
-## 🗂 Multi-folder tabs
+## 🗂 Multi-directory tabs
 
-Keep several folders open at once in a stacked **paper-folder tab bar**. **Drag** a tab to reorder,
-**swipe** the file area to flip between tabs, and **long-press** a tab to pin its folder to your
+Keep several directories open at once in a stacked **paper-folder tab bar**. **Drag** a tab to reorder,
+**swipe** the file area to flip between tabs, and **long-press** a tab to pin its directory to your
 favorites. The whole tab set — paths and selection — **survives restarts, reboots and app updates**.
 
 ## 🎨 Black & yellow, themed to the pixel
@@ -46,15 +46,15 @@ it opens. A dedicated **UI page** lets you retune it: per-element **colours** (p
 hex), **fonts** (import your own `.ttf`/`.otf`, set family/weight/size), icon size and spacing — all
 with live previews.
 
-## 🔭 Six listing views + per-folder styling
+## 🔭 Six listing views + per-directory styling
 
-**List, Grid, Compact, Column, Detailed** and **Wrapped** views — and each **folder remembers its own
+**List, Grid, Compact, Column, Detailed** and **Wrapped** views — and each **directory remembers its own
 view**, restored as you navigate (Back included), defaulting to List. **File names are shown in
 full**: a long name wraps onto as many lines as it needs instead of losing its middle to a `…`, so
 build numbers, dates and episode numbers stay readable. Style the grid to taste — image
 size, padding down to zero, a name-over-photo overlay for **seamless photo walls**, or no names at
 all — and set **row/column separators** as a clean lattice. Every tweak can be a **global default**
-or a **per-folder override** from a sheet on the address line, remembered per path.
+or a **per-directory override** from a sheet on the address line, remembered per path.
 
 ## 📂 A smarter Open-with
 
@@ -65,16 +65,16 @@ installers even bypass the APK prompt. No more wrestling with the system chooser
 ## 💾 Full settings export / import
 
 Everything settable in the app — theme colours and fonts (including your imported font files),
-separators and grid styles, app settings, storages and bookmarks, per-folder views and sorting, open
+separators and grid styles, app settings, storages and bookmarks, per-directory views and sorting, open
 tabs, share targets and open-with defaults — exports to a **single ZIP of plain JSON**, split into
-**selectable categories**. Set an export folder once and it's **one-tap export** from then on, with
+**selectable categories**. Set an export directory once and it's **one-tap export** from then on, with
 the latest export shown right on the UI page. Import merges category-by-category — take a whole
 setup, or just the theme — and never wipes what it doesn't touch.
 
 And it runs **headlessly** too: a sister app's backup task can trigger the very same export — pick
-the target folder and the categories, watch **real counts** stream back as it writes
+the target directory and the categories, watch **real counts** stream back as it writes
 (`区分 3/8 — App settings`, never a percentage), and get the path and exact size in reply. A long
-export can be **stopped from where it was started**, and a cancelled one leaves the backup folder
+export can be **stopped from where it was started**, and a cancelled one leaves the backup directory
 exactly as it found it. Automation ships **on**, with an optional **authorization token** for when
 you'd rather it were closed.
 
@@ -88,15 +88,15 @@ a rooted full-app restore would give.
 It works on a phone where **nothing has been configured yet**, which is the whole point: the backup
 app is identified by its **package name, its uid and its pinned signing certificate**, so there is
 no secret to have pasted beforehand and nothing to lose in the wipe. The data moves through a **file
-descriptor the caller opens** rather than a folder path — so it lands inside the encrypted, checksummed
+descriptor the caller opens** rather than a directory path — so it lands inside the encrypted, checksummed
 backup instead of beside it, and this app needs **no storage permission at all** on that route.
 
 
-## 🖼 Images: flick through, then pinch out to the whole folder
+## 🖼 Images: flick through, then pinch out to the whole directory
 
 Tap a PNG or JPEG and it opens in the **built-in viewer**, not whatever gallery the phone defaults
-to — so a flick left or right moves to the **next image in this folder**, in the list's own order.
-Pinch in and the picture shrinks into a **wall of every image in the folder**: zoom it smoothly
+to — so a flick left or right moves to the **next image in this directory**, in the list's own order.
+Pinch in and the picture shrinks into a **wall of every image in the directory**: zoom it smoothly
 anywhere from one image to the whole lot, so you can sit at one-and-a-bit images with the
 neighbour peeking in, and **drag the wall in any direction**. The wall reshapes itself to the
 screen — a strip of a few pictures, or rows of many on a big unfolded display. Tap any image (or
@@ -121,7 +121,7 @@ Termux script, with one-tap share tiles.
 
 ## 🔤 Power-user touches
 
-- **“Name (literal)” sort** — a per-folder mode that orders digit runs by character instead of
+- **“Name (literal)” sort** — a per-directory mode that orders digit runs by character instead of
   numeric magnitude, for when you want strict lexicographic order.
 - **Paste from the top toolbar** — the pending paste sits top-right where Copy/Cut were, not in a
   bottom bar. **Back keeps your copy armed** (it just navigates the filesystem); long-press the
