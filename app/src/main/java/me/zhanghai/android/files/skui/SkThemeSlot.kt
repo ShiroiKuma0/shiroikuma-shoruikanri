@@ -39,6 +39,8 @@ enum class SkThemeSlot(
     ACCENT("sk_accent", SkThemeGroup.FOUNDATION, R.string.sk_ui_accent, isFoundation = true),
     TEXT("sk_text", SkThemeGroup.FOUNDATION, R.string.sk_ui_text, isFoundation = true),
     TEXT_SECONDARY("sk_text_secondary", SkThemeGroup.FOUNDATION, R.string.sk_ui_text_secondary, isFoundation = true),
+    // A switch that is off: an opaque darker yellow, never a faded one.
+    SWITCH_OFF("sk_switch_off", SkThemeGroup.FOUNDATION, R.string.sk_ui_switch_off),
 
     // Toolbar (app bar)
     TOOLBAR_BACKGROUND("sk_toolbar_background", SkThemeGroup.TOOLBAR, R.string.sk_ui_toolbar_background),
@@ -99,6 +101,10 @@ private fun skDefault(slot: SkThemeSlot): Int = when (slot) {
     SkThemeSlot.ACCENT -> SkUi.PALETTE_YELLOW
     SkThemeSlot.TEXT -> SkUi.PALETTE_YELLOW
     SkThemeSlot.TEXT_SECONDARY -> skColor(SkThemeSlot.TEXT).withAlphaFraction(0.7f)
+    // 55 % of the way from the background to the accent: #8C8C00 on the default palette.
+    SkThemeSlot.SWITCH_OFF -> ColorUtils.blendARGB(
+        skColor(SkThemeSlot.BACKGROUND), skColor(SkThemeSlot.ACCENT), 0.55f
+    ) or 0xFF000000.toInt()
 
     // Toolbar
     SkThemeSlot.TOOLBAR_BACKGROUND -> skColor(SkThemeSlot.BACKGROUND)

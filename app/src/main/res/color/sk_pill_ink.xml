@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!-- 白い熊 fork: the frame and text of a pill — the accent, at 38 % when disabled. -->
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:alpha="0.38" android:color="@color/sk_yellow" android:state_enabled="false" />
+    <item android:color="@color/sk_yellow" />
+</selector>

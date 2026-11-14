@@ -19,7 +19,6 @@ import android.widget.SeekBar
 import android.widget.TextView
 import androidx.annotation.StringRes
 import androidx.appcompat.content.res.AppCompatResources
-import androidx.appcompat.widget.SwitchCompat
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import java8.nio.file.Path
 import me.zhanghai.android.files.R
@@ -132,14 +131,18 @@ class SkGridStyleSheet(
             TextView(activity).apply {
                 text = activity.getString(R.string.sk_grid_style_reset)
                 textSize = 15f
-                setTextColor(skColor(SkThemeSlot.ACCENT))
-                gravity = Gravity.END
-                setPadding(dp(8), dp(12), dp(8), dp(4))
+                applySkPill()
                 setOnClickListener {
                     onReset()
                     onChanged()
                     dialog.dismiss()
                 }
+            },
+            LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT
+            ).apply {
+                gravity = Gravity.END
+                topMargin = dp(10)
             }
         )
     }
@@ -263,7 +266,7 @@ class SkGridStyleSheet(
                     LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f)
             }
         )
-        val switch = SwitchCompat(activity).apply { isChecked = checked }
+        val switch = SkSwitch(activity).apply { isChecked = checked }
         switch.setOnCheckedChangeListener { _, isChecked -> onToggle(isChecked) }
         row.addView(switch)
         row.setOnClickListener { switch.toggle() }

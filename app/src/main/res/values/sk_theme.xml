@@ -13,6 +13,8 @@
     <color name="sk_yellow_tertiary">#80FFFF00</color>
     <color name="sk_yellow_hint">#80FFFF00</color>
     <color name="sk_yellow_divider">#33FFFF00</color>
+    <!-- The ripple inside a pill: the accent at 30 %. -->
+    <color name="sk_pill_ripple">#4DFFFF00</color>
 
     <style name="ThemeOverlay.Sk" parent="">
         <item name="android:windowBackground">@color/sk_black</item>
@@ -65,10 +67,56 @@
              background via their window; Material dialogs get it from
              SkMaterialAlertDialogBuilder. -->
         <item name="alertDialogTheme">@style/ThemeOverlay.Sk.AlertDialog</item>
+        <!-- Every button is a pill, never filled and never bare text: the main
+             action of a block (the positive button) thick and bold, every
+             other one thin. -->
+        <item name="materialButtonStyle">@style/Widget.Sk.Pill</item>
+        <item name="materialButtonOutlinedStyle">@style/Widget.Sk.Pill</item>
+        <item name="borderlessButtonStyle">@style/Widget.Sk.Pill</item>
+        <item name="buttonBarButtonStyle">@style/Widget.Sk.Pill</item>
+        <item name="buttonBarPositiveButtonStyle">@style/Widget.Sk.Pill.Main</item>
+        <item name="buttonBarNegativeButtonStyle">@style/Widget.Sk.Pill</item>
+        <item name="buttonBarNeutralButtonStyle">@style/Widget.Sk.Pill</item>
     </style>
 
     <style name="ThemeOverlay.Sk.AlertDialog" parent="@style/ThemeOverlay.MaterialComponents.Dialog.Alert">
         <item name="android:windowBackground">@drawable/sk_dialog_background</item>
+        <item name="buttonBarPositiveButtonStyle">@style/Widget.Sk.Pill.Main</item>
+        <item name="buttonBarNegativeButtonStyle">@style/Widget.Sk.Pill</item>
+        <item name="buttonBarNeutralButtonStyle">@style/Widget.Sk.Pill</item>
+    </style>
+
+    <!-- Layered by SkMaterialAlertDialogBuilder over the Material dialog theme,
+         which would otherwise put its own bare-text buttons back. -->
+    <style name="ThemeOverlay.Sk.MaterialAlertDialog" parent="">
+        <item name="buttonBarPositiveButtonStyle">@style/Widget.Sk.Pill.Main</item>
+        <item name="buttonBarNegativeButtonStyle">@style/Widget.Sk.Pill</item>
+        <item name="buttonBarNeutralButtonStyle">@style/Widget.Sk.Pill</item>
+    </style>
+
+    <!-- The pill: fully round, an accent frame, the background showing through
+         (see skui/SkPill.kt for the same look on views built in code). -->
+    <style name="Widget.Sk.Pill" parent="@style/Widget.MaterialComponents.Button.OutlinedButton">
+        <item name="android:textColor">@color/sk_pill_ink</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="android:fontFamily">sans-serif</item>
+        <item name="android:textStyle">normal</item>
+        <item name="android:letterSpacing">0</item>
+        <item name="android:minWidth">0dp</item>
+        <item name="android:paddingLeft">18dp</item>
+        <item name="android:paddingRight">18dp</item>
+        <item name="android:layout_marginStart">8dp</item>
+        <item name="backgroundTint">@android:color/transparent</item>
+        <item name="strokeColor">@color/sk_pill_ink</item>
+        <item name="strokeWidth">1.25dp</item>
+        <item name="cornerRadius">100dp</item>
+        <item name="rippleColor">@color/sk_pill_ripple</item>
+        <item name="iconTint">@color/sk_pill_ink</item>
+    </style>
+
+    <style name="Widget.Sk.Pill.Main">
+        <item name="android:textStyle">bold</item>
+        <item name="strokeWidth">3dp</item>
     </style>
 
     <style name="Widget.Sk.PopupMenu" parent="@style/Widget.MaterialComponents.PopupMenu">

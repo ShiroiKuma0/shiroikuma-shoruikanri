@@ -24,7 +24,6 @@ import android.widget.SeekBar
 import android.widget.TextView
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.StringRes
-import androidx.appcompat.widget.SwitchCompat
 import androidx.core.view.isVisible
 import me.zhanghai.android.files.R
 import me.zhanghai.android.files.app.AppActivity
@@ -579,7 +578,7 @@ class SkUiActivity : AppActivity() {
         binding.holder.addView(row)
     }
 
-    // An action / navigation row: a full-width outlined pill holding the label
+    // An action / navigation row: an outlined pill as wide as its label
     // (› when it opens something; 3 dp and bold for the main action of its
     // section, else 1.25 dp), its explanation beneath in the secondary color.
     // Only the pill is the touch target.
@@ -601,16 +600,7 @@ class SkUiActivity : AppActivity() {
             orientation = LinearLayout.HORIZONTAL
             gravity = Gravity.CENTER_VERTICAL
             setPaddingRelative(dp(18), dp(9), dp(16), dp(9))
-            val frame = GradientDrawable().apply {
-                setColor(Color.TRANSPARENT)
-                setStroke(
-                    maxOf(1, Math.round((if (main) 3f else 1.25f) * densityPx)), ink
-                )
-                cornerRadius = dp(50).toFloat()
-            }
-            background = RippleDrawable(
-                ColorStateList.valueOf((ink and 0x00FFFFFF) or 0x33000000), frame, null
-            )
+            background = skPillBackground(densityPx, ink, main = main)
             setOnClickListener { onClick() }
         }
         pill.addView(
@@ -619,8 +609,6 @@ class SkUiActivity : AppActivity() {
                 textSize = 16f
                 setTextColor(ink)
                 if (main) setTypeface(typeface, android.graphics.Typeface.BOLD)
-                layoutParams =
-                    LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f)
             }
         )
         if (opens) {
@@ -638,9 +626,10 @@ class SkUiActivity : AppActivity() {
                 }
             )
         }
+        // The pill hugs its label — never stretched across the line.
         row.addView(
             pill, LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT
+                LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT
             )
         )
         if (!summary.isNullOrEmpty()) {
@@ -665,7 +654,7 @@ class SkUiActivity : AppActivity() {
     ) {
         val row = makeRow(indent)
         row.addView(makeLabelColumn(labelRes, descriptionRes))
-        val switch = SwitchCompat(this).apply {
+        val switch = SkSwitch(this).apply {
             isChecked = checked
             minHeight = 0
             minimumHeight = 0
@@ -692,10 +681,12 @@ class SkUiActivity : AppActivity() {
             TextView(this).apply {
                 text = getString(R.string.sk_automation_token_regenerate)
                 textSize = 14f
-                setTypeface(typeface, android.graphics.Typeface.BOLD)
-                setTextColor(skColor(SkThemeSlot.ACCENT))
-                setPaddingRelative(dp(16), dp(2), dp(4), dp(2))
-                setBackgroundResource(android.R.drawable.list_selector_background)
+                applySkPill()
+                setPadding(dp(14), dp(5), dp(14), dp(5))
+                layoutParams = LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.WRAP_CONTENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT
+                ).apply { marginStart = dp(12) }
                 setOnClickListener { confirmRegenerateToken(valueView) }
             }
         )

@@ -1,7 +1,7 @@
 /*
  * 白い熊 fork (skui): drop-in replacement for MaterialAlertDialogBuilder that
  * gives every dialog the 白い熊 look — solid black background with a yellow
- * border (the text colors come from the theme overlay).
+ * border and pill buttons (the text colors come from the theme overlay).
  */
 
 package me.zhanghai.android.files.skui
@@ -14,7 +14,15 @@ import me.zhanghai.android.files.R
 class SkMaterialAlertDialogBuilder @JvmOverloads constructor(
     context: Context,
     overrideThemeResId: Int = 0
-) : MaterialAlertDialogBuilder(context, overrideThemeResId) {
+) : MaterialAlertDialogBuilder(
+    context,
+    // The dialog buttons are pills: an overlay on top of the Material dialog theme.
+    if (overrideThemeResId == 0 && SkUi.isSkThemeEnabled) {
+        R.style.ThemeOverlay_Sk_MaterialAlertDialog
+    } else {
+        overrideThemeResId
+    }
+) {
     init {
         // Material insets every dialog 80 dp from the top and the bottom of its window. With the
         // keyboard up on a short screen that leaves less height than title + text field + buttons

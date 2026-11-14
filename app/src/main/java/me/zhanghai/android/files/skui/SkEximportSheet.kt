@@ -153,7 +153,7 @@ class SkEximportSheet(
             }
         )
         buttons.addView(
-            pillButton(activity.getString(R.string.sk_eximport_export)).apply {
+            pillButton(activity.getString(R.string.sk_eximport_export), main = true).apply {
                 setOnClickListener { onExportClicked() }
             }
         )
@@ -297,7 +297,7 @@ class SkEximportSheet(
             activity.getString(R.string.sk_eximport_export_done_body, fileName)
         ) { infoDialog, buttons ->
             buttons.addView(
-                pillButton(activity.getString(android.R.string.ok)).apply {
+                pillButton(activity.getString(android.R.string.ok), main = true).apply {
                     setOnClickListener {
                         infoDialog.dismiss()
                         closeChain()
@@ -324,7 +324,7 @@ class SkEximportSheet(
                 }
             )
             buttons.addView(
-                pillButton(activity.getString(R.string.sk_eximport_restart_now)).apply {
+                pillButton(activity.getString(R.string.sk_eximport_restart_now), main = true).apply {
                     setOnClickListener { SkEximport.restartApp(activity) }
                 }
             )
@@ -404,27 +404,11 @@ class SkEximportSheet(
             setPadding(dp(8), dp(7), 0, dp(7))
         }
 
-    // An ArcaneChat-style round pill: black fill, thin accent stroke, accent
-    // text, accent ripple.
-    private fun pillButton(label: String): Button =
+    // A pill (see SkPill.kt): never filled; thick and bold for the main action
+    // of its row, thin otherwise.
+    private fun pillButton(label: String, main: Boolean = false): Button =
         Button(activity).apply {
             text = label
-            isAllCaps = false
-            setTextColor(accent)
-            background = RippleDrawable(
-                ColorStateList.valueOf((accent and 0x00FFFFFF) or 0x33000000),
-                GradientDrawable().apply {
-                    cornerRadius = 50 * density
-                    setColor(backgroundColor)
-                    setStroke((1.5f * density).toInt(), accent)
-                },
-                null
-            )
-            stateListAnimator = null
-            minWidth = 0
-            minimumWidth = 0
-            minHeight = 0
-            minimumHeight = 0
-            setPadding(dp(20), dp(8), dp(20), dp(8))
+            applySkPill(main, accent, backgroundColor)
         }
 }

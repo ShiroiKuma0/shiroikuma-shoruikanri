@@ -6,7 +6,8 @@
   -->
 
 <!-- @see @androidx.preference:preference:layout/preference_widget_switch_compat -->
-<com.google.android.material.materialswitch.MaterialSwitch
+<!-- 白い熊 fork: the outlined-pill switch (a SwitchCompat; stock look with the theme off). -->
+<me.zhanghai.android.files.skui.SkSwitch
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/switchWidget"
     android:layout_width="wrap_content"

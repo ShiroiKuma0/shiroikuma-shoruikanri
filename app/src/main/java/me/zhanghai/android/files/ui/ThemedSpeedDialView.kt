@@ -14,6 +14,7 @@ import android.content.Context
 import android.content.res.ColorStateList
 import android.graphics.Canvas
 import android.graphics.Color
+import android.graphics.Typeface
 import android.graphics.drawable.Drawable
 import android.graphics.drawable.GradientDrawable
 import android.graphics.drawable.RotateDrawable
@@ -36,6 +37,7 @@ import me.zhanghai.android.files.compat.foregroundCompat
 import me.zhanghai.android.files.compat.setTextAppearanceCompat
 import me.zhanghai.android.files.skui.SkThemeSlot
 import me.zhanghai.android.files.skui.skColor
+import me.zhanghai.android.files.skui.skPillFrame
 import me.zhanghai.android.files.util.ParcelableState
 import me.zhanghai.android.files.util.asColor
 import me.zhanghai.android.files.util.dpToDimensionPixelSize
@@ -51,15 +53,12 @@ class ThemedSpeedDialView : SpeedDialView {
 
     private var mainFabAnimator: Animator? = null
 
-    // 白い熊 fork: the opened action items read as one dialog — a black box with a single
-    // yellow frame drawn around all of them, labels and mini buttons alike, like the audio
-    // mini-player's box. The main FAB stays outside it: it's the button that opens this.
-    private val skFrameDrawable = GradientDrawable().apply {
-        shape = GradientDrawable.RECTANGLE
-        cornerRadius = 12 * resources.displayMetrics.density
-    }
+    // 白い熊 fork: every opened action item is a pill — an outlined, never filled, fully round
+    // frame around its label and its icon together (black-yellow theme: every action is a
+    // pill). The items are equals, so each gets the thin frame and normal-weight text.
+    private var skPillDrawable: GradientDrawable? = null
 
-    // 0 while closed, 1 while open — fades the frame in and out with the items.
+    // 0 while closed, 1 while open — fades the pills in and out with the items.
     private var skFrameFraction = 0f
 
     constructor(context: Context) : super(context)
@@ -128,40 +127,69 @@ class ThemedSpeedDialView : SpeedDialView {
         this.onChangeListener = onChangeListener
     }
 
-    // 白い熊 fork: (re)read the configured slot colors into the dialog frame. Called again
-    // whenever the UI page changes a slot.
+    // 白い熊 fork: (re)read the configured slot colors into the pills and their items. Called
+    // again whenever the UI page changes a slot.
     fun applySkStyle() {
-        skFrameDrawable.setColor(skColor(SkThemeSlot.FAB_BACKGROUND))
-        skFrameDrawable.setStroke(
-            resources.displayMetrics.density.toInt().coerceAtLeast(1),
-            skColor(SkThemeSlot.FAB_ICON)
+        skPillDrawable = skPillFrame(
+            resources.displayMetrics.density, skColor(SkThemeSlot.FAB_ICON),
+            skColor(SkThemeSlot.FAB_BACKGROUND), false
         )
+        for (index in 0 until childCount) {
+            (getChildAt(index) as? FabWithLabelView)?.applySkItemStyle()
+        }
         invalidate()
     }
 
+    // The label and the icon sit inside the pill drawn behind them, so neither keeps a
+    // background, a card or a shadow of its own.
+    private fun FabWithLabelView.applySkItemStyle() {
+        val ink = skColor(SkThemeSlot.FAB_ICON)
+        fab.apply {
+            backgroundTintList = ColorStateList.valueOf(Color.TRANSPARENT)
+            imageTintList = ColorStateList.valueOf(ink)
+            compatElevation = 0f
+        }
+        labelBackground.apply {
+            setCardBackgroundColor(Color.TRANSPARENT)
+            cardElevation = 0f
+            useCompatPadding = false
+            setContentPadding(0, 0, 0, 0)
+            foregroundCompat = null
+            (getChildAt(0) as? TextView)?.apply {
+                setTextColor(ink)
+                typeface = Typeface.create(Typeface.SANS_SERIF, Typeface.NORMAL)
+            }
+        }
+    }
+
     override fun dispatchDraw(canvas: Canvas) {
-        drawSkFrame(canvas)
+        drawSkPills(canvas)
 
         super.dispatchDraw(canvas)
     }
 
-    // 白い熊 fork: one rounded frame around the union of every action item's label chip and
-    // mini button. The item views themselves are wider than their content — the mini fabs
-    // carry 20dp side margins — so the box is measured from the content views, not from the
-    // rows, and then padded out evenly.
-    private fun drawSkFrame(canvas: Canvas) {
+    // 白い熊 fork: one pill per action item, around the union of its label and its mini button.
+    // The item views themselves are wider than their content — the mini fabs carry 20dp side
+    // margins — so each pill is measured from the content views, not from the row.
+    private fun drawSkPills(canvas: Canvas) {
+        val pillDrawable = skPillDrawable ?: return
         if (skFrameFraction <= 0f) {
             return
         }
-        var left = Int.MAX_VALUE
-        var top = Int.MAX_VALUE
-        var right = Int.MIN_VALUE
-        var bottom = Int.MIN_VALUE
+        val paddingStart = context.dpToDimensionPixelSize(18)
+        val paddingEnd = context.dpToDimensionPixelSize(6)
+        val paddingVertical = context.dpToDimensionPixelSize(2)
+        val isRtl = layoutDirection == LAYOUT_DIRECTION_RTL
+        pillDrawable.alpha = (255 * skFrameFraction).toInt()
         for (index in 0 until childCount) {
             val itemView = getChildAt(index) as? FabWithLabelView ?: continue
             if (itemView.visibility != VISIBLE) {
                 continue
             }
+            var left = Int.MAX_VALUE
+            var top = Int.MAX_VALUE
+            var right = Int.MIN_VALUE
+            var bottom = Int.MIN_VALUE
             for (contentView in arrayOf<View>(itemView.labelBackground, itemView.fab)) {
                 if (contentView.visibility != VISIBLE) {
                     continue
@@ -171,14 +199,16 @@ class ThemedSpeedDialView : SpeedDialView {
                 right = maxOf(right, itemView.left + contentView.right)
                 bottom = maxOf(bottom, itemView.top + contentView.bottom)
             }
+            if (left > right || top > bottom) {
+                continue
+            }
+            // The label is on the start side, the icon on the end side.
+            pillDrawable.setBounds(
+                left - (if (isRtl) paddingEnd else paddingStart), top - paddingVertical,
+                right + (if (isRtl) paddingStart else paddingEnd), bottom + paddingVertical
+            )
+            pillDrawable.draw(canvas)
         }
-        if (left > right || top > bottom) {
-            return
-        }
-        val padding = context.dpToDimensionPixelSize(12)
-        skFrameDrawable.alpha = (255 * skFrameFraction).toInt()
-        skFrameDrawable.setBounds(left - padding, top - padding, right + padding, bottom + padding)
-        skFrameDrawable.draw(canvas)
     }
 
     private fun createMainFabAnimator(isOpen: Boolean): Animator =
@@ -195,7 +225,7 @@ class ThemedSpeedDialView : SpeedDialView {
                 ObjectAnimator.ofInt(
                     mainFab.drawable, DRAWABLE_PROPERTY_LEVEL, if (isOpen) 10000 else 0
                 ),
-                // 白い熊 fork: fade the dialog frame in and out along with the items.
+                // 白い熊 fork: fade the pills in and out along with the items.
                 ValueAnimator.ofFloat(skFrameFraction, if (isOpen) 1f else 0f).apply {
                     addUpdateListener {
                         skFrameFraction = it.animatedValue as Float
@@ -262,6 +292,14 @@ class ThemedSpeedDialView : SpeedDialView {
                 }
                 useCompatPadding = false
             }
+            // 白い熊 fork: room between the rows for each item's pill, and the whole pill
+            // tappable rather than only its label and icon.
+            updateLayoutParams<MarginLayoutParams> {
+                val verticalMargin = context.dpToDimensionPixelSize(5)
+                topMargin = verticalMargin
+                bottomMargin = verticalMargin
+            }
+            setOnClickListener { fab.performClick() }
             if (isMaterial3Theme) {
                 labelBackground.apply {
                     useCompatPadding = false
@@ -276,6 +314,8 @@ class ThemedSpeedDialView : SpeedDialView {
                     }
                 }
             }
+            // After the Material 3 text appearance, which would reset color and weight.
+            applySkItemStyle()
         }
     }
 

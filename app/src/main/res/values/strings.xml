@@ -176,10 +176,10 @@
     <string name="file_job_write_notification_title_format">Writing “%1$s”</string>
     <string name="file_job_create_error_title">Error while creating</string>
     <string name="file_job_create_error_message_format">There was an error creating “%1$s”.\n%2$s</string>
-    <string name="file_job_cannot_copy_into_itself_title">Cannot copy a folder into itself</string>
-    <string name="file_job_cannot_extract_into_itself_title">Cannot extract a folder into itself</string>
-    <string name="file_job_cannot_move_into_itself_title">Cannot move a folder into itself</string>
-    <string name="file_job_cannot_copy_move_into_itself_message">The destination folder is inside the source folder.</string>
+    <string name="file_job_cannot_copy_into_itself_title">Cannot copy a directory into itself</string>
+    <string name="file_job_cannot_extract_into_itself_title">Cannot extract a directory into itself</string>
+    <string name="file_job_cannot_move_into_itself_title">Cannot move a directory into itself</string>
+    <string name="file_job_cannot_copy_move_into_itself_message">The destination directory is inside the source directory.</string>
     <string name="file_job_cannot_copy_over_itself_title">Cannot copy a file over itself</string>
     <string name="file_job_cannot_extract_over_itself_title">Cannot extract a file over itself</string>
     <string name="file_job_cannot_move_over_itself_title">Cannot move a file over itself</string>
@@ -188,11 +188,11 @@
     <string name="file_job_replace_message_format">Another file with the same name already exists in “%1$s”.\nReplacing it will overwrite its content.</string>
     <string name="file_job_replace_target_name">Original file</string>
     <string name="file_job_replace_source_name">Replace with</string>
-    <string name="file_job_merge_title_format">Merge folder “%1$s”?</string>
-    <string name="file_job_merge_copy_message_format">Merging will ask for confirmation before replacing any files in the folder that conflict with the files being copied.</string>
-    <string name="file_job_merge_extract_message_format">Merging will ask for confirmation before replacing any files in the folder that conflict with the files being extracted.</string>
-    <string name="file_job_merge_move_message_format">Merging will ask for confirmation before replacing any files in the folder that conflict with the files being moved.</string>
-    <string name="file_job_merge_target_name">Original folder</string>
+    <string name="file_job_merge_title_format">Merge directory “%1$s”?</string>
+    <string name="file_job_merge_copy_message_format">Merging will ask for confirmation before replacing any files in the directory that conflict with the files being copied.</string>
+    <string name="file_job_merge_extract_message_format">Merging will ask for confirmation before replacing any files in the directory that conflict with the files being extracted.</string>
+    <string name="file_job_merge_move_message_format">Merging will ask for confirmation before replacing any files in the directory that conflict with the files being moved.</string>
+    <string name="file_job_merge_target_name">Original directory</string>
     <string name="file_job_merge_source_name">Merge with</string>
     <string name="file_job_conflict_show_name">Select a new name for the destination</string>
     <string name="file_job_conflict_name_hint">New name</string>
@@ -234,7 +234,7 @@
     <string name="file_open_as_type_image">Image</string>
     <string name="file_open_as_type_audio">Audio</string>
     <string name="file_open_as_type_video">Video</string>
-    <string name="file_open_as_type_directory">Folder</string>
+    <string name="file_open_as_type_directory">Directory</string>
     <string name="file_open_as_type_any">Other</string>
     <string name="file_install_apk_from_background_title_format">“%1$s” is ready to be installed</string>
     <string name="file_install_apk_from_background_text">Tap to install</string>
@@ -245,14 +245,14 @@
     <string name="file_name_error_already_exists">A file with this name already exists</string>
     <string name="file_replace_message_format">Replace “%1$s”?</string>
     <string name="file_delete_message_file_format">Delete “%1$s”?</string>
-    <string name="file_delete_message_directory_format">Delete folder “%1$s” and its contents?</string>
+    <string name="file_delete_message_directory_format">Delete directory “%1$s” and its contents?</string>
     <plurals name="file_delete_message_multiple_files_format">
         <item quantity="one">Delete %1$,d file?</item>
         <item quantity="other">Delete %1$,d files?</item>
     </plurals>
     <plurals name="file_delete_message_multiple_directories_format">
-        <item quantity="one">Delete %1$,d folder and its content?</item>
-        <item quantity="other">Delete %1$,d folders and their contents?</item>
+        <item quantity="one">Delete %1$,d directory and its content?</item>
+        <item quantity="other">Delete %1$,d directories and their contents?</item>
     </plurals>
     <plurals name="file_delete_message_multiple_mixed_format">
         <item quantity="one">Delete %1$,d item?</item>
@@ -265,7 +265,7 @@
     <string name="file_create_archive_password">Password (optional)</string>
     <string name="file_add_bookmark_success">Bookmark added</string>
     <string name="file_create_file_title">New file</string>
-    <string name="file_create_directory_title">New folder</string>
+    <string name="file_create_directory_title">New directory</string>
 
     <string name="file_list_title">Files</string>
     <plurals name="file_list_title_open_file">
@@ -274,12 +274,12 @@
     </plurals>
     <string name="file_list_title_create_file">Save file</string>
     <plurals name="file_list_title_open_directory">
-        <item quantity="one">Select a folder</item>
-        <item quantity="other">Select folders</item>
+        <item quantity="one">Select a directory</item>
+        <item quantity="other">Select directories</item>
     </plurals>
     <plurals name="file_list_subtitle_directory_count_format">
-        <item quantity="one">%1$,d folder</item>
-        <item quantity="other">%1$,d folders</item>
+        <item quantity="one">%1$,d directory</item>
+        <item quantity="other">%1$,d directories</item>
     </plurals>
     <plurals name="file_list_subtitle_file_count_format">
         <item quantity="one">%1$,d file</item>
@@ -296,8 +296,8 @@
     <string name="file_list_action_sort_by_size">Size</string>
     <string name="file_list_action_sort_by_last_modified">Last modified</string>
     <string name="file_list_action_sort_order_ascending">Ascending</string>
-    <string name="file_list_action_sort_directories_first">Folders first</string>
-    <string name="file_list_action_view_sort_path_specific">Only for this folder</string>
+    <string name="file_list_action_sort_directories_first">Directories first</string>
+    <string name="file_list_action_view_sort_path_specific">Only for this directory</string>
     <string name="file_list_action_new_task">New window</string>
     <string name="file_list_action_navigate_up">Go up</string>
     <string name="file_list_action_navigate_to">Go to</string>
@@ -328,7 +328,7 @@
     <string name="file_list_paste_action_extract_here">Extract here</string>
     <string name="file_list_empty">No files</string>
     <string name="file_list_action_create_file">File</string>
-    <string name="file_list_action_create_directory">Folder</string>
+    <string name="file_list_action_create_directory">Directory</string>
 
     <string name="file_item_description_separator">\u0020\u0020\u0020\u0020</string>
     <string name="file_item_action_open_with">Open with</string>
@@ -354,7 +354,7 @@
         <item quantity="other">%1$,d items, totaling %2$s</item>
     </plurals>
     <string name="file_properties_basic_last_modification_time">Last Modified</string>
-    <string name="file_properties_basic_parent_directory">Parent Folder</string>
+    <string name="file_properties_basic_parent_directory">Parent Directory</string>
     <string name="file_properties_basic_archive_file">Archive File</string>
     <string name="file_properties_basic_archive_entry">Archive Entry</string>
     <string name="file_properties_basic_free_space">Free Space</string>
@@ -701,7 +701,7 @@
     <string name="navigation_standard_directory_qq">QQ</string>
     <string name="navigation_standard_directory_tim">TIM</string>
     <string name="navigation_standard_directory_wechat">WeChat</string>
-    <string name="navigation_edit_bookmark_directory_title">Bookmark folder</string>
+    <string name="navigation_edit_bookmark_directory_title">Bookmark directory</string>
     <string name="navigation_edit_bookmark_directory_name">Name</string>
     <string name="navigation_edit_bookmark_directory_path">Path</string>
     <string name="navigation_ftp_server" translatable="false">@string/ftp_server_title</string>
@@ -743,7 +743,7 @@
     <string name="ftp_server_username_title">Username</string>
     <string name="ftp_server_password_title">Password</string>
     <string name="ftp_server_port_title">Port</string>
-    <string name="ftp_server_home_directory_title">Root folder</string>
+    <string name="ftp_server_home_directory_title">Root directory</string>
     <string name="ftp_server_writable_title">Allow writing</string>
     <string name="ftp_server_notification_title" translatable="false">@string/ftp_server_title</string>
     <string name="ftp_server_notification_text_no_local_inet_address" translatable="false">@string/ftp_server_url_summary_no_local_inet_address</string>
@@ -772,15 +772,15 @@
         <item>Marquee</item>
     </string-array>
     <string name="settings_behavior_title">Behavior</string>
-    <string name="settings_default_directory_title">Default folder</string>
+    <string name="settings_default_directory_title">Default directory</string>
     <string name="settings_storages_title" translatable="false">@string/storage_list_title</string>
     <string name="settings_storages_summary_empty" translatable="false">@string/storage_list_empty</string>
-    <string name="settings_standard_directories_title">Standard folders</string>
-    <string name="settings_standard_directories_summary_empty">No standard folders enabled</string>
+    <string name="settings_standard_directories_title">Standard directories</string>
+    <string name="settings_standard_directories_summary_empty">No standard directories enabled</string>
     <string name="settings_standard_directory_list_title" translatable="false">@string/settings_standard_directories_title</string>
     <string name="settings_bookmark_directory_screenshots">Screenshots</string>
-    <string name="settings_bookmark_directories_title">Bookmark folders</string>
-    <string name="settings_bookmark_directories_summary_empty">No bookmark folders</string>
+    <string name="settings_bookmark_directories_title">Bookmark directories</string>
+    <string name="settings_bookmark_directories_summary_empty">No bookmark directories</string>
     <string name="settings_bookmark_directory_list_title" translatable="false">@string/settings_bookmark_directories_title</string>
     <string name="settings_bookmark_directory_list_empty" translatable="false">@string/settings_bookmark_directories_summary_empty</string>
     <string name="settings_root_strategy_title">Root access mode</string>

@@ -116,13 +116,18 @@ class SkOpenWithDialog(
             TextView(activity).apply {
                 text = activity.getString(R.string.sk_open_with_open_as)
                 textSize = 16f
-                setTextColor(skColor(SkThemeSlot.ACCENT))
-                setPadding(dp(24), dp(12), dp(24), dp(12))
-                setBackgroundResource(android.R.drawable.list_selector_background)
+                applySkPill()
                 setOnClickListener {
                     dialog?.dismiss()
                     showOpenAsTypes()
                 }
+            },
+            LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT
+            ).apply {
+                marginStart = dp(24)
+                topMargin = dp(8)
+                bottomMargin = dp(4)
             }
         )
         holder.addView(rememberBox.apply { setPadding(dp(24), dp(8), dp(24), dp(4)) })

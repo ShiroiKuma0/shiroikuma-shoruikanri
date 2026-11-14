@@ -248,7 +248,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/save"
-                style="?buttonBarButtonStyle" />
+                style="?buttonBarPositiveButtonStyle" />
         </LinearLayout>
     </me.zhanghai.android.files.ui.CoordinatorScrollingLinearLayout>
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
