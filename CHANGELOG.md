@@ -6,6 +6,23 @@ plus our build increment (e.g. `1.7.5+001`; the counter is zero-padded to three 
 `1.7.4+050` onwards, so builds sort in order). This fork installs side-by-side with upstream under
 the app ID `shiroikuma.shoruikanri`.
 
+## 1.7.5+008 — 2026-11-14
+
+### New since 1.7.5+007
+
+Built on upstream Material Files **1.7.5**.
+
+#### 🔧 Fixes
+
+- **Text fields in dialogs are no longer cut off at the bottom.** With the keyboard up on a short
+  screen (a folded phone, landscape), the Rename dialog showed its text field with the bottom edge
+  clipped. Material insets every dialog 80 dp from the top and the bottom of its window, which left
+  less height than title, field and buttons need. Dialogs now use a 16 dp inset, so the field fits.
+- **The same fix covers every dialog with a text field** — new file and new directory, create
+  archive, archive password, the bookmark and storage edit dialogs, set mode, set SELinux context
+  and the rename field of the conflict dialog.
+- Tall dialogs (long lists, licences) may now reach closer to the top and bottom of the screen.
+
 ## 1.7.5+007 — 2026-11-14
 
 ### New since 1.7.5+005
