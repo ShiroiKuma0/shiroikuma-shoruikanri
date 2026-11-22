@@ -75,34 +75,33 @@ class FtpServerUrlPreference : Preference {
     override fun onBindViewHolder(holder: PreferenceViewHolder) {
         super.onBindViewHolder(holder)
 
-        holder.itemView.setOnCreateContextMenuListener(object : OnCreateContextMenuListener {
-            override fun onCreateContextMenu(
-                menu: ContextMenu,
-                view: View,
-                menuInfo: ContextMenuInfo?
-            ) {
-                val url = url ?: return
-                menu.apply {
-                    setHeaderTitle(url)
-                    add(Menu.NONE, Menu.NONE, Menu.NONE, R.string.ftp_server_url_menu_copy_url)
-                        .setOnMenuItemClickListener {
-                            clipboardManager.copyText(url, context)
+        // 白い熊 fork: a pill popup in place of the platform's context menu, whose rows the
+        // theme cannot reach.
+        holder.itemView.setOnLongClickListener { view ->
+            val url = url ?: return@setOnLongClickListener false
+            me.zhanghai.android.files.skui.SkPopupMenu(context, view).apply {
+                menu.add(Menu.NONE, Menu.NONE, Menu.NONE, url).isEnabled = false
+                menu.add(
+                    Menu.NONE, R.id.action_sk_copy_url, Menu.NONE,
+                    R.string.ftp_server_url_menu_copy_url
+                ).setOnMenuItemClickListener {
+                    clipboardManager.copyText(url, context)
+                    true
+                }
+                if (!Settings.FTP_SERVER_ANONYMOUS_LOGIN.valueCompat) {
+                    val password = Settings.FTP_SERVER_PASSWORD.valueCompat
+                    if (password.isNotEmpty()) {
+                        menu.add(
+                            Menu.NONE, R.id.action_sk_copy_password, Menu.NONE,
+                            R.string.ftp_server_url_menu_copy_password
+                        ).setOnMenuItemClickListener {
+                            clipboardManager.copyText(password, context)
                             true
-                        }
-                    if (!Settings.FTP_SERVER_ANONYMOUS_LOGIN.valueCompat) {
-                        val password = Settings.FTP_SERVER_PASSWORD.valueCompat
-                        if (password.isNotEmpty()) {
-                            add(
-                                Menu.NONE, Menu.NONE, Menu.NONE,
-                                R.string.ftp_server_url_menu_copy_password
-                            ).setOnMenuItemClickListener {
-                                clipboardManager.copyText(password, context)
-                                true
-                            }
                         }
                     }
                 }
-            }
-        })
+            }.show()
+            true
+        }
     }
 }

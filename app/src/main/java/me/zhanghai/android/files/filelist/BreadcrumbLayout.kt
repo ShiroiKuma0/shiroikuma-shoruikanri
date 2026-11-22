@@ -164,7 +164,7 @@ class BreadcrumbLayout : HorizontalScrollView {
         }
         for (index in itemsLayout.childCount..<data.paths.size) {
             val binding = BreadcrumbItemBinding.inflate(context.layoutInflater, itemsLayout, false)
-            val menu = PopupMenu(popupContext, binding.root)
+            val menu: PopupMenu = me.zhanghai.android.files.skui.SkPopupMenu(popupContext, binding.root)
                 .apply { inflate(R.menu.file_list_breadcrumb) }
             binding.root.setOnLongClickListener {
                 menu.show()

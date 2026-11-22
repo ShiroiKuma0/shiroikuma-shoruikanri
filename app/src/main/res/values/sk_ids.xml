@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!-- 白い熊 fork: ids of menu items built in code, so skui/SkMenuPills can give them an icon. -->
+<resources>
+    <item name="action_sk_copy_url" type="id" />
+    <item name="action_sk_copy_password" type="id" />
+</resources>

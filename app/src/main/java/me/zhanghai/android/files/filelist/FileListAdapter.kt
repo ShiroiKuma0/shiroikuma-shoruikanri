@@ -252,7 +252,7 @@ class FileListAdapter(
     // very same menu, and in the grid views the whole name row (overflow button included) can be
     // hidden, leaving the item as the only possible anchor.
     private fun showPopupMenu(file: FileItem, anchor: View) {
-        val popupMenu = PopupMenu(anchor.context, anchor).apply { inflate(R.menu.file_item) }
+        val popupMenu = me.zhanghai.android.files.skui.SkPopupMenu(anchor.context, anchor).apply { inflate(R.menu.file_item) }
         val menu = popupMenu.menu
         val path = file.path
         val hasPickOptions = pickOptions != null
@@ -474,6 +474,18 @@ class FileListAdapter(
         }
         holder.directoryThumbnailImage?.isVisible = isDirectory
         holder.thumbnailOutlineView?.isVisible = !isDirectory
+        // 白い熊 fork: the outline of a grid thumbnail in its own role. Only the stroke of
+        // the shape is recoloured — a tint on the view laid a film over the whole thumbnail.
+        if (SkUi.isSkThemeEnabled) {
+            holder.thumbnailOutlineView?.let { outline ->
+                outline.backgroundTintList = null
+                (outline.background?.mutate() as? android.graphics.drawable.GradientDrawable)
+                    ?.setStroke(
+                        Math.round(outline.resources.displayMetrics.density),
+                        skColor(SkThemeSlot.GRID_OUTLINE)
+                    )
+            }
+        }
         val supportsThumbnail = file.supportsThumbnail
         // 白い熊 fork: XAPK and APKS icons go into the icon slot too, so they look like APK icons.
         val shouldLoadThumbnailIcon = supportsThumbnail && holder.thumbnailIconImage != null &&
@@ -527,6 +539,12 @@ class FileListAdapter(
             isVisible = hasBadge
             if (hasBadge) {
                 setImageResource(badgeIconRes!!)
+                // 白い熊 fork: the badge in its own role, not in upstream's grey.
+                if (me.zhanghai.android.files.skui.SkUi.isSkThemeEnabled) {
+                    imageTintList = android.content.res.ColorStateList.valueOf(
+                        me.zhanghai.android.files.skui.skColor(me.zhanghai.android.files.skui.SkThemeSlot.FILE_BADGE)
+                    )
+                }
             } else {
                 setImageDrawable(null)
             }
