@@ -16,6 +16,13 @@ abstract class FileJob {
     internal lateinit var service: FileJobService
         private set
 
+    // 白い熊 fork: what a tap on this job's notification opens (the extraction progress dialog).
+    internal var skContentIntent: android.app.PendingIntent? = null
+
+    // 白い熊 fork: set by SkExtractProgress.prepare() for a job that shows its progress in a
+    // dialog — an extraction, a copy, a move, the creation of an archive.
+    internal var skProgress: SkExtractProgress.Session? = null
+
     fun runOn(service: FileJobService) {
         this.service = service
         try {

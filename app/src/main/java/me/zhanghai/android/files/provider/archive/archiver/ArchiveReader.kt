@@ -105,6 +105,9 @@ object ArchiveReader {
 
     @Throws(IOException::class)
     fun newInputStream(file: Path, passwords: List<String>, entry: ReadArchive.Entry): InputStream? {
+        // 白い熊 fork: an extraction that is running over this archive reads on from where it
+        // stands, instead of opening the archive again for every entry.
+        extractions[file]?.newInputStream(passwords, entry)?.let { return it }
         val charset = archiveFileNameCharset
         val (archive, closeable) = openArchive(file, passwords)
         var successful = false
@@ -127,6 +130,86 @@ object ArchiveReader {
                 closeable.close()
             }
         }
+    }
+
+    // 白い熊 fork: one-pass extraction.
+    //
+    // newInputStream() above opens the archive and reads it from its start up to the wanted
+    // entry — once per entry, so extracting n entries reads the archive n times, and a solid
+    // archive (most RARs, every .tar.gz) is decompressed n times over. An Extraction keeps the
+    // archive open instead: asked for entries in the order the archive stores them
+    // (entryOrder()), it hands out one after the other and the archive is read exactly once.
+    // An entry asked for out of order is simply not found ahead; the cursor is then dropped
+    // and the caller falls back to the stock way, so the result is the same either way.
+    private val extractions = java.util.concurrent.ConcurrentHashMap<Path, Extraction>()
+
+    /** Start reading [file] in one pass for the calling thread; close it when done. */
+    fun beginExtraction(file: Path): Closeable =
+        Extraction(file).also { extractions[file] = it }
+
+    /** The position of every entry in the archive, by entry name. */
+    @Throws(IOException::class)
+    fun entryOrder(file: Path, passwords: List<String>): Map<String, Int> {
+        val order = HashMap<String, Int>()
+        readEntries(file, passwords).forEachIndexed { index, entry ->
+            if (entry.name !in order) {
+                order[entry.name] = index
+            }
+        }
+        return order
+    }
+
+    private class Extraction(private val file: Path) : Closeable {
+        // Only the thread that extracts follows the cursor; a thumbnail loader or the file
+        // list reading the same archive must not move it.
+        private val thread = Thread.currentThread()
+
+        private var opened: Pair<ReadArchive, ArchiveCloseable>? = null
+
+        @Throws(IOException::class)
+        fun newInputStream(passwords: List<String>, entry: ReadArchive.Entry): InputStream? {
+            if (Thread.currentThread() !== thread) {
+                return null
+            }
+            val charset = archiveFileNameCharset
+            val archive = (opened ?: openArchive(file, passwords).also { opened = it }).first
+            try {
+                while (true) {
+                    val current = archive.readEntry(charset)
+                    if (current == null) {
+                        // Not ahead of the cursor: start over the stock way.
+                        closeArchive()
+                        return null
+                    }
+                    if (current.name == entry.name) {
+                        return CursorInputStream(archive.newDataInputStream())
+                    }
+                }
+            } catch (e: Throwable) {
+                closeArchive()
+                throw e
+            }
+        }
+
+        private fun closeArchive() {
+            val closeable = opened?.second
+            opened = null
+            try {
+                closeable?.close()
+            } catch (e: IOException) {
+                e.printStackTrace()
+            }
+        }
+
+        override fun close() {
+            extractions.remove(file, this)
+            closeArchive()
+        }
+    }
+
+    // The data of one entry; closing it leaves the archive open for the next one.
+    private class CursorInputStream(inputStream: InputStream) : DelegateInputStream(inputStream) {
+        override fun close() {}
     }
 
     // 白い熊 fork: read the content of a single entry, matched by name, in one pass over the

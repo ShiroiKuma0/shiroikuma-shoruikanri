@@ -1244,8 +1244,9 @@ class FileListFragment : Fragment(), BreadcrumbLayout.Listener, FileListAdapter.
                 menu.findItem(R.id.action_delete).isVisible = !isAnyFileReadOnly
                 val areAllFilesArchiveFiles = files.all { it.isArchiveFile }
                 menu.findItem(R.id.action_extract).isVisible = areAllFilesArchiveFiles
-                val isCurrentPathReadOnly = viewModel.currentPath.fileSystem.isReadOnly
-                menu.findItem(R.id.action_archive).isVisible = !isCurrentPathReadOnly
+                // 白い熊 fork: packing only marks the files; where the archive goes is chosen
+                // afterwards, so a read-only directory here is no obstacle.
+                menu.findItem(R.id.action_archive).isVisible = true
             }
         } else if (pickOptions == null && viewModel.pasteState.files.isNotEmpty()) {
             // 白い熊 fork: show the pending paste at the top in the overlay toolbar (in
@@ -1254,7 +1255,9 @@ class FileListFragment : Fragment(), BreadcrumbLayout.Listener, FileListAdapter.
             val pasteFiles = pasteState.files
             val areAllFilesArchivePaths = pasteFiles.all { it.path.isArchivePath }
             overlayActionMode.title = getString(
-                if (pasteState.copy) {
+                if (pasteState.archive) {
+                    R.string.sk_file_list_paste_archive_title_format
+                } else if (pasteState.copy) {
                     if (areAllFilesArchivePaths) {
                         R.string.file_list_paste_extract_title_format
                     } else {
@@ -1267,8 +1270,18 @@ class FileListFragment : Fragment(), BreadcrumbLayout.Listener, FileListAdapter.
             overlayActionMode.setMenuResource(R.menu.file_list_paste)
             val isCurrentPathReadOnly = viewModel.currentPath.fileSystem.isReadOnly
             overlayActionMode.menu.findItem(R.id.action_paste)
+                .setIcon(
+                    // 白い熊 fork: a pending pack shows the pack icon.
+                    if (pasteState.archive) {
+                        R.drawable.sk_archive_icon_control_normal_24dp
+                    } else {
+                        R.drawable.paste_icon_control_normal_24dp
+                    }
+                )
                 .setTitle(
-                    if (areAllFilesArchivePaths) {
+                    if (pasteState.archive) {
+                        R.string.sk_file_list_paste_action_archive_here
+                    } else if (areAllFilesArchivePaths) {
                         R.string.file_list_paste_action_extract_here
                     } else {
                         R.string.paste
@@ -1343,7 +1356,7 @@ class FileListFragment : Fragment(), BreadcrumbLayout.Listener, FileListAdapter.
                 true
             }
             R.id.action_archive -> {
-                showCreateArchiveDialog(viewModel.selectedFiles)
+                archiveFiles(viewModel.selectedFiles)
                 true
             }
             R.id.action_share -> {
@@ -1411,6 +1424,14 @@ class FileListFragment : Fragment(), BreadcrumbLayout.Listener, FileListAdapter.
         viewModel.selectFiles(files, false)
     }
 
+    // 白い熊 fork: packing works like cut and copy — the files wait in the top bar while
+    // 白い熊 walks to the directory the archive should go to, and "Pack here" there opens
+    // the dialog that names it.
+    private fun archiveFiles(files: FileItemSet) {
+        viewModel.addToPasteState(true, files, archive = true)
+        viewModel.selectFiles(files, false)
+    }
+
     private fun showCreateArchiveDialog(files: FileItemSet) {
         CreateArchiveDialogFragment.show(files, this)
     }
@@ -1427,6 +1448,10 @@ class FileListFragment : Fragment(), BreadcrumbLayout.Listener, FileListAdapter.
             makePathListForJob(files), archiveFile, format, filter, password, requireContext()
         )
         viewModel.selectFiles(files, false)
+        // 白い熊 fork: the pending pack is done with.
+        if (viewModel.pasteState.archive) {
+            viewModel.clearPasteState()
+        }
     }
 
     private fun shareFiles(files: FileItemSet) {
@@ -1559,6 +1584,12 @@ class FileListFragment : Fragment(), BreadcrumbLayout.Listener, FileListAdapter.
 
     private fun pasteFiles(targetDirectory: Path) {
         val pasteState = viewModel.pasteState
+        // 白い熊 fork: "Pack here" — ask for the archive's name and format. The files stay
+        // pending until the dialog is confirmed, so cancelling it loses nothing.
+        if (pasteState.archive) {
+            showCreateArchiveDialog(pasteState.files)
+            return
+        }
         if (viewModel.pasteState.copy) {
             FileJobService.copy(
                 makePathListForJob(pasteState.files), targetDirectory, requireContext()
@@ -1862,7 +1893,8 @@ class FileListFragment : Fragment(), BreadcrumbLayout.Listener, FileListAdapter.
     }
 
     override fun showCreateArchiveDialog(file: FileItem) {
-        showCreateArchiveDialog(fileItemSetOf(file))
+        // 白い熊 fork: from a file's own menu too, packing waits for "Pack here".
+        archiveFiles(fileItemSetOf(file))
     }
 
     override fun shareFile(file: FileItem) {

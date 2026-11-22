@@ -463,6 +463,14 @@
             android:autoRemoveFromRecents="true"
             android:theme="@style/Theme.MaterialFiles.Translucent" />
 
+        <!-- 白い熊 fork: the extraction progress dialog, opened after Paste and from the
+             notification of the job. -->
+        <activity
+            android:name="me.zhanghai.android.files.filejob.SkExtractProgressActivity"
+            android:autoRemoveFromRecents="true"
+            android:theme="@style/Theme.MaterialFiles.Translucent"
+            android:windowSoftInputMode="adjustResize" />
+
         <activity
             android:name="me.zhanghai.android.files.viewer.saveas.SaveAsActivity"
             android:autoRemoveFromRecents="true"

@@ -196,13 +196,15 @@ class FileListViewModel : ViewModel() {
     val pasteState: PasteState
         get() = _pasteStateLiveData.valueCompat
 
-    fun addToPasteState(copy: Boolean, files: FileItemSet) {
+    // 白い熊 fork: archive = the files are to be packed, not pasted.
+    fun addToPasteState(copy: Boolean, files: FileItemSet, archive: Boolean = false) {
         val pasteState = _pasteStateLiveData.valueCompat
         var changed = false
-        if (pasteState.copy != copy) {
+        if (pasteState.copy != copy || pasteState.archive != archive) {
             changed = pasteState.files.isNotEmpty()
             pasteState.files.clear()
             pasteState.copy = copy
+            pasteState.archive = archive
         }
         changed = changed or pasteState.files.addAll(files)
         if (changed) {

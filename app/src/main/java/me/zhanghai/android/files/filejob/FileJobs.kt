@@ -49,6 +49,9 @@ import me.zhanghai.android.files.provider.archive.archiveFile
 import me.zhanghai.android.files.provider.archive.archiver.ArchiveWriter
 import me.zhanghai.android.files.provider.archive.createArchiveRootPath
 import me.zhanghai.android.files.provider.archive.isArchivePath
+import me.zhanghai.android.files.provider.archive.skArchiveEntryName
+import me.zhanghai.android.files.provider.archive.skArchiveEntryOrder
+import me.zhanghai.android.files.provider.archive.skBeginArchiveExtraction
 import me.zhanghai.android.files.provider.common.ByteString
 import me.zhanghai.android.files.provider.common.ByteStringBuilder
 import me.zhanghai.android.files.provider.common.InvalidFileNameException
@@ -133,8 +136,8 @@ private fun FileJob.postNotification(
         setSubText(subText)
         setContentInfo(info)
         setProgress(max, progress, indeterminate)
-        // TODO
-        //setContentIntent()
+        // 白い熊 fork: an extraction's notification opens its progress dialog.
+        skContentIntent?.let { setContentIntent(it) }
         if (showCancel) {
             val intent = FileJobReceiver.createIntent(id)
             val pendingIntent = PendingIntent.getBroadcast(
@@ -343,6 +346,21 @@ private fun FileJob.postTransferSizeNotification(
     @StringRes titleOneRes: Int,
     @PluralsRes titleMultipleRes: Int
 ) {
+    // 白い熊 fork: feed the progress dialog; it is not throttled like the notification.
+    transferInfo.skProgress?.update(
+        currentSource.toString(),
+        if (currentSource.isArchivePath) {
+            currentSource.toString().trimStart('/').ifEmpty { getFileName(currentSource) }
+        } else {
+            getFileName(currentSource)
+        },
+        transferInfo.transferredFileCount, transferInfo.fileCount, transferInfo.transferredSize,
+        transferInfo.size
+    ) {
+        currentSource.readAttributes(
+            BasicFileAttributes::class.java, LinkOption.NOFOLLOW_LINKS
+        ).size()
+    }
     if (!transferInfo.shouldPostNotification()) {
         return
     }
@@ -384,7 +402,10 @@ private fun FileJob.postTransferSizeNotification(
         max = maxLong.toInt()
         progress = progressLong.toInt()
     }
-    postNotification(title, text, null, null, max, progress, false, true)
+    // 白い熊 fork: an extraction also shows its speed and the time left.
+    postNotification(
+        title, text, transferInfo.skProgress?.notificationSubText, null, max, progress, false, true
+    )
 }
 
 private fun FileJob.postTransferCountNotification(
@@ -434,6 +455,11 @@ private class TransferInfo(scanInfo: ScanInfo, val target: Path?) {
         private set
 
     private var lastNotificationTimeMillis = 0L
+
+    // 白い熊 fork: the progress dialog of an extraction, and the target the last successful
+    // copy wrote — which a conflict may have renamed, so the caller cannot know it.
+    var skProgress: SkExtractProgress.Session? = null
+    var skLastTarget: Path? = null
 
     fun incrementTransferredFileCount() {
         ++transferredFileCount
@@ -617,6 +643,47 @@ class ArchiveFileJob(
 ) : FileJob() {
     @Throws(IOException::class)
     override fun run() {
+        val skProgress = skProgress
+        try {
+            skProgress?.setName(getFileName(archiveFile))
+            runArchive()
+            skRenameArchive()
+            skProgress?.finish(true)
+        } finally {
+            // A no-op after the line above; otherwise the job was cancelled or failed.
+            skProgress?.finish(false)
+        }
+    }
+
+    // 白い熊 fork: the archive is complete, so the name typed in the progress dialog is safe
+    // to apply now. Never renames over something that exists.
+    private fun skRenameArchive() {
+        val progress = skProgress ?: return
+        progress.finalPath = archiveFile
+        val newName = progress.requestedName ?: return
+        if (newName == getFileName(archiveFile)) {
+            return
+        }
+        val newPath = archiveFile.resolveSibling(newName)
+        if (newPath.exists(LinkOption.NOFOLLOW_LINKS)) {
+            showToast(
+                getString(R.string.sk_extract_progress_name_exists_format, newName),
+                Toast.LENGTH_LONG
+            )
+            return
+        }
+        try {
+            rename(archiveFile, newPath)
+        } catch (e: InterruptedIOException) {
+            // Cancel in the rename error dialog: the archive keeps its name.
+            return
+        }
+        progress.finalPath = newPath
+        progress.setName(newName)
+    }
+
+    @Throws(IOException::class)
+    private fun runArchive() {
         val scanInfo = scan(sources, R.plurals.file_job_archive_scan_notification_title_format)
         val channel = archiveFile.newByteChannel(
             StandardOpenOption.CREATE_NEW, StandardOpenOption.WRITE
@@ -626,6 +693,7 @@ class ArchiveFileJob(
             channel.use {
                 ArchiveWriter(channel, format, filter, password).use { writer ->
                     val transferInfo = TransferInfo(scanInfo, archiveFile)
+                    transferInfo.skProgress = skProgress
                     for (source in sources) {
                         val target = getTargetFileName(source)
                         archiveRecursively(source, writer, target, transferInfo)
@@ -731,8 +799,24 @@ private fun FileJob.postArchiveNotification(transferInfo: TransferInfo, currentF
 }
 
 class CopyFileJob(private val sources: List<Path>, private val targetDirectory: Path) : FileJob() {
+    // 白い熊 fork: where the top-level item of the source being copied was written, or null
+    // when it was skipped or merged into a directory that was already there.
+    private var skTopLevelTarget: Path? = null
+
     @Throws(IOException::class)
     override fun run() {
+        val skProgress = skProgress
+        try {
+            runCopy()
+            skProgress?.finish(true)
+        } finally {
+            // A no-op after the line above; otherwise the job was cancelled or failed.
+            skProgress?.finish(false)
+        }
+    }
+
+    @Throws(IOException::class)
+    private fun runCopy() {
         val isExtract = sources.all { it.isArchivePath }
         val scanInfo = scan(
             sources, if (isExtract) {
@@ -742,16 +826,102 @@ class CopyFileJob(private val sources: List<Path>, private val targetDirectory: 
             }
         )
         val transferInfo = TransferInfo(scanInfo, targetDirectory)
+        transferInfo.skProgress = skProgress
         val actionAllInfo = ActionAllInfo()
+        // 白い熊 fork: an extraction out of one archive creates the directories first and
+        // leaves the files for one pass over the archive afterwards (skExtractDeferred).
+        val deferredFiles = if (isExtract && sources.map { it.archiveFile }.distinct().size == 1) {
+            mutableListOf<SkDeferredFile>()
+        } else {
+            null
+        }
+        skTopLevelTarget = null
         for (source in sources) {
             val target = if (source.parent == targetDirectory) {
                 getTargetPathForDuplicate(source)
             } else {
                 targetDirectory.resolveForeign(getTargetFileName(source))
             }
-            copyRecursively(source, target, isExtract, transferInfo, actionAllInfo)
+            skProgress?.setName(getFileName(target))
+            copyRecursively(source, target, isExtract, transferInfo, actionAllInfo, deferredFiles)
             throwIfInterrupted()
         }
+        if (deferredFiles != null) {
+            skExtractDeferred(deferredFiles, transferInfo, actionAllInfo)
+        }
+        skRenameExtracted()
+    }
+
+    // 白い熊 fork: a file of an archive whose extraction waits for the one pass.
+    private class SkDeferredFile(val file: Path, val target: Path, val isTopLevel: Boolean)
+
+    // 白い熊 fork: extract the files in the order the archive stores them, with the archive
+    // kept open in between — so it is read once, where the stock way opens it and reads it
+    // from its start for every single file. Each file still goes through the same copy as
+    // before, with its conflict and error dialogs.
+    @Throws(IOException::class)
+    private fun skExtractDeferred(
+        files: MutableList<SkDeferredFile>,
+        transferInfo: TransferInfo,
+        actionAllInfo: ActionAllInfo
+    ) {
+        if (files.isEmpty()) {
+            return
+        }
+        val anyFile = files.first().file
+        try {
+            val order = anyFile.skArchiveEntryOrder()
+            files.sortBy { order[it.file.skArchiveEntryName()] ?: Int.MAX_VALUE }
+        } catch (e: IOException) {
+            // Unsorted, every file is still found — only by starting over each time.
+            e.printStackTrace()
+        }
+        anyFile.skBeginArchiveExtraction().use {
+            for (deferred in files) {
+                transferInfo.skLastTarget = null
+                copy(deferred.file, deferred.target, true, transferInfo, actionAllInfo)
+                if (deferred.isTopLevel) {
+                    skTopLevelTarget = transferInfo.skLastTarget
+                }
+                throwIfInterrupted()
+            }
+        }
+    }
+
+    // 白い熊 fork: the item is complete, so the name typed in the progress dialog is safe to
+    // apply now. Never renames over something that exists, and never renames an item this job
+    // did not write itself.
+    private fun skRenameExtracted() {
+        val progress = skProgress ?: return
+        if (!progress.isRenamable) {
+            return
+        }
+        val extracted = skTopLevelTarget
+        progress.finalPath = extracted
+        val newName = progress.requestedName ?: return
+        if (extracted == null) {
+            showToast(R.string.sk_extract_progress_not_renamed, Toast.LENGTH_LONG)
+            return
+        }
+        if (newName == getFileName(extracted)) {
+            return
+        }
+        val newPath = extracted.resolveSibling(newName)
+        if (newPath.exists(LinkOption.NOFOLLOW_LINKS)) {
+            showToast(
+                getString(R.string.sk_extract_progress_name_exists_format, newName),
+                Toast.LENGTH_LONG
+            )
+            return
+        }
+        try {
+            rename(extracted, newPath)
+        } catch (e: InterruptedIOException) {
+            // Cancel in the rename error dialog: the item stays under its extracted name.
+            return
+        }
+        progress.finalPath = newPath
+        progress.setName(newName)
     }
 
     @Throws(IOException::class)
@@ -760,7 +930,8 @@ class CopyFileJob(private val sources: List<Path>, private val targetDirectory: 
         target: Path,
         isExtract: Boolean,
         transferInfo: TransferInfo,
-        actionAllInfo: ActionAllInfo
+        actionAllInfo: ActionAllInfo,
+        deferredFiles: MutableList<SkDeferredFile>?
     ) {
         Files.walkFileTree(source, object : SimpleFileVisitor<Path>() {
             @Throws(IOException::class)
@@ -769,9 +940,13 @@ class CopyFileJob(private val sources: List<Path>, private val targetDirectory: 
                 attributes: BasicFileAttributes
             ): FileVisitResult {
                 val directoryInTarget = target.resolveForeign(source.relativize(directory))
+                transferInfo.skLastTarget = null
                 val copied = copy(
                     directory, directoryInTarget, isExtract, transferInfo, actionAllInfo
                 )
+                if (directory == source) {
+                    skTopLevelTarget = transferInfo.skLastTarget
+                }
                 throwIfInterrupted()
                 return if (copied) FileVisitResult.CONTINUE else FileVisitResult.SKIP_SUBTREE
             }
@@ -779,7 +954,15 @@ class CopyFileJob(private val sources: List<Path>, private val targetDirectory: 
             @Throws(IOException::class)
             override fun visitFile(file: Path, attributes: BasicFileAttributes): FileVisitResult {
                 val fileInTarget = target.resolveForeign(source.relativize(file))
+                if (deferredFiles != null && attributes.isRegularFile) {
+                    deferredFiles += SkDeferredFile(file, fileInTarget, file == source)
+                    return FileVisitResult.CONTINUE
+                }
+                transferInfo.skLastTarget = null
                 copy(file, fileInTarget, isExtract, transferInfo, actionAllInfo)
+                if (file == source) {
+                    skTopLevelTarget = transferInfo.skLastTarget
+                }
                 throwIfInterrupted()
                 return FileVisitResult.CONTINUE
             }
@@ -1068,11 +1251,65 @@ private fun FileJob.postDeleteNotification(transferInfo: TransferInfo, currentPa
 class MoveFileJob(private val sources: List<Path>, private val targetDirectory: Path) : FileJob() {
     @Throws(IOException::class)
     override fun run() {
+        val skProgress = skProgress
+        try {
+            runMove()
+            skProgress?.finish(true)
+        } finally {
+            // A no-op after the line above; otherwise the job was cancelled or failed.
+            skProgress?.finish(false)
+        }
+    }
+
+    // 白い熊 fork: where the one item of this move ended up, or null when it was skipped or
+    // merged into a directory that was already there. Only then is a rename safe.
+    private var skTopLevelTarget: Path? = null
+
+    // 白い熊 fork: the item has arrived, so the name typed in the progress dialog is safe to
+    // apply now. Never renames over something that exists, and never renames an item this
+    // job did not move itself.
+    private fun skRenameMoved() {
+        val progress = skProgress ?: return
+        if (!progress.isRenamable) {
+            return
+        }
+        val moved = skTopLevelTarget
+        progress.finalPath = moved
+        val newName = progress.requestedName ?: return
+        if (moved == null) {
+            showToast(R.string.sk_extract_progress_not_renamed, Toast.LENGTH_LONG)
+            return
+        }
+        if (newName == getFileName(moved)) {
+            return
+        }
+        val newPath = moved.resolveSibling(newName)
+        if (newPath.exists(LinkOption.NOFOLLOW_LINKS)) {
+            showToast(
+                getString(R.string.sk_extract_progress_name_exists_format, newName),
+                Toast.LENGTH_LONG
+            )
+            return
+        }
+        try {
+            rename(moved, newPath)
+        } catch (e: InterruptedIOException) {
+            // Cancel in the rename error dialog: the item keeps its name.
+            return
+        }
+        progress.finalPath = newPath
+        progress.setName(newName)
+    }
+
+    @Throws(IOException::class)
+    private fun runMove() {
         val sourcesToMove = mutableListOf<Path>()
         for (source in sources) {
             val target = targetDirectory.resolveForeign(source.fileName)
+            skProgress?.setName(getFileName(target))
             try {
                 moveAtomically(source, target)
+                skTopLevelTarget = target
             } catch (e: InterruptedIOException) {
                 throw e
             } catch (e: IOException) {
@@ -1082,12 +1319,14 @@ class MoveFileJob(private val sources: List<Path>, private val targetDirectory: 
         }
         val scanInfo = scan(sourcesToMove, R.plurals.file_job_move_scan_notification_title_format)
         val transferInfo = TransferInfo(scanInfo, targetDirectory)
+        transferInfo.skProgress = skProgress
         val actionAllInfo = ActionAllInfo()
         for (source in sourcesToMove) {
             val target = targetDirectory.resolveForeign(source.fileName)
             moveRecursively(source, target, transferInfo, actionAllInfo)
             throwIfInterrupted()
         }
+        skRenameMoved()
     }
 
     @Throws(IOException::class)
@@ -1106,6 +1345,9 @@ class MoveFileJob(private val sources: List<Path>, private val targetDirectory: 
                 val directoryInTarget = target.resolveForeign(source.relativize(directory))
                 try {
                     moveAtomically(directory, directoryInTarget)
+                    if (directory == source) {
+                        skTopLevelTarget = directoryInTarget
+                    }
                     throwIfInterrupted()
                     return FileVisitResult.SKIP_SUBTREE
                 } catch (e: InterruptedIOException) {
@@ -1113,7 +1355,11 @@ class MoveFileJob(private val sources: List<Path>, private val targetDirectory: 
                 } catch (e: IOException) {
                     e.printStackTrace()
                 }
+                transferInfo.skLastTarget = null
                 val copied = copyForMove(directory, directoryInTarget, transferInfo, actionAllInfo)
+                if (directory == source) {
+                    skTopLevelTarget = transferInfo.skLastTarget
+                }
                 throwIfInterrupted()
                 return if (copied) FileVisitResult.CONTINUE else FileVisitResult.SKIP_SUBTREE
             }
@@ -1123,6 +1369,9 @@ class MoveFileJob(private val sources: List<Path>, private val targetDirectory: 
                 val fileInTarget = target.resolveForeign(source.relativize(file))
                 try {
                     moveAtomically(file, fileInTarget)
+                    if (file == source) {
+                        skTopLevelTarget = fileInTarget
+                    }
                     throwIfInterrupted()
                     return FileVisitResult.CONTINUE
                 } catch (e: InterruptedIOException) {
@@ -1130,7 +1379,11 @@ class MoveFileJob(private val sources: List<Path>, private val targetDirectory: 
                 } catch (e: IOException) {
                     e.printStackTrace()
                 }
+                transferInfo.skLastTarget = null
                 moveByCopy(file, fileInTarget, transferInfo, actionAllInfo)
+                if (file == source) {
+                    skTopLevelTarget = transferInfo.skLastTarget
+                }
                 throwIfInterrupted()
                 return FileVisitResult.CONTINUE
             }
@@ -1297,6 +1550,7 @@ private fun FileJob.copyOrMove(
                 source.moveTo(target, *options)
             }
             transferInfo.incrementTransferredFileCount()
+            transferInfo.skLastTarget = target
             postCopyMoveNotification(transferInfo, source, type)
         } catch (e: FileAlreadyExistsException) {
             val sourceFile = source.loadFileItem()

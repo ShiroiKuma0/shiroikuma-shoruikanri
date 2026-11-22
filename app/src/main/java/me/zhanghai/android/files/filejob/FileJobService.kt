@@ -12,6 +12,7 @@ import android.os.IBinder
 import androidx.annotation.MainThread
 import java8.nio.file.Path
 import me.zhanghai.android.files.file.MimeType
+import me.zhanghai.android.files.provider.archive.isArchivePath
 import me.zhanghai.android.files.provider.common.PosixFileModeBit
 import me.zhanghai.android.files.provider.common.PosixGroup
 import me.zhanghai.android.files.provider.common.PosixUser
@@ -120,11 +121,26 @@ class FileJobService : Service() {
             password: String?,
             context: Context
         ) {
-            startJob(ArchiveFileJob(sources, archiveFile, format, filter, password), context)
+            val job = ArchiveFileJob(sources, archiveFile, format, filter, password)
+            // 白い熊 fork: a progress dialog.
+            SkExtractProgress.prepare(
+                job, SkExtractProgress.Kind.ARCHIVE, sources, archiveFile.parent, context
+            )
+            startJob(job, context)
         }
 
         fun copy(sources: List<Path>, targetDirectory: Path, context: Context) {
-            startJob(CopyFileJob(sources, targetDirectory), context)
+            val job = CopyFileJob(sources, targetDirectory)
+            // 白い熊 fork: a progress dialog.
+            SkExtractProgress.prepare(
+                job,
+                if (sources.isNotEmpty() && sources.all { it.isArchivePath }) {
+                    SkExtractProgress.Kind.EXTRACT
+                } else {
+                    SkExtractProgress.Kind.COPY
+                }, sources, targetDirectory, context
+            )
+            startJob(job, context)
         }
 
         fun create(path: Path, createDirectory: Boolean, context: Context) {
@@ -136,7 +152,12 @@ class FileJobService : Service() {
         }
 
         fun move(sources: List<Path>, targetDirectory: Path, context: Context) {
-            startJob(MoveFileJob(sources, targetDirectory), context)
+            val job = MoveFileJob(sources, targetDirectory)
+            // 白い熊 fork: a progress dialog.
+            SkExtractProgress.prepare(
+                job, SkExtractProgress.Kind.MOVE, sources, targetDirectory, context
+            )
+            startJob(job, context)
         }
 
         fun installApk(file: Path, context: Context) {

@@ -117,6 +117,43 @@ Nothing open. (Dual-pane mode was dropped by 白い熊 on 2026-11-14.)
 
 ### Done
 
+- **Black-yellow theme, applied fully** (2026-11-22, shipped in `1.7.5+014`), the **mixed way**
+  (白い熊's decision: the fork follows upstream's releases, so upstream's layouts are not edited
+  for colour). `ThemeOverlay.Sk` (`sk_theme.xml`) holds no colour: every colour attribute points at
+  a role colour `@color/sk_role_*` (`sk_roles.xml`, default `values/` only — never add a qualified
+  copy, it would beat the loader), and `skui/SkPalette.kt` lays the stored roles over them with a
+  `ResourcesLoader` (Android 11+; `com/google/android/material/color/SkColorLoaderBridge.java` is
+  the one class in Material's package that reaches its loader creator). The values written in
+  `sk_roles.xml` are each role's computed default, shown on Android 6–10 — change a default in
+  `SkThemeSlot.skDefault()` and there together. The role table is `skui/SkThemeSlot.kt`; a new
+  coloured thing gets a role there and a swatch row in its section of `SkUiActivity`.
+  `skui/SkViewInflater.kt` (the theme's `viewInflaterClass`) turns every inflated button into a
+  pill, every switch into `SkSwitch`, and tints check boxes / radio buttons as selection marks
+  (they stay marks; glyph-only buttons stay glyphs — 白い熊, 2026-11-22). Menus:
+  `SkPillMenuItemView` through the app's copies of AppCompat's two `abc_*_menu_item_layout.xml`
+  (**diff them against the library after an AppCompat upgrade**), `SkMenuPills.ROWS` (item id →
+  icon, role, ›; add a line for every new menu item), `SkPopupMenu` (shifts up instead of
+  scrolling; use it for every new popup). Dialog action lists: `showActions` /
+  `createWithActions` (`SkActionList.kt`); a deleting dialog:
+  `SkMaterialAlertDialogBuilder(destructive = true)`. The UI page is a folding accordion with a
+  draggable chip index (`SkSectionIndex.kt`; order and fold state in the `sk_ui` preferences).
+  `AppActivity` gives translucent dialog-host windows their clear ground back, which the overlay
+  would otherwise paint black.
+
+- **File job progress dialog, one-pass extraction, pack mode** (2026-11-22, shipped in
+  `1.7.5+014`). `filejob/SkExtractProgress.kt` is a session shared by a job and
+  `SkExtractProgressDialogFragment` (hosted by the translucent `SkExtractProgressActivity`), for
+  extraction, copy, move and archive creation: progress bar (two with several files — the file
+  and the total), sizes, speed, time left, Cancel and Hide; the job's notification reopens it; it
+  appears only when the job lasts over 0.4 s and closes by itself. The name of the produced item
+  is editable from the start and applied by the job once the item is complete — only to an item
+  the job wrote itself (`TransferInfo.skLastTarget`). Extraction reads the archive **once**:
+  `ArchiveReader.beginExtraction` keeps it open and `CopyFileJob.skExtractDeferred` asks for the
+  files in archive order (stock code re-read the archive from its start for every entry). Packing
+  is a pending mode like cut / copy (`PasteState.archive`): the pack icon on the selection bar,
+  then "Pack here" in the target directory opens the name dialog. RAR cannot be written (no
+  open RAR compressor exists); 白い熊 declined an "Open" pill on the finished dialog.
+
 - **XAPK support** (2026-08-04, shipped in `1.7.4+053`). XAPK bundles (a ZIP holding a base APK,
   split APKs and OBBs) get their own fork media type `application/x-xapk` — minted in
   `MimeTypeConversionExtensions.kt` because the extension is unregistered and would otherwise fall

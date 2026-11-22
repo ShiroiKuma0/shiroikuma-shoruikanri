@@ -72,6 +72,18 @@ internal class ArchiveFileSystem(
             entries!![path] ?: throw NoSuchFileException(path.toString())
         }
 
+    // 白い熊 fork: the position of every entry in the archive, by entry name — the order a
+    // one-pass extraction asks for them in (see ArchiveReader.beginExtraction).
+    @Throws(IOException::class)
+    fun skEntryOrder(): Map<String, Int> {
+        val passwords = synchronized(lock) { passwords }
+        return try {
+            ArchiveReader.entryOrder(archiveFile, passwords)
+        } catch (e: ArchiveException) {
+            throw e.toFileSystemOrInterruptedIOException(archiveFile)
+        }
+    }
+
     @Throws(IOException::class)
     fun newInputStream(file: Path): InputStream =
         synchronized(lock) {
