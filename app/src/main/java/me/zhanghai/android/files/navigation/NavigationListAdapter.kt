@@ -244,13 +244,14 @@ class NavigationListAdapter(
                 )
                 binding.titleText.applySkFontOnly(SkThemeSlot.DRAWER_ITEM)
                 binding.subtitleText.setTextColor(skColor(SkThemeSlot.TEXT_SECONDARY))
-                binding.iconImage.imageTintList =
-                    ColorStateList(
-                        checkedStates,
-                        intArrayOf(
-                            skColor(SkThemeSlot.ACCENT), skColor(SkThemeSlot.DRAWER_ICONS)
-                        )
-                    )
+                // The icon is coloured by what the item does; a plain "view" item takes the
+                // drawer's own icon colour.
+                val iconColor = when (val role = item.skRole) {
+                    me.zhanghai.android.files.skui.SkIconRole.VIEW ->
+                        skColor(SkThemeSlot.DRAWER_ICONS)
+                    else -> skColor(role.slot)
+                }
+                binding.iconImage.imageTintList = ColorStateList.valueOf(iconColor)
                 if (payloads.isNotEmpty()) {
                     return
                 }

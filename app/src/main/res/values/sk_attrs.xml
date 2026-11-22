@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!-- 白い熊 fork: theme attributes of the 白い熊 theme. -->
+<resources>
+    <!-- Set by the theme of a dialog that deletes: its main button is drawn in the danger
+         role (skui/SkViewInflater). -->
+    <attr name="skDestructiveDialog" format="boolean" />
+</resources>

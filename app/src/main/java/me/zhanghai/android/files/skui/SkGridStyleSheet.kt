@@ -43,7 +43,7 @@ class SkGridStyleSheet(
         val dialog = BottomSheetDialog(activity)
         val holder = LinearLayout(activity).apply {
             orientation = LinearLayout.VERTICAL
-            background = AppCompatResources.getDrawable(activity, R.drawable.sk_dialog_background)
+            background = skPanel(activity.resources.displayMetrics.density)
             setPadding(dp(20), dp(16), dp(20), dp(20))
         }
 
@@ -171,7 +171,7 @@ class SkGridStyleSheet(
             background = GradientDrawable().apply {
                 shape = GradientDrawable.OVAL
                 setColor(color)
-                setStroke(dp(1), 0x66888888)
+                setStroke(dp(1), skColor(SkThemeSlot.TEXT_TERTIARY))
             }
             layoutParams = LinearLayout.LayoutParams(dp(28), dp(28))
         }

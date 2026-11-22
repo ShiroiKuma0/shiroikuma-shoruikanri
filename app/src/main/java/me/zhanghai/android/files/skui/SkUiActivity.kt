@@ -47,7 +47,6 @@ private const val ROW_INDENT_DP = 72
 private const val ROW_SUB_INDENT_DP = 90
 private const val INDENT_STEP_DP = 18
 private const val MAX_FONT_SIZE_SP = 40
-private const val WARN_COLOR = 0xFFFF5252.toInt()
 
 class SkUiActivity : AppActivity() {
     private lateinit var binding: SkUiActivityBinding
@@ -56,6 +55,23 @@ class SkUiActivity : AppActivity() {
     private var densityPx = 1f
 
     private var pendingFontSlot: SkThemeSlot? = null
+
+    // Where the row builders put their rows: the body of the section being built.
+    private lateinit var rowTarget: LinearLayout
+
+    private class Section(
+        val key: String,
+        @StringRes val labelRes: Int,
+        val icon: Int,
+        val role: SkIconRole,
+        val build: () -> Unit
+    )
+
+    private val sectionHeaders = mutableMapOf<String, View>()
+
+    // The page repaints itself while its colours are edited.
+    override val skRecreatesOnColorChange: Boolean
+        get() = false
 
     private val fontImportLauncher =
         registerForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
@@ -95,6 +111,8 @@ class SkUiActivity : AppActivity() {
         rowL1Px = dp(ROW_INDENT_DP)
         rowL2Px = dp(ROW_SUB_INDENT_DP)
         binding.holder.removeAllViews()
+        rowTarget = binding.holder
+        sectionHeaders.clear()
 
         window.setBackgroundDrawable(ColorDrawable(skColor(SkThemeSlot.BACKGROUND)))
         binding.toolbar.setBackgroundColor(skColor(SkThemeSlot.TOOLBAR_BACKGROUND))
@@ -104,214 +122,379 @@ class SkUiActivity : AppActivity() {
         // The link to the app's own settings, first and thick, right under the
         // page title (black-yellow-theme: every pressable row is a pill).
         addActionRow(
-            getString(R.string.settings_title), null, null, rowL1Px, main = true, opens = true
+            getString(R.string.settings_title), null, null, rowL1Px, main = true, opens = true,
+            icon = R.drawable.settings_icon_white_24dp, role = SkIconRole.VIEW
         ) { startActivity(SettingsActivity::class.createIntent()) }
+
+        val sections = mutableListOf<Section>()
+        fun section(
+            key: String,
+            @StringRes labelRes: Int,
+            icon: Int,
+            role: SkIconRole,
+            build: () -> Unit
+        ) {
+            sections += Section(key, labelRes, icon, role, build)
+        }
 
         // Export / Import — carry every setting between installs (the Kōjiki
         // flow); the explanation beneath is the latest export found in the
         // export directory, queried on every page open.
-        addSection(R.string.sk_eximport_title)
-        val (eximportStatus, eximportWarn) = eximportPageStatus()
-        addActionRow(
-            getString(R.string.sk_eximport_open), eximportStatus,
-            if (eximportWarn) WARN_COLOR else null, rowL1Px, main = true, opens = true
-        ) { openEximportSheet() }
-        // …and, right below the export rows, the automation gate: the same
-        // export run headlessly by a sister app's 保存復元 task, plus (contract
-        // v2) the data door 応用管理 uses to back this app up with its data.
-        // Three rows, in the order every sister app shows them.
-        addSwitchRow(
-            R.string.sk_automation_enabled, SkAutomation.isEnabled, rowL1Px,
-            R.string.sk_automation_enabled_desc
-        ) { SkAutomation.isEnabled = it }
-        addSwitchRow(
-            R.string.sk_automation_require_token, SkAutomation.isTokenRequired, rowL1Px,
-            R.string.sk_automation_require_token_desc
-        ) {
-            SkAutomation.isTokenRequired = it
-            buildRows()
-        }
-        // Hidden while the token is not being asked for: a 48-character secret sitting under an
-        // off switch invites 白い熊 to paste it somewhere it will do nothing.
-        if (SkAutomation.isTokenRequired) {
-            addAutomationTokenRow(rowL1Px)
-        }
-
-        // Foundation — the colors everything else inherits from
-        addSection(R.string.sk_ui_group_foundation)
-        addSwitchRow(R.string.sk_ui_theme_enabled, SkUi.isSkThemeEnabled, rowL1Px) {
-            SkUi.isSkThemeEnabled = it
-            recreate()
-        }
-        SkThemeSlot.entries.filter { it.group == SkThemeGroup.FOUNDATION }.forEach {
-            addColorRow(it, rowL1Px)
+        section("eximport", R.string.sk_eximport_title, R.drawable.sk_ic_swap, SkIconRole.SHARE) {
+            val (eximportStatus, eximportWarn) = eximportPageStatus()
+            addActionRow(
+                getString(R.string.sk_eximport_open), eximportStatus,
+                if (eximportWarn) skColor(SkThemeSlot.DANGER) else null, rowL1Px, main = true,
+                opens = true, icon = R.drawable.sk_ic_swap, role = SkIconRole.SHARE
+            ) { openEximportSheet() }
+            // …and, right below the export rows, the automation gate: the same
+            // export run headlessly by a sister app's 保存復元 task, plus (contract
+            // v2) the data door 応用管理 uses to back this app up with its data.
+            // Three rows, in the order every sister app shows them.
+            addSwitchRow(
+                R.string.sk_automation_enabled, SkAutomation.isEnabled, rowL1Px,
+                R.string.sk_automation_enabled_desc
+            ) { SkAutomation.isEnabled = it }
+            addSwitchRow(
+                R.string.sk_automation_require_token, SkAutomation.isTokenRequired, rowL1Px,
+                R.string.sk_automation_require_token_desc
+            ) {
+                SkAutomation.isTokenRequired = it
+                buildRows()
+            }
+            // Hidden while the token is not being asked for: a 48-character secret sitting under an
+            // off switch invites 白い熊 to paste it somewhere it will do nothing.
+            if (SkAutomation.isTokenRequired) {
+                addAutomationTokenRow(rowL1Px)
+            }
         }
 
-        // Toolbar
-        addSection(R.string.sk_ui_group_toolbar)
-        addColorRow(SkThemeSlot.TOOLBAR_BACKGROUND, rowL1Px)
-        addTextRow(SkThemeSlot.TOOLBAR_TITLE, rowL1Px)
-        addTextRow(SkThemeSlot.TOOLBAR_SUBTITLE, rowL1Px)
-        addColorRow(SkThemeSlot.TOOLBAR_ICONS, rowL1Px)
+            // Foundation — the colors everything else inherits from
+        section("foundation", R.string.sk_ui_group_foundation, R.drawable.sk_ic_palette, SkIconRole.VIEW) {
+            addSwitchRow(
+                R.string.sk_ui_theme_enabled, SkUi.isSkThemeEnabled, rowL1Px,
+                R.string.sk_ui_theme_enabled_desc
+            ) {
+                SkUi.isSkThemeEnabled = it
+                recreate()
+            }
+            SkThemeSlot.entries.filter { it.group == SkThemeGroup.FOUNDATION }.forEach {
+                addColorRow(it, rowL1Px)
+            }
+        }
 
-        // Breadcrumbs
-        addSection(R.string.sk_ui_group_breadcrumbs)
-        addTextRow(SkThemeSlot.BREADCRUMB_SELECTED, rowL1Px)
-        addColorRow(SkThemeSlot.BREADCRUMB_UNSELECTED, rowL1Px)
-        addColorRow(SkThemeSlot.BREADCRUMB_ARROWS, rowL1Px)
+        section("text", R.string.sk_ui_group_text, R.drawable.sk_ic_text, SkIconRole.WRITE) {
+            addGroupRows(SkThemeGroup.TEXT)
+        }
+        section("buttons", R.string.sk_ui_group_buttons, R.drawable.sk_ic_button, SkIconRole.VIEW) {
+            addGroupRows(SkThemeGroup.BUTTONS)
+        }
+        section("dialogs", R.string.sk_ui_group_dialogs, R.drawable.sk_ic_window, SkIconRole.VIEW) {
+            addGroupRows(SkThemeGroup.DIALOGS)
+        }
+        section(
+            "switches", R.string.sk_ui_group_switches, R.drawable.sk_ic_toggle, SkIconRole.VIEW
+        ) {
+            addGroupRows(SkThemeGroup.SWITCHES)
+        }
+        section("marks", R.string.sk_ui_group_marks, R.drawable.sk_ic_check_box, SkIconRole.VIEW) {
+            addGroupRows(SkThemeGroup.MARKS)
+        }
+        section("menus", R.string.sk_ui_group_menus, R.drawable.sk_ic_list, SkIconRole.VIEW) {
+            addGroupRows(SkThemeGroup.MENUS)
+        }
+        section("lists", R.string.sk_ui_group_lists, R.drawable.sk_ic_list, SkIconRole.VIEW) {
+            addGroupRows(SkThemeGroup.LISTS)
+        }
+        section("fields", R.string.sk_ui_group_fields, R.drawable.sk_ic_field, SkIconRole.WRITE) {
+            addGroupRows(SkThemeGroup.FIELDS)
+        }
+        section("bars", R.string.sk_ui_group_bars, R.drawable.sk_ic_layers, SkIconRole.VIEW) {
+            addNote(R.string.sk_ui_bars_note, rowL1Px)
+            addGroupRows(SkThemeGroup.BARS)
+        }
+        section("toasts", R.string.sk_ui_group_toasts, R.drawable.sk_ic_bell, SkIconRole.VIEW) {
+            addGroupRows(SkThemeGroup.TOASTS)
+        }
 
-        // File list
-        addSection(R.string.sk_ui_group_file_list)
-        val updateFileListPreview = addFileListPreview(rowL1Px)
-        addSubgroup(R.string.sk_ui_subgroup_text)
-        addTextRow(SkThemeSlot.FILE_NAME, rowL2Px)
-        addTextRow(SkThemeSlot.FILE_DESCRIPTION, rowL2Px)
-        addSubgroup(R.string.sk_ui_subgroup_icons)
-        addColorRow(SkThemeSlot.FILE_ICONS, rowL2Px)
-        addSliderRow(
-            R.string.sk_ui_file_icon_size, 16, 64, SkUi.fileIconSizeDp, rowL2Px
+            // Toolbar
+        section("toolbar", R.string.sk_ui_group_toolbar, R.drawable.sk_ic_window, SkIconRole.VIEW) {
+            addColorRow(SkThemeSlot.TOOLBAR_BACKGROUND, rowL1Px)
+            addTextRow(SkThemeSlot.TOOLBAR_TITLE, rowL1Px)
+            addTextRow(SkThemeSlot.TOOLBAR_SUBTITLE, rowL1Px)
+            addColorRow(SkThemeSlot.TOOLBAR_ICONS, rowL1Px)
+        }
+
+            // Breadcrumbs
+        section("breadcrumbs", R.string.sk_ui_group_breadcrumbs, R.drawable.arrow_end_icon_white_24dp, SkIconRole.OPEN) {
+            addTextRow(SkThemeSlot.BREADCRUMB_SELECTED, rowL1Px)
+            addColorRow(SkThemeSlot.BREADCRUMB_UNSELECTED, rowL1Px)
+            addColorRow(SkThemeSlot.BREADCRUMB_ARROWS, rowL1Px)
+        }
+
+            // File list
+        section("file_list", R.string.sk_ui_group_file_list, R.drawable.file_icon_white_24dp, SkIconRole.OPEN) {
+            val updateFileListPreview = addFileListPreview(rowL1Px)
+            addSubgroup(R.string.sk_ui_subgroup_text)
+            addTextRow(SkThemeSlot.FILE_NAME, rowL2Px)
+            addTextRow(SkThemeSlot.FILE_DESCRIPTION, rowL2Px)
+            addSubgroup(R.string.sk_ui_subgroup_icons)
+            addColorRow(SkThemeSlot.FILE_ICONS, rowL2Px)
+            addColorRow(SkThemeSlot.FILE_BADGE, rowL2Px)
+            addColorRow(SkThemeSlot.GRID_OUTLINE, rowL2Px)
+            addSliderRow(
+                R.string.sk_ui_file_icon_size, 16, 64, SkUi.fileIconSizeDp, rowL2Px
+            ) {
+                SkUi.fileIconSizeDp = it
+                updateFileListPreview()
+            }
+            addSubgroup(R.string.sk_ui_subgroup_grid)
+            val updateGridPreview = addGridPreview(rowL2Px)
+            addTextRow(SkThemeSlot.GRID_TEXT, rowL2Px)
+            addSliderRow(
+                R.string.sk_ui_grid_image_width, 48, 320, SkUi.gridImageWidthDp, rowL2Px
+            ) {
+                SkUi.gridImageWidthDp = it
+                updateGridPreview()
+            }
+            addSliderRow(
+                R.string.sk_ui_grid_image_height, 48, 320, SkUi.gridImageHeightDp, rowL2Px
+            ) {
+                SkUi.gridImageHeightDp = it
+                updateGridPreview()
+            }
+            addSliderRow(
+                R.string.sk_ui_grid_padding_h, 0, 32, SkUi.gridPaddingHDp, rowL2Px
+            ) {
+                SkUi.gridPaddingHDp = it
+                updateGridPreview()
+            }
+            addSliderRow(
+                R.string.sk_ui_grid_padding_v, 0, 32, SkUi.gridPaddingVDp, rowL2Px
+            ) {
+                SkUi.gridPaddingVDp = it
+                updateGridPreview()
+            }
+            addSliderRow(
+                R.string.sk_ui_grid_text_gap, 0, 24, SkUi.gridTextGapDp, rowL2Px
+            ) {
+                SkUi.gridTextGapDp = it
+                updateGridPreview()
+            }
+            addSwitchRow(
+                R.string.sk_ui_grid_text_overlay, SkUi.isGridTextOverlay, rowL2Px
+            ) {
+                SkUi.isGridTextOverlay = it
+                updateGridPreview()
+            }
+            addSwitchRow(
+                R.string.sk_ui_grid_text_show, SkUi.isGridTextVisible, rowL2Px
+            ) {
+                SkUi.isGridTextVisible = it
+                updateGridPreview()
+            }
+            addSubgroup(R.string.sk_ui_subgroup_separators)
+            listOf(
+                FileViewType.LIST to R.string.sk_view_list,
+                FileViewType.COMPACT to R.string.sk_view_compact,
+                FileViewType.COLUMN to R.string.sk_view_column,
+                FileViewType.DETAILED to R.string.sk_view_detailed,
+                FileViewType.WRAPPED to R.string.sk_view_wrapped
+            ).forEach { (separatorViewType, nameRes) ->
+                addSliderRowText(
+                    getString(nameRes), 0, 8,
+                    SkSeparators.getGlobalThickness(separatorViewType), rowL2Px
+                ) { SkSeparators.setGlobalThickness(separatorViewType, it) }
+                addCustomColorRow(
+                    getString(R.string.sk_ui_separator_color_format, getString(nameRes)),
+                    SkSeparators.getGlobalColor(separatorViewType), rowL2Px
+                ) { SkSeparators.setGlobalColor(separatorViewType, it) }
+            }
+            addSubgroup(R.string.sk_ui_subgroup_options)
+            addSliderRow(
+                R.string.sk_ui_file_padding, 0, 24, SkUi.filePaddingDp, rowL2Px
+            ) {
+                SkUi.filePaddingDp = it
+                updateFileListPreview()
+            }
+            addSwitchRow(
+                R.string.settings_file_list_animation_title,
+                Settings.FILE_LIST_ANIMATION.valueCompat,
+                rowL2Px
+            ) { Settings.FILE_LIST_ANIMATION.putValue(it) }
+            addValueRow(
+                R.string.settings_file_name_ellipsize_title,
+                ellipsizeLabel(Settings.FILE_NAME_ELLIPSIZE.valueCompat),
+                rowL2Px
+            ) { valueView ->
+                val entries = resources.getStringArray(R.array.settings_file_name_ellipsize_entries)
+                SkMaterialAlertDialogBuilder(this)
+                    .setTitle(R.string.settings_file_name_ellipsize_title)
+                    .setSingleChoiceItems(
+                        entries, Settings.FILE_NAME_ELLIPSIZE.valueCompat.ordinal
+                    ) { dialog, which ->
+                        Settings.FILE_NAME_ELLIPSIZE.putValue(TextUtils.TruncateAt.entries[which])
+                        valueView.text = ellipsizeLabel(Settings.FILE_NAME_ELLIPSIZE.valueCompat)
+                        dialog.dismiss()
+                    }
+                    .setNegativeButton(android.R.string.cancel, null)
+                    .show()
+            }
+        }
+
+            // Navigation drawer
+        section("drawer", R.string.sk_ui_group_drawer, R.drawable.menu_icon_control_normal_24dp, SkIconRole.VIEW) {
+            addColorRow(SkThemeSlot.DRAWER_BACKGROUND, rowL1Px)
+            addTextRow(SkThemeSlot.DRAWER_ITEM, rowL1Px)
+            addColorRow(SkThemeSlot.DRAWER_ICONS, rowL1Px)
+        }
+
+            // Tab bar
+        section("tabs", R.string.sk_ui_group_tabs, R.drawable.sk_ic_tab, SkIconRole.VIEW) {
+            addColorRow(SkThemeSlot.TAB_BACKGROUND, rowL1Px)
+            addTextRow(SkThemeSlot.TAB_SELECTED, rowL1Px)
+            addColorRow(SkThemeSlot.TAB_UNSELECTED, rowL1Px)
+            addColorRow(SkThemeSlot.TAB_BUTTONS, rowL1Px)
+        }
+
+            // Bottom bar
+        section("bottom_bar", R.string.sk_ui_group_bottom_bar, R.drawable.paste_icon_control_normal_24dp, SkIconRole.WRITE) {
+            addColorRow(SkThemeSlot.BOTTOM_BAR_BACKGROUND, rowL1Px)
+            addTextRow(SkThemeSlot.BOTTOM_BAR_TEXT, rowL1Px)
+            addColorRow(SkThemeSlot.BOTTOM_BAR_ICONS, rowL1Px)
+        }
+
+            // Speed dial
+        section("speed_dial", R.string.sk_ui_group_speed_dial, R.drawable.add_icon_white_24dp, SkIconRole.WRITE) {
+            addColorRow(SkThemeSlot.FAB_BACKGROUND, rowL1Px)
+            addColorRow(SkThemeSlot.FAB_ICON, rowL1Px)
+        }
+
+            // Audio mini-player
+        section("audio_player", R.string.sk_ui_group_audio_player, R.drawable.sk_ic_play, SkIconRole.OPEN) {
+            addColorRow(SkThemeSlot.AUDIO_PLAYER_BACKGROUND, rowL1Px)
+            addTextRow(SkThemeSlot.AUDIO_PLAYER_TITLE, rowL1Px)
+            addTextRow(SkThemeSlot.AUDIO_PLAYER_TIME, rowL1Px)
+            addColorRow(SkThemeSlot.AUDIO_PLAYER_CONTROLS, rowL1Px)
+        }
+
+        section("extract_progress", R.string.sk_ui_group_extract_progress, R.drawable.extract_icon_control_normal_24dp, SkIconRole.OPEN) {
+            addColorRow(SkThemeSlot.EXTRACT_PROGRESS_BAR, rowL1Px)
+            addColorRow(SkThemeSlot.EXTRACT_PROGRESS_TRACK, rowL1Px)
+            addTextRow(SkThemeSlot.EXTRACT_PROGRESS_NAME, rowL1Px)
+            addTextRow(SkThemeSlot.EXTRACT_PROGRESS_INFO, rowL1Px)
+            addTextRow(SkThemeSlot.EXTRACT_PROGRESS_SPEED, rowL1Px)
+        }
+
+            // Share → Termux
+        section("share", R.string.sk_ui_group_share, R.drawable.sk_share_icon_control_normal_24dp, SkIconRole.SHARE) {
+            addSwitchRow(R.string.sk_ui_share_one_target, SkTermux.oneTargetMode, rowL1Px) {
+                SkTermux.oneTargetMode = it
+            }
+            addValueRow(R.string.sk_ui_share_staging_dir, SkTermux.stagingDir, rowL1Px) { valueView ->
+                showStagingDirDialog(valueView)
+            }
+        }
+
+            // APK files: what a tap on an APK / XAPK / APKS / APKM does (SkApkRoute).
+        section("apk", R.string.sk_ui_group_apk, R.drawable.sk_ic_shield, SkIconRole.BLOCK) {
+            addValueRow(
+                R.string.sk_ui_apk_route, getString(SkApkRoute.mode.labelRes), rowL1Px
+            ) { valueView -> showApkRouteDialog(valueView) }
+
+        }
+        section(
+            "maintenance", R.string.sk_ui_group_maintenance, R.drawable.reset_icon_white_24dp,
+            SkIconRole.BLOCK
         ) {
-            SkUi.fileIconSizeDp = it
-            updateFileListPreview()
+            addActionRow(
+                getString(R.string.sk_ui_reset_section_order),
+                getString(R.string.sk_ui_reset_section_order_desc), null, rowL1Px, main = false,
+                opens = false, icon = R.drawable.sk_ic_swap, role = SkIconRole.VIEW
+            ) {
+                SkUi.resetUiSectionOrder()
+                buildRows()
+            }
+            addActionRow(
+                getString(R.string.sk_ui_reset_all_colors),
+                getString(R.string.sk_ui_reset_all_colors_desc), null, rowL1Px, main = false,
+                opens = true, icon = R.drawable.sk_ic_palette, role = SkIconRole.DELETE,
+                destructive = true
+            ) {
+                SkMaterialAlertDialogBuilder(this, destructive = true)
+                    .setTitle(R.string.sk_ui_reset_all_colors)
+                    .setMessage(R.string.sk_ui_reset_all_colors_message)
+                    .setPositiveButton(R.string.sk_ui_reset_all_colors) { _, _ ->
+                        SkUi.clearAllColorOverrides()
+                        buildRows()
+                    }
+                    .setNegativeButton(android.R.string.cancel, null)
+                    .show()
+            }
         }
-        addSubgroup(R.string.sk_ui_subgroup_grid)
-        val updateGridPreview = addGridPreview(rowL2Px)
-        addTextRow(SkThemeSlot.GRID_TEXT, rowL2Px)
-        addSliderRow(
-            R.string.sk_ui_grid_image_width, 48, 320, SkUi.gridImageWidthDp, rowL2Px
-        ) {
-            SkUi.gridImageWidthDp = it
-            updateGridPreview()
+
+        // The stored order: stored keys first, as far as they still exist, then any section
+        // added since at its built place.
+        val stored = SkUi.uiSectionOrder.filter { key -> sections.any { it.key == key } }
+            .distinct()
+        val ordered = stored.mapNotNull { key -> sections.find { it.key == key } } +
+            sections.filter { it.key !in stored }
+        addSectionIndex(ordered)
+        ordered.forEach { addSection(it) }
+    }
+
+    private fun addGroupRows(group: SkThemeGroup) {
+        SkThemeSlot.entries.filter { it.group == group }.forEach {
+            if (it.hasFont) addTextRow(it, rowL1Px) else addColorRow(it, rowL1Px)
         }
-        addSliderRow(
-            R.string.sk_ui_grid_image_height, 48, 320, SkUi.gridImageHeightDp, rowL2Px
-        ) {
-            SkUi.gridImageHeightDp = it
-            updateGridPreview()
-        }
-        addSliderRow(
-            R.string.sk_ui_grid_padding_h, 0, 32, SkUi.gridPaddingHDp, rowL2Px
-        ) {
-            SkUi.gridPaddingHDp = it
-            updateGridPreview()
-        }
-        addSliderRow(
-            R.string.sk_ui_grid_padding_v, 0, 32, SkUi.gridPaddingVDp, rowL2Px
-        ) {
-            SkUi.gridPaddingVDp = it
-            updateGridPreview()
-        }
-        addSliderRow(
-            R.string.sk_ui_grid_text_gap, 0, 24, SkUi.gridTextGapDp, rowL2Px
-        ) {
-            SkUi.gridTextGapDp = it
-            updateGridPreview()
-        }
-        addSwitchRow(
-            R.string.sk_ui_grid_text_overlay, SkUi.isGridTextOverlay, rowL2Px
-        ) {
-            SkUi.isGridTextOverlay = it
-            updateGridPreview()
-        }
-        addSwitchRow(
-            R.string.sk_ui_grid_text_show, SkUi.isGridTextVisible, rowL2Px
-        ) {
-            SkUi.isGridTextVisible = it
-            updateGridPreview()
-        }
-        addSubgroup(R.string.sk_ui_subgroup_separators)
-        listOf(
-            FileViewType.LIST to R.string.sk_view_list,
-            FileViewType.COMPACT to R.string.sk_view_compact,
-            FileViewType.COLUMN to R.string.sk_view_column,
-            FileViewType.DETAILED to R.string.sk_view_detailed,
-            FileViewType.WRAPPED to R.string.sk_view_wrapped
-        ).forEach { (separatorViewType, nameRes) ->
-            addSliderRowText(
-                getString(nameRes), 0, 8,
-                SkSeparators.getGlobalThickness(separatorViewType), rowL2Px
-            ) { SkSeparators.setGlobalThickness(separatorViewType, it) }
-            addCustomColorRow(
-                getString(R.string.sk_ui_separator_color_format, getString(nameRes)),
-                SkSeparators.getGlobalColor(separatorViewType), rowL2Px
-            ) { SkSeparators.setGlobalColor(separatorViewType, it) }
-        }
-        addSubgroup(R.string.sk_ui_subgroup_options)
-        addSliderRow(
-            R.string.sk_ui_file_padding, 0, 24, SkUi.filePaddingDp, rowL2Px
-        ) {
-            SkUi.filePaddingDp = it
-            updateFileListPreview()
-        }
-        addSwitchRow(
-            R.string.settings_file_list_animation_title,
-            Settings.FILE_LIST_ANIMATION.valueCompat,
-            rowL2Px
-        ) { Settings.FILE_LIST_ANIMATION.putValue(it) }
-        addValueRow(
-            R.string.settings_file_name_ellipsize_title,
-            ellipsizeLabel(Settings.FILE_NAME_ELLIPSIZE.valueCompat),
-            rowL2Px
-        ) { valueView ->
-            val entries = resources.getStringArray(R.array.settings_file_name_ellipsize_entries)
-            SkMaterialAlertDialogBuilder(this)
-                .setTitle(R.string.settings_file_name_ellipsize_title)
-                .setSingleChoiceItems(
-                    entries, Settings.FILE_NAME_ELLIPSIZE.valueCompat.ordinal
-                ) { dialog, which ->
-                    Settings.FILE_NAME_ELLIPSIZE.putValue(TextUtils.TruncateAt.entries[which])
-                    valueView.text = ellipsizeLabel(Settings.FILE_NAME_ELLIPSIZE.valueCompat)
-                    dialog.dismiss()
+    }
+
+    // A note that belongs to a whole section rather than to one row: dim gold, nothing to press.
+    private fun addNote(@StringRes textRes: Int, indent: Int) {
+        rowTarget.addView(
+            TextView(this).apply {
+                text = getString(textRes)
+                textSize = 13f
+                setTextColor(skColor(SkThemeSlot.NOTE))
+                setPaddingRelative(indent, dp(2), dp(16), dp(2))
+            }
+        )
+    }
+
+    // The index: one small chip for every section. A tap unfolds the section and scrolls to
+    // it; a long press drags the chip, and the sections follow its new place.
+    private fun addSectionIndex(ordered: List<Section>) {
+        val index = SkSectionIndex.build(
+            this, ordered.map { SkSectionIndex.Item(it.key, getString(it.labelRes)) },
+            skColor(SkThemeSlot.PILL_FRAME), skColor(SkThemeSlot.PILL_TEXT),
+            onJump = { key ->
+                if (key !in SkUi.uiSectionsOpen) {
+                    SkUi.uiSectionsOpen = SkUi.uiSectionsOpen + key
+                    buildRows()
                 }
-                .setNegativeButton(android.R.string.cancel, null)
-                .show()
-        }
-
-        // Navigation drawer
-        addSection(R.string.sk_ui_group_drawer)
-        addColorRow(SkThemeSlot.DRAWER_BACKGROUND, rowL1Px)
-        addTextRow(SkThemeSlot.DRAWER_ITEM, rowL1Px)
-        addColorRow(SkThemeSlot.DRAWER_ICONS, rowL1Px)
-
-        // Tab bar
-        addSection(R.string.sk_ui_group_tabs)
-        addColorRow(SkThemeSlot.TAB_BACKGROUND, rowL1Px)
-        addTextRow(SkThemeSlot.TAB_SELECTED, rowL1Px)
-        addColorRow(SkThemeSlot.TAB_UNSELECTED, rowL1Px)
-        addColorRow(SkThemeSlot.TAB_BUTTONS, rowL1Px)
-
-        // Bottom bar
-        addSection(R.string.sk_ui_group_bottom_bar)
-        addColorRow(SkThemeSlot.BOTTOM_BAR_BACKGROUND, rowL1Px)
-        addTextRow(SkThemeSlot.BOTTOM_BAR_TEXT, rowL1Px)
-        addColorRow(SkThemeSlot.BOTTOM_BAR_ICONS, rowL1Px)
-
-        // Speed dial
-        addSection(R.string.sk_ui_group_speed_dial)
-        addColorRow(SkThemeSlot.FAB_BACKGROUND, rowL1Px)
-        addColorRow(SkThemeSlot.FAB_ICON, rowL1Px)
-
-        // Audio mini-player
-        addSection(R.string.sk_ui_group_audio_player)
-        addColorRow(SkThemeSlot.AUDIO_PLAYER_BACKGROUND, rowL1Px)
-        addTextRow(SkThemeSlot.AUDIO_PLAYER_TITLE, rowL1Px)
-        addTextRow(SkThemeSlot.AUDIO_PLAYER_TIME, rowL1Px)
-        addColorRow(SkThemeSlot.AUDIO_PLAYER_CONTROLS, rowL1Px)
-
-        // Share → Termux
-        addSection(R.string.sk_ui_group_share)
-        addSwitchRow(R.string.sk_ui_share_one_target, SkTermux.oneTargetMode, rowL1Px) {
-            SkTermux.oneTargetMode = it
-        }
-        addValueRow(R.string.sk_ui_share_staging_dir, SkTermux.stagingDir, rowL1Px) { valueView ->
-            showStagingDirDialog(valueView)
-        }
-
-        // APK files: what a tap on an APK / XAPK / APKS / APKM does (SkApkRoute).
-        addSection(R.string.sk_ui_group_apk)
-        addValueRow(
-            R.string.sk_ui_apk_route, getString(SkApkRoute.mode.labelRes), rowL1Px
-        ) { valueView -> showApkRouteDialog(valueView) }
+                binding.holder.post {
+                    sectionHeaders[key]?.let { header ->
+                        (binding.holder.parent as? androidx.core.widget.NestedScrollView)
+                            ?.smoothScrollTo(0, header.top)
+                    }
+                }
+            },
+            onReordered = {
+                SkUi.uiSectionOrder = it
+                buildRows()
+            }
+        )
+        binding.holder.addView(
+            LinearLayout(this).apply {
+                setPaddingRelative(dp(HEADING_INDENT_DP), dp(6), dp(16), dp(2))
+                addView(
+                    index, LinearLayout.LayoutParams(
+                        LinearLayout.LayoutParams.MATCH_PARENT,
+                        LinearLayout.LayoutParams.WRAP_CONTENT
+                    )
+                )
+            }
+        )
     }
 
     private fun showApkRouteDialog(valueView: TextView) {
@@ -403,7 +586,7 @@ class SkUiActivity : AppActivity() {
         textSizeSp: Float,
         underlineHeightDp: Float
     ): LinearLayout {
-        val accent = skColor(SkThemeSlot.ACCENT)
+        val accent = skColor(SkThemeSlot.HEADING)
         val box = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
             layoutParams = LinearLayout.LayoutParams(
@@ -429,39 +612,97 @@ class SkUiActivity : AppActivity() {
         return box
     }
 
-    // kxkb-style section header: an edge-to-edge 1px accent rule separating it
-    // from the previous section, then a 20sp bold accent title with a 2.5dp
-    // text-wide underline.
-    private fun addSection(@StringRes labelRes: Int) {
-        val first = binding.holder.childCount == 0
+    // A folding section: a 1 px darker-accent rule separating it from what is above — kept
+    // whether the section is folded or open — then its heading: the section's icon, a 20 sp
+    // bold title with a 2.5 dp text-wide underline, and at the right a › when folded, a ⌄ when
+    // open. A tap on the heading folds or unfolds the rows. Folded unless it was opened; the
+    // rows of a folded section are not built at all.
+    private fun addSection(section: Section) {
+        val isOpen = section.key in SkUi.uiSectionsOpen
+        val heading = skColor(SkThemeSlot.HEADING)
         val holder = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
-            setPadding(0, dp(if (first) 12 else 10), 0, dp(2))
-        }
-        if (!first) {
-            holder.addView(
-                View(this).apply {
-                    setBackgroundColor(skColor(SkThemeSlot.ACCENT))
-                    layoutParams = LinearLayout.LayoutParams(
-                        LinearLayout.LayoutParams.MATCH_PARENT, 1
-                    )
-                }
-            )
+            setPadding(0, dp(6), 0, dp(2))
         }
         holder.addView(
-            LinearLayout(this).apply {
-                orientation = LinearLayout.VERTICAL
-                setPaddingRelative(dp(HEADING_INDENT_DP), dp(8), 0, 0)
-                addView(makeUnderlinedHeading(labelRes, 20f, 2.5f))
+            View(this).apply {
+                setBackgroundColor(skColor(SkThemeSlot.MENU_DIVIDER))
+                layoutParams = LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.MATCH_PARENT, 1
+                )
             }
         )
+        val headingBox = makeUnderlinedHeading(section.labelRes, 20f, 2.5f)
+        (headingBox.getChildAt(0) as TextView).let { applyRowIcon(it, section.icon, section.role) }
+        val header = LinearLayout(this).apply {
+            orientation = LinearLayout.HORIZONTAL
+            gravity = Gravity.CENTER_VERTICAL
+            setPaddingRelative(dp(HEADING_INDENT_DP), dp(8), dp(16), dp(6))
+            setBackgroundResource(android.R.drawable.list_selector_background)
+            addView(headingBox)
+            addView(
+                View(this@SkUiActivity),
+                LinearLayout.LayoutParams(0, 1, 1f)
+            )
+            // › when folded, ⌄ when open: the same mark, turned.
+            addView(
+                android.widget.ImageView(this@SkUiActivity).apply {
+                    setImageDrawable(
+                        androidx.appcompat.content.res.AppCompatResources.getDrawable(
+                            this@SkUiActivity, R.drawable.sk_ic_chevron
+                        )
+                    )
+                    imageTintList = ColorStateList.valueOf(heading)
+                    rotation = if (isOpen) 90f else 0f
+                }, LinearLayout.LayoutParams(dp(24), dp(24))
+            )
+            setOnClickListener {
+                val open = SkUi.uiSectionsOpen
+                SkUi.uiSectionsOpen =
+                    if (section.key in open) open - section.key else open + section.key
+                buildRows()
+            }
+        }
+        holder.addView(header)
+        sectionHeaders[section.key] = holder
+        if (isOpen) {
+            val sectionBody = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
+            holder.addView(sectionBody)
+            rowTarget = sectionBody
+            section.build()
+            rowTarget = binding.holder
+        }
         binding.holder.addView(holder)
+    }
+
+    // The icon of a row, at the start of its label: coloured by what the row does and as tall
+    // as the label's text line (1.25 × its text size), never under 18 dp.
+    private fun applyRowIcon(label: TextView, iconRes: Int, role: SkIconRole) {
+        if (iconRes == 0) {
+            return
+        }
+        val size = maxOf(dp(18), Math.round(label.textSize * 1.25f))
+        val icon = androidx.appcompat.content.res.AppCompatResources.getDrawable(this, iconRes)
+            ?.mutate() ?: return
+        icon.setTint(skColor(role))
+        icon.setBounds(0, 0, size, size)
+        label.compoundDrawablePadding = dp(8)
+        label.setCompoundDrawablesRelative(icon, null, null, null)
+    }
+
+    // The 2 dp dim-gold rule down the left edge of a row that carries an explanation, 10 dp
+    // before its text.
+    private fun ruled(row: View) {
+        row.foreground = SkLeftRule(
+            row.paddingStart - dp(12).toFloat(), dp(2).toFloat(), dp(2).toFloat(),
+            skColor(SkThemeSlot.NOTE)
+        )
     }
 
     // A sub-section heading one level down: 17sp bold with a 1.5dp text-wide
     // underline, no rule of its own.
     private fun addSubgroup(@StringRes labelRes: Int) {
-        binding.holder.addView(
+        rowTarget.addView(
             LinearLayout(this).apply {
                 orientation = LinearLayout.VERTICAL
                 setPaddingRelative(dp(SUBHEADING_INDENT_DP), dp(10), 0, dp(2))
@@ -481,23 +722,39 @@ class SkUiActivity : AppActivity() {
             setBackgroundResource(android.R.drawable.list_selector_background)
         }
 
-    private fun makeLabel(@StringRes labelRes: Int): TextView = makeLabelText(getString(labelRes))
+    private fun makeLabel(
+        @StringRes labelRes: Int,
+        icon: Int,
+        role: SkIconRole = SkIconRole.VIEW
+    ): TextView = makeLabelText(getString(labelRes), icon, role)
 
-    private fun makeLabelText(labelText: String): TextView =
+    private fun makeLabelText(
+        labelText: String,
+        icon: Int,
+        role: SkIconRole = SkIconRole.VIEW
+    ): TextView =
         TextView(this).apply {
             text = labelText
             textSize = 16f
             setTextColor(skColor(SkThemeSlot.TEXT))
             layoutParams = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f)
+            applyRowIcon(this, icon, role)
         }
 
     // The label, optionally over a smaller explanatory line — both taking the
     // row's free width, so the control on the right keeps its natural size.
-    private fun makeLabelColumn(@StringRes labelRes: Int, @StringRes descriptionRes: Int?): View {
-        val label = makeLabel(labelRes)
+    private fun makeLabelColumn(
+        @StringRes labelRes: Int,
+        @StringRes descriptionRes: Int?,
+        icon: Int,
+        role: SkIconRole
+    ): View {
+        val label = makeLabel(labelRes, icon, role)
         if (descriptionRes == null) {
             return label
         }
+        // An explained row: bold label, dim-gold description.
+        label.setTypeface(label.typeface, android.graphics.Typeface.BOLD)
         return LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
             layoutParams = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f)
@@ -509,7 +766,7 @@ class SkUiActivity : AppActivity() {
                 TextView(this@SkUiActivity).apply {
                     text = getString(descriptionRes)
                     textSize = 13f
-                    setTextColor(skColor(SkThemeSlot.TEXT_SECONDARY))
+                    setTextColor(skColor(SkThemeSlot.NOTE))
                     setPadding(0, dp(1), dp(8), 0)
                 }
             )
@@ -521,14 +778,14 @@ class SkUiActivity : AppActivity() {
             background = GradientDrawable().apply {
                 shape = GradientDrawable.OVAL
                 setColor(color)
-                setStroke(dp(1), 0x66888888)
+                setStroke(dp(1), skColor(SkThemeSlot.TEXT_TERTIARY))
             }
             layoutParams = LinearLayout.LayoutParams(dp(28), dp(28))
         }
 
     private fun addColorRow(slot: SkThemeSlot, indent: Int) {
         val row = makeRow(indent)
-        row.addView(makeLabel(slot.labelRes))
+        row.addView(makeLabel(slot.labelRes, R.drawable.sk_ic_palette))
         row.addView(makeSwatch(skColor(slot)))
         row.setOnClickListener {
             SkColorPickerDialog(this, skColor(slot)) { color ->
@@ -536,7 +793,7 @@ class SkUiActivity : AppActivity() {
                 buildRows()
             }
         }
-        binding.holder.addView(row)
+        rowTarget.addView(row)
     }
 
     // A color row for non-slot values (e.g. the per-view separator colors);
@@ -548,7 +805,7 @@ class SkUiActivity : AppActivity() {
         onResult: (Int?) -> Unit
     ) {
         val row = makeRow(indent)
-        row.addView(makeLabelText(labelText))
+        row.addView(makeLabelText(labelText, R.drawable.sk_ic_palette))
         row.addView(makeSwatch(color))
         row.setOnClickListener {
             SkColorPickerDialog(this, color) { newColor ->
@@ -556,7 +813,7 @@ class SkUiActivity : AppActivity() {
                 buildRows()
             }
         }
-        binding.holder.addView(row)
+        rowTarget.addView(row)
     }
 
     private fun addValueRow(
@@ -567,7 +824,7 @@ class SkUiActivity : AppActivity() {
         onClick: (TextView) -> Unit
     ) {
         val row = makeRow(indent)
-        row.addView(makeLabel(labelRes))
+        row.addView(makeLabel(labelRes, R.drawable.sk_ic_list, SkIconRole.OPEN))
         val valueView = TextView(this).apply {
             text = value
             textSize = 14f
@@ -575,7 +832,7 @@ class SkUiActivity : AppActivity() {
         }
         row.addView(valueView)
         row.setOnClickListener { onClick(valueView) }
-        binding.holder.addView(row)
+        rowTarget.addView(row)
     }
 
     // An action / navigation row: an outlined pill as wide as its label
@@ -589,9 +846,13 @@ class SkUiActivity : AppActivity() {
         indent: Int,
         main: Boolean,
         opens: Boolean,
+        icon: Int = 0,
+        role: SkIconRole = SkIconRole.VIEW,
+        destructive: Boolean = false,
         onClick: () -> Unit
     ) {
-        val ink = skColor(SkThemeSlot.ACCENT)
+        val ink = skColor(if (destructive) SkThemeSlot.DANGER else SkThemeSlot.PILL_TEXT)
+        val frame = skColor(if (destructive) SkThemeSlot.DANGER else SkThemeSlot.PILL_FRAME)
         val row = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
             setPaddingRelative(indent, dp(3), dp(16), dp(3))
@@ -600,7 +861,9 @@ class SkUiActivity : AppActivity() {
             orientation = LinearLayout.HORIZONTAL
             gravity = Gravity.CENTER_VERTICAL
             setPaddingRelative(dp(18), dp(9), dp(16), dp(9))
-            background = skPillBackground(densityPx, ink, main = main)
+            background = skPillBackground(
+                densityPx, frame, skColor(SkThemeSlot.PILL_GROUND), main
+            )
             setOnClickListener { onClick() }
         }
         pill.addView(
@@ -609,6 +872,7 @@ class SkUiActivity : AppActivity() {
                 textSize = 16f
                 setTextColor(ink)
                 if (main) setTypeface(typeface, android.graphics.Typeface.BOLD)
+                applyRowIcon(this, icon, role)
             }
         )
         if (opens) {
@@ -637,12 +901,13 @@ class SkUiActivity : AppActivity() {
                 TextView(this).apply {
                     text = summary
                     textSize = 13f
-                    setTextColor(summaryColor ?: skColor(SkThemeSlot.TEXT_SECONDARY))
+                    setTextColor(summaryColor ?: skColor(SkThemeSlot.NOTE))
                     setPaddingRelative(dp(18), dp(3), 0, 0)
                 }
             )
+            ruled(row)
         }
-        binding.holder.addView(row)
+        rowTarget.addView(row)
     }
 
     private fun addSwitchRow(
@@ -650,10 +915,15 @@ class SkUiActivity : AppActivity() {
         checked: Boolean,
         indent: Int,
         @StringRes descriptionRes: Int? = null,
+        icon: Int = R.drawable.sk_ic_toggle,
+        role: SkIconRole = SkIconRole.VIEW,
         onToggle: (Boolean) -> Unit
     ) {
         val row = makeRow(indent)
-        row.addView(makeLabelColumn(labelRes, descriptionRes))
+        row.addView(makeLabelColumn(labelRes, descriptionRes, icon, role))
+        if (descriptionRes != null) {
+            ruled(row)
+        }
         val switch = SkSwitch(this).apply {
             isChecked = checked
             minHeight = 0
@@ -662,7 +932,7 @@ class SkUiActivity : AppActivity() {
         row.addView(switch)
         switch.setOnCheckedChangeListener { _, isChecked -> onToggle(isChecked) }
         row.setOnClickListener { switch.toggle() }
-        binding.holder.addView(row)
+        rowTarget.addView(row)
     }
 
     // The automation shared secret: shown abbreviated, copied whole on tap (it
@@ -670,7 +940,7 @@ class SkUiActivity : AppActivity() {
     // at the end of the row.
     private fun addAutomationTokenRow(indent: Int) {
         val row = makeRow(indent)
-        row.addView(makeLabel(R.string.sk_automation_token))
+        row.addView(makeLabel(R.string.sk_automation_token, R.drawable.sk_ic_key, SkIconRole.BLOCK))
         val valueView = TextView(this).apply {
             text = SkAutomation.abbreviatedToken()
             textSize = 14f
@@ -694,7 +964,7 @@ class SkUiActivity : AppActivity() {
             clipboardManager.primaryText = SkAutomation.token
             showToast(R.string.sk_automation_token_copied)
         }
-        binding.holder.addView(row)
+        rowTarget.addView(row)
     }
 
     private fun confirmRegenerateToken(valueView: TextView) {
@@ -715,7 +985,7 @@ class SkUiActivity : AppActivity() {
         val holder = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
 
         val colorRow = makeRow(indent)
-        colorRow.addView(makeLabel(slot.labelRes))
+        colorRow.addView(makeLabel(slot.labelRes, R.drawable.sk_ic_palette))
         colorRow.addView(makeSwatch(skColor(slot)))
         colorRow.setOnClickListener {
             SkColorPickerDialog(this, skColor(slot)) { color ->
@@ -729,7 +999,7 @@ class SkUiActivity : AppActivity() {
 
         // Font family
         val fontRow = makeRow(subIndent)
-        fontRow.addView(makeLabel(R.string.sk_font))
+        fontRow.addView(makeLabel(R.string.sk_font, R.drawable.sk_ic_text, SkIconRole.WRITE))
         val fontValue = TextView(this).apply {
             text = skFontDisplayName(SkUi.getFontFamily(slot.key))
             textSize = 14f
@@ -753,7 +1023,7 @@ class SkUiActivity : AppActivity() {
 
         // Font weight
         val weightRow = makeRow(subIndent)
-        weightRow.addView(makeLabel(R.string.sk_font_weight))
+        weightRow.addView(makeLabel(R.string.sk_font_weight, R.drawable.sk_ic_text, SkIconRole.WRITE))
         val weightValue = TextView(this).apply {
             text = getString(SkFontWeight.fromValue(SkUi.getFontWeight(slot.key)).labelRes)
             textSize = 14f
@@ -782,7 +1052,7 @@ class SkUiActivity : AppActivity() {
         }
 
         val sizeRow = makeRow(subIndent)
-        sizeRow.addView(makeLabel(R.string.sk_font_size))
+        sizeRow.addView(makeLabel(R.string.sk_font_size, R.drawable.sk_ic_tune, SkIconRole.WRITE))
         val sizeValue = TextView(this).apply {
             textSize = 14f
             setTextColor(skColor(SkThemeSlot.TEXT_SECONDARY))
@@ -816,7 +1086,7 @@ class SkUiActivity : AppActivity() {
         refreshSample(sample, slot)
         holder.addView(sample)
 
-        binding.holder.addView(holder)
+        rowTarget.addView(holder)
     }
 
     // A generic labeled slider row; values are in dp.
@@ -838,7 +1108,7 @@ class SkUiActivity : AppActivity() {
         onChange: (Int) -> Unit
     ) {
         val row = makeRow(indent)
-        val label = makeLabelText(labelText)
+        val label = makeLabelText(labelText, R.drawable.sk_ic_tune)
         label.layoutParams = LinearLayout.LayoutParams(
             LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT
         )
@@ -866,7 +1136,7 @@ class SkUiActivity : AppActivity() {
 
             override fun onStopTrackingTouch(seekBar: SeekBar) {}
         })
-        binding.holder.addView(row)
+        rowTarget.addView(row)
     }
 
     // A live preview of a file row: icon size, padding, fonts and colors.
@@ -893,7 +1163,7 @@ class SkUiActivity : AppActivity() {
         textColumn.addView(nameView)
         textColumn.addView(descriptionView)
         row.addView(textColumn)
-        binding.holder.addView(row)
+        rowTarget.addView(row)
 
         val update = {
             val iconSizePx = dp(SkUi.fileIconSizeDp)
@@ -925,7 +1195,7 @@ class SkUiActivity : AppActivity() {
         }
         cell.addView(imageBox)
         cell.addView(nameView)
-        binding.holder.addView(cell)
+        rowTarget.addView(cell)
 
         val update = {
             val paddingHPx = dp(SkUi.gridPaddingHDp)
@@ -938,7 +1208,7 @@ class SkUiActivity : AppActivity() {
                 topMargin = paddingVPx
             }
             imageBox.background = GradientDrawable().apply {
-                setColor(0x22FFFF00)
+                setColor(skColor(SkThemeSlot.LIST_SELECTED))
                 setStroke(dp(1), skColor(SkThemeSlot.ACCENT))
                 cornerRadius = dp(4).toFloat()
             }

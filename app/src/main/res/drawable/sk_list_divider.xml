@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 
+<!-- 白い熊 fork: the divider of a list, read by the platform from the theme; its colour is
+     a role. -->
+<!-- Android 6 only: from Android 7 on drawable-v24/sk_list_divider.xml draws this in code. -->
 <shape xmlns:android="http://schemas.android.com/apk/res/android">
-    <solid android:color="@color/sk_yellow_divider" />
+    <solid android:color="@color/sk_role_list_divider" />
     <size android:height="1dp" />
 </shape>

@@ -14,6 +14,9 @@ import me.zhanghai.android.files.skui.SkMaterialAlertDialogBuilder
 import me.zhanghai.android.files.R
 import me.zhanghai.android.files.file.asExternalStorageUri
 import me.zhanghai.android.files.provider.document.resolver.ExternalStorageProviderHacks
+import me.zhanghai.android.files.skui.SkAction
+import me.zhanghai.android.files.skui.SkIconRole
+import me.zhanghai.android.files.skui.createWithActions
 import me.zhanghai.android.files.util.createIntent
 import me.zhanghai.android.files.util.finish
 import me.zhanghai.android.files.util.putArgs
@@ -23,14 +26,18 @@ class AddStorageDialogFragment : AppCompatDialogFragment() {
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog =
         SkMaterialAlertDialogBuilder(requireContext(), theme)
             .setTitle(R.string.storage_add_storage_title)
-            .apply {
-                val items = STORAGE_TYPES.map { getString(it.first) }.toTypedArray<CharSequence>()
-                setItems(items) { _, which ->
-                    startActivitySafe(STORAGE_TYPES[which].second)
-                    finish()
+            // 白い熊 fork: the list as icon pills (black-yellow theme), not as plain lines.
+            .createWithActions(
+                STORAGE_TYPES.map { (titleRes, intent) ->
+                    SkAction(
+                        getString(titleRes), R.drawable.add_icon_white_24dp, SkIconRole.WRITE,
+                        opens = true
+                    ) {
+                        startActivitySafe(intent)
+                        finish()
+                    }
                 }
-            }
-            .create()
+            )
 
     override fun onCancel(dialog: DialogInterface) {
         super.onCancel(dialog)

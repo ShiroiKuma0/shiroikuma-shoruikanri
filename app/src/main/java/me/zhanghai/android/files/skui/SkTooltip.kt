@@ -72,9 +72,11 @@ object SkTooltip {
         fun dp(value: Int): Int = (value * density).toInt()
         val textView = TextView(context).apply {
             this.text = text
-            setTextColor(skColor(SkThemeSlot.TEXT))
+            setTextColor(skColor(SkThemeSlot.TOAST_TEXT))
             setTextSize(TypedValue.COMPLEX_UNIT_SP, 14f)
-            background = AppCompatResources.getDrawable(context, R.drawable.sk_popup_background)
+            background = skPanel(
+                density, skColor(SkThemeSlot.TOAST_GROUND), skColor(SkThemeSlot.TOAST_FRAME), 8f
+            )
             setPaddingRelative(dp(12), dp(6), dp(12), dp(6))
             maxLines = 1
         }

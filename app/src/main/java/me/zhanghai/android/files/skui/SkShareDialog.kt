@@ -225,35 +225,45 @@ class SkShareDialog(
         if (index < 0) {
             return
         }
-        val labels = mutableListOf<CharSequence>()
-        val actions = mutableListOf<() -> Unit>()
+        val actions = mutableListOf<SkAction>()
         if (index > 0) {
-            labels += activity.getString(R.string.sk_share_move_to_top)
-            actions += { moveEntry(index, 0) }
+            actions += SkAction(
+                activity.getString(R.string.sk_share_move_to_top), R.drawable.sk_ic_arrow_up,
+                SkIconRole.VIEW
+            ) { moveEntry(index, 0) }
         }
         if (index < entries.size - 1) {
-            labels += activity.getString(R.string.sk_share_move_to_bottom)
-            actions += { moveEntry(index, entries.size - 1) }
+            actions += SkAction(
+                activity.getString(R.string.sk_share_move_to_bottom),
+                R.drawable.sk_ic_arrow_down, SkIconRole.VIEW
+            ) { moveEntry(index, entries.size - 1) }
         }
+        val deleteLabel = activity.getString(R.string.delete)
+        val removeLabel = activity.getString(R.string.remove)
         entry.extraActions.forEach { (label, action) ->
-            labels += label
-            actions += action
+            val deletes = label.toString().let { it == deleteLabel || it == removeLabel }
+            actions += SkAction(
+                label,
+                if (deletes) R.drawable.delete_icon_control_normal_24dp else R.drawable.sk_ic_edit,
+                if (deletes) SkIconRole.DELETE else SkIconRole.WRITE, opens = true, run = action
+            )
         }
         if (SkShare.order.isNotEmpty()) {
-            labels += activity.getString(R.string.sk_share_reset_order)
-            actions += {
+            actions += SkAction(
+                activity.getString(R.string.sk_share_reset_order),
+                R.drawable.reset_icon_white_24dp, SkIconRole.BLOCK
+            ) {
                 SkShare.clearOrder()
                 reopen()
             }
         }
-        if (labels.isEmpty()) {
+        if (actions.isEmpty()) {
             return
         }
         SkMaterialAlertDialogBuilder(activity)
             .setTitle(entry.label)
-            .setItems(labels.toTypedArray()) { _, which -> actions[which]() }
             .setNegativeButton(android.R.string.cancel, null)
-            .show()
+            .showActions(actions)
     }
 
     // --- Termux ---
@@ -301,6 +311,7 @@ class SkShareDialog(
         val terminalBox = CheckBox(activity).apply {
             text = activity.getString(R.string.sk_termux_run_in_terminal)
             isChecked = !(script?.background ?: false)
+            applySkMark()
         }
         val form = LinearLayout(activity).apply {
             orientation = LinearLayout.VERTICAL

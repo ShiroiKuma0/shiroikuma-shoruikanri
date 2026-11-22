@@ -14,8 +14,6 @@ import android.util.TypedValue
 import android.view.Gravity
 import android.widget.TextView
 import android.widget.Toast
-import androidx.appcompat.content.res.AppCompatResources
-import me.zhanghai.android.files.R
 
 object SkToast {
     fun make(context: Context, text: CharSequence, duration: Int): Toast? {
@@ -27,10 +25,12 @@ object SkToast {
         val paddingVertical = (12 * density).toInt()
         val view = TextView(context).apply {
             this.text = text
-            setTextColor(SkUi.PALETTE_YELLOW)
+            setTextColor(skColor(SkThemeSlot.TOAST_TEXT))
             setTextSize(TypedValue.COMPLEX_UNIT_SP, 14f)
             gravity = Gravity.CENTER
-            background = AppCompatResources.getDrawable(context, R.drawable.sk_toast_background)
+            background = skPanel(
+                density, skColor(SkThemeSlot.TOAST_GROUND), skColor(SkThemeSlot.TOAST_FRAME), 24f
+            )
             setPadding(paddingHorizontal, paddingVertical, paddingHorizontal, paddingVertical)
         }
         @Suppress("DEPRECATION")

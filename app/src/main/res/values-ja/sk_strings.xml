@@ -101,6 +101,12 @@
     <string name="sk_ui_audio_player_title">タイトル</string>
     <string name="sk_ui_audio_player_time">再生時間</string>
     <string name="sk_ui_audio_player_controls">コントロール</string>
+    <string name="sk_ui_group_extract_progress">ファイル操作の進行状況</string>
+    <string name="sk_ui_extract_progress_bar">進行バー</string>
+    <string name="sk_ui_extract_progress_track">バーの下地</string>
+    <string name="sk_ui_extract_progress_name">名前</string>
+    <string name="sk_ui_extract_progress_info">詳細</string>
+    <string name="sk_ui_extract_progress_speed">速度と残り時間</string>
 
     <!-- Fonts -->
     <string name="sk_font">フォント</string>
@@ -210,4 +216,83 @@
     <string name="sk_ui_group_apk">APK ファイル</string>
     <string name="sk_ui_apk_route">APK をタップしたとき</string>
     <string name="sk_eximport_cat_apk_route">APK タップの動作</string>
+
+    <!-- 白い熊 fork: the role table and the UI page (black-yellow theme, applied fully). -->
+    <string name="sk_ui_group_text">文字とアイコン</string>
+    <string name="sk_ui_group_buttons">ボタン</string>
+    <string name="sk_ui_group_dialogs">ダイアログ</string>
+    <string name="sk_ui_group_switches">スイッチ</string>
+    <string name="sk_ui_group_marks">チェックボックスとラジオボタン</string>
+    <string name="sk_ui_group_menus">メニュー</string>
+    <string name="sk_ui_group_lists">リスト</string>
+    <string name="sk_ui_group_fields">入力欄</string>
+    <string name="sk_ui_group_bars">システムバー</string>
+    <string name="sk_ui_group_toasts">トーストとツールチップ</string>
+    <string name="sk_ui_group_maintenance">メンテナンス</string>
+    <string name="sk_ui_group_theme">テーマ</string>
+    <string name="sk_ui_text_tertiary">第三の文字</string>
+    <string name="sk_ui_text_hint">ヒントの文字</string>
+    <string name="sk_ui_text_disabled">無効な文字</string>
+    <string name="sk_ui_text_secondary_disabled">無効な補助文字</string>
+    <string name="sk_ui_heading">見出し</string>
+    <string name="sk_ui_note">説明文と左の罫線</string>
+    <string name="sk_ui_link">リンク</string>
+    <string name="sk_ui_text_selection">文字の選択範囲</string>
+    <string name="sk_ui_icon">アイコン</string>
+    <string name="sk_ui_icon_active">有効なコントロール</string>
+    <string name="sk_ui_pill_frame">ボタンの枠</string>
+    <string name="sk_ui_pill_text">ボタンの文字</string>
+    <string name="sk_ui_pill_ground">ボタンの地</string>
+    <string name="sk_ui_danger">削除（ボタン・メニュー・アイコン）</string>
+    <string name="sk_ui_dialog_ground">地</string>
+    <string name="sk_ui_dialog_frame">枠</string>
+    <string name="sk_ui_dialog_title">タイトル</string>
+    <string name="sk_ui_dialog_text">本文</string>
+    <string name="sk_ui_switch_on">スイッチ（オン）</string>
+    <string name="sk_ui_mark_on">マーク（選択）</string>
+    <string name="sk_ui_mark_off">マーク（未選択）</string>
+    <string name="sk_ui_menu_ground">地</string>
+    <string name="sk_ui_menu_frame">枠</string>
+    <string name="sk_ui_menu_label">行の文字</string>
+    <string name="sk_ui_menu_row_frame">行の枠</string>
+    <string name="sk_ui_menu_divider">グループの区切り線</string>
+    <string name="sk_ui_menu_icon_open">アイコン：開く・展開・読み込み</string>
+    <string name="sk_ui_menu_icon_write">アイコン：書く・作成・名前変更</string>
+    <string name="sk_ui_menu_icon_person">アイコン：所有者・人</string>
+    <string name="sk_ui_menu_icon_share">アイコン：コピー・共有・書き出し</string>
+    <string name="sk_ui_menu_icon_view">アイコン：表示・選択・設定</string>
+    <string name="sk_ui_menu_icon_block">アイコン：隠す・停止・保護</string>
+    <string name="sk_ui_list_divider">区切り線</string>
+    <string name="sk_ui_list_pressed">押した行</string>
+    <string name="sk_ui_list_selected">選択した行の地</string>
+    <string name="sk_ui_list_selected_text">選択した行の文字</string>
+    <string name="sk_ui_field_text">文字</string>
+    <string name="sk_ui_field_frame">枠と下線</string>
+    <string name="sk_ui_status_bar">ステータスバー</string>
+    <string name="sk_ui_navigation_bar">ナビゲーションバー</string>
+    <string name="sk_ui_bars_note">ここで色を設定するまで、バーはアプリ本来の透過表示のままです。</string>
+    <string name="sk_ui_toast_ground">地</string>
+    <string name="sk_ui_toast_frame">枠</string>
+    <string name="sk_ui_toast_text">文字</string>
+    <string name="sk_ui_reset_section_order">セクションの順序をリセット</string>
+    <string name="sk_ui_reset_section_order_desc">このページのセクションを元の順序に戻します。</string>
+    <string name="sk_ui_reset_all_colors">すべての色をリセット</string>
+    <string name="sk_ui_reset_all_colors_desc">このページのすべての色を既定に戻します。フォントとサイズはそのままです。</string>
+    <string name="sk_ui_reset_all_colors_message">すべての色を既定に戻しますか？</string>
+    <string name="sk_ui_theme_enabled_desc">黒地に黄色の文字、ピル型ボタン、枠線スイッチ。オフにすると元のアプリの表示になります。</string>
+
+    <!-- 白い熊 fork: the progress dialog, for a copy, a move and the creation of an archive. -->
+    <string name="sk_progress_title_copy">コピー中</string>
+    <string name="sk_progress_title_copy_done">コピー完了</string>
+    <string name="sk_progress_title_move">移動中</string>
+    <string name="sk_progress_title_move_done">移動完了</string>
+    <string name="sk_progress_title_archive">圧縮中</string>
+    <string name="sk_progress_title_archive_done">圧縮完了</string>
+    <string name="sk_ui_file_badge">アイコンのバッジ（リンク・暗号化）</string>
+    <string name="sk_ui_grid_outline">サムネイルの枠</string>
+    <string name="sk_ui_notification_accent">通知のアクセント</string>
+    <string name="sk_extract_progress_total">合計</string>
+    <!-- 白い熊 fork: a pending pack, shown in the top bar like a pending paste. -->
+    <string name="sk_file_list_paste_archive_title_format">%1$,d 件を圧縮</string>
+    <string name="sk_file_list_paste_action_archive_here">ここに圧縮</string>
 </resources>

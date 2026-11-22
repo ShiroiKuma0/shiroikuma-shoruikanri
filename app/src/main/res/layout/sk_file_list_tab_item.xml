@@ -16,8 +16,7 @@
         android:ellipsize="middle"
         android:maxWidth="160dp"
         android:singleLine="true"
-        android:textAppearance="?attr/textAppearanceBody2"
-        android:textColor="@color/sk_file_list_tab_text" />
+        android:textAppearance="?attr/textAppearanceBody2" />
 
     <ImageButton
         android:id="@+id/closeButton"

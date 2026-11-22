@@ -40,7 +40,6 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
-private const val WARN_COLOR = 0xFFFF5252.toInt()
 
 class SkEximportSheet(
     private val activity: Activity,
@@ -192,7 +191,7 @@ class SkEximportSheet(
         val dir = SkEximport.exportDirPath
         folderValueView.text =
             dir?.toUserFriendlyString() ?: activity.getString(R.string.sk_eximport_dir_unset)
-        folderValueView.setTextColor(if (dir == null) WARN_COLOR else textColor)
+        folderValueView.setTextColor(if (dir == null) skColor(SkThemeSlot.DANGER) else textColor)
         val newest = dir?.let { SkEximport.latestExport(it) }
         val (message, isWarning) = when {
             dir == null -> activity.getString(R.string.sk_eximport_warn_nodir) to true
@@ -202,7 +201,7 @@ class SkEximportSheet(
                     false
         }
         statusView.text = message
-        statusView.setTextColor(if (isWarning) WARN_COLOR else textColor)
+        statusView.setTextColor(if (isWarning) skColor(SkThemeSlot.DANGER) else textColor)
         statusView.alpha = if (isWarning) 1f else 0.8f
     }
 
@@ -361,7 +360,7 @@ class SkEximportSheet(
             gravity = Gravity.END
             setPadding(0, dp(16), 0, 0)
         }
-        val infoDialog = AlertDialog.Builder(activity)
+        val infoDialog = SkMaterialAlertDialogBuilder(activity)
             .setView(NestedScrollView(activity).apply { addView(box) })
             .setCancelable(false)
             .create()
@@ -397,6 +396,7 @@ class SkEximportSheet(
             text = label
             textSize = 15f
             setTextColor(textColor)
+            applySkMark()
             if (bold) {
                 setTypeface(typeface, Typeface.BOLD)
             }

@@ -55,6 +55,7 @@ class SkOpenWithDialog(
             textSize = 14f
             setTextColor(skColor(SkThemeSlot.TEXT_SECONDARY))
             setPadding(dp(8), dp(4), dp(16), dp(8))
+            applySkMark()
         }
 
         var dialog: androidx.appcompat.app.AlertDialog? = null
@@ -147,16 +148,19 @@ class SkOpenWithDialog(
     }
 
     private fun showOpenAsTypes() {
-        val labels = OPEN_AS_TYPES.map { activity.getString(it.first) }.toTypedArray<CharSequence>()
         SkMaterialAlertDialogBuilder(activity)
             .setTitle(R.string.file_open_as_title_format.let {
                 activity.getString(it, path.fileName?.toString() ?: "")
             })
-            .setItems(labels) { _, which ->
-                SkOpenWithDialog(activity, path, OPEN_AS_TYPES[which].second)
-            }
             .setNegativeButton(android.R.string.cancel, null)
-            .show()
+            .showActions(
+                OPEN_AS_TYPES.map { (labelRes, openAsType) ->
+                    SkAction(
+                        activity.getString(labelRes), R.drawable.sk_ic_open_with,
+                        SkIconRole.OPEN, opens = true
+                    ) { SkOpenWithDialog(activity, path, openAsType) }
+                }
+            )
     }
 
     companion object {

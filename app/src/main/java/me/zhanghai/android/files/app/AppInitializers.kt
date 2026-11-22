@@ -87,6 +87,7 @@ private fun initializeCustomTheme() {
 // 白い熊 fork: one-time migrations of the persisted skui slot colors.
 private fun initializeSkUi() {
     SkUi.migrateToPureYellow()
+    me.zhanghai.android.files.skui.SkPalette.apply(application)
 }
 
 // 白い熊 fork: publish the per-script Termux Direct-Share targets (off the main

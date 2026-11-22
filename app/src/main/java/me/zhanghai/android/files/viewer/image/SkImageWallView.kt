@@ -84,7 +84,12 @@ class SkImageWallView @JvmOverloads constructor(
 
     private val entries = HashMap<Int, Entry>()
 
-    private val placeholderPaint = Paint().apply { color = 0xFF151515.toInt() }
+    // An image not loaded yet: a ground a shade off the background, derived from the roles.
+    private val placeholderPaint = Paint().apply {
+        color = androidx.core.graphics.ColorUtils.blendARGB(
+            skColor(SkThemeSlot.BACKGROUND), skColor(SkThemeSlot.TEXT), 0.08f
+        )
+    }
     private val highlightPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         style = Paint.Style.STROKE
         strokeWidth = context.dpToDimension(3)

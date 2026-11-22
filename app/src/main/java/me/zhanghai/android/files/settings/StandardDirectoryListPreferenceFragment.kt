@@ -60,7 +60,14 @@ class StandardDirectoryListPreferenceFragment : PreferenceFragmentCompat(),
             preference.apply {
                 icon = context.getDrawableCompat(standardDirectory.iconRes).apply {
                     mutate()
-                    setTintCompat(secondaryTextColor)
+                    // 白い熊 fork: a directory opens something — that role's colour.
+                    setTintCompat(
+                        if (me.zhanghai.android.files.skui.SkUi.isSkThemeEnabled) {
+                            me.zhanghai.android.files.skui.skColor(me.zhanghai.android.files.skui.SkIconRole.OPEN)
+                        } else {
+                            secondaryTextColor
+                        }
+                    )
                 }
                 title = standardDirectory.getTitle(context)
                 summary = getExternalStorageDirectory(standardDirectory.relativePath)

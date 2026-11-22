@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!-- 白い熊 fork: the panel of a popup menu, drawn in code from its roles (skui/SkPanelDrawables.kt).
+     No colour is written here; drawable/sk_popup_background.xml stands in on Android 6 only. -->
+<drawable xmlns:android="http://schemas.android.com/apk/res/android"
+    class="me.zhanghai.android.files.skui.SkMenuPanelDrawable" />

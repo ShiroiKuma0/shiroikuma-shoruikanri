@@ -25,6 +25,9 @@ import me.zhanghai.android.files.util.createViewIntent
 import me.zhanghai.android.files.util.extraPath
 import me.zhanghai.android.files.util.finish
 import me.zhanghai.android.files.util.startActivitySafe
+import me.zhanghai.android.files.skui.SkAction
+import me.zhanghai.android.files.skui.SkIconRole
+import me.zhanghai.android.files.skui.createWithActions
 import me.zhanghai.android.files.util.withChooser
 
 class OpenFileAsDialogFragment : AppCompatDialogFragment() {
@@ -33,11 +36,15 @@ class OpenFileAsDialogFragment : AppCompatDialogFragment() {
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog =
         SkMaterialAlertDialogBuilder(requireContext(), theme)
             .setTitle(getString(R.string.file_open_as_title_format, args.path.name))
-            .apply {
-                val items = FILE_TYPES.map { getString(it.first) }.toTypedArray<CharSequence>()
-                setItems(items) { _, which -> openAs(FILE_TYPES[which].second) }
-            }
-            .create()
+            // 白い熊 fork: the list as icon pills (black-yellow theme), not as plain lines.
+            .createWithActions(
+                FILE_TYPES.map { (titleRes, mimeType) ->
+                    SkAction(
+                        getString(titleRes), R.drawable.sk_ic_open_with, SkIconRole.OPEN,
+                        opens = true
+                    ) { openAs(mimeType) }
+                }
+            )
 
     private fun openAs(mimeType: MimeType) {
         val intent = args.path.fileProviderUri.createViewIntent(mimeType)

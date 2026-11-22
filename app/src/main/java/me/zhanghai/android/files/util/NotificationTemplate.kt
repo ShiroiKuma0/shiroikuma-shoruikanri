@@ -31,7 +31,16 @@ class NotificationTemplate(
 ) {
     fun createBuilder(context: Context): NotificationCompat.Builder =
         NotificationCompat.Builder(context, channelTemplate.id).apply {
-            colorRes?.let { setColor(context.getColorCompat(it)) }
+            // 白い熊 fork: the accent of a notification is a role under the 白い熊 theme.
+            colorRes?.let {
+                setColor(
+                    if (me.zhanghai.android.files.skui.SkUi.isSkThemeEnabled) {
+                        me.zhanghai.android.files.skui.skColor(me.zhanghai.android.files.skui.SkThemeSlot.NOTIFICATION_ACCENT)
+                    } else {
+                        context.getColorCompat(it)
+                    }
+                )
+            }
             smallIcon?.let { setSmallIcon(it) }
             contentTitleRes?.let { setContentTitle(context.getText(contentTitleRes)) }
             contentTextRes?.let { setContentText(context.getText(contentTextRes)) }

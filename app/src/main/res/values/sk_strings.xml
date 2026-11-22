@@ -119,6 +119,12 @@
     <string name="sk_ui_audio_player_title">Title</string>
     <string name="sk_ui_audio_player_time">Time</string>
     <string name="sk_ui_audio_player_controls">Controls</string>
+    <string name="sk_ui_group_extract_progress">File operation progress</string>
+    <string name="sk_ui_extract_progress_bar">Progress bar</string>
+    <string name="sk_ui_extract_progress_track">Bar track</string>
+    <string name="sk_ui_extract_progress_name">Name</string>
+    <string name="sk_ui_extract_progress_info">Details</string>
+    <string name="sk_ui_extract_progress_speed">Speed and time left</string>
 
     <!-- Fonts -->
     <string name="sk_font">Font</string>
@@ -235,4 +241,103 @@
     <string name="sk_ui_group_apk">APK files</string>
     <string name="sk_ui_apk_route">On tapping an APK</string>
     <string name="sk_eximport_cat_apk_route">APK tap routing</string>
+
+    <!-- 白い熊 fork: the extraction progress dialog (SkExtractProgress). -->
+    <string name="sk_extract_progress_title">Extracting</string>
+    <string name="sk_extract_progress_title_done">Extracted</string>
+    <string name="sk_extract_progress_hide">Hide</string>
+    <string name="sk_extract_progress_done">Done</string>
+    <string name="sk_extract_progress_name_hint">Name</string>
+    <string name="sk_extract_progress_name_invalid">This is not a valid name.</string>
+    <string name="sk_extract_progress_preparing">Reading the archive…</string>
+    <string name="sk_extract_progress_source_format">From %1$s</string>
+    <string name="sk_extract_progress_target_format">To %1$s</string>
+    <string name="sk_extract_progress_entry_format">%1$d / %2$d — %3$s</string>
+    <string name="sk_extract_progress_size_format">%1$s / %2$s (%3$d%%)</string>
+    <string name="sk_extract_progress_speed_format">%1$s/s</string>
+    <string name="sk_extract_progress_eta_format">%1$s left</string>
+    <string name="sk_extract_progress_average_format">%1$s on average</string>
+    <string name="sk_extract_progress_elapsed_format">%1$s elapsed</string>
+    <string name="sk_extract_progress_done_toast_format">%1$s: “%2$s”.</string>
+    <string name="sk_extract_progress_name_exists_format">Not renamed: “%1$s” already exists.</string>
+    <string name="sk_extract_progress_not_renamed">Not renamed: the item was merged into an existing directory or skipped.</string>
+
+    <!-- 白い熊 fork: the role table and the UI page (black-yellow theme, applied fully). -->
+    <string name="sk_ui_group_text">Text and icons</string>
+    <string name="sk_ui_group_buttons">Buttons</string>
+    <string name="sk_ui_group_dialogs">Dialogs</string>
+    <string name="sk_ui_group_switches">Switches</string>
+    <string name="sk_ui_group_marks">Check boxes and radio buttons</string>
+    <string name="sk_ui_group_menus">Menus</string>
+    <string name="sk_ui_group_lists">Lists</string>
+    <string name="sk_ui_group_fields">Text fields</string>
+    <string name="sk_ui_group_bars">System bars</string>
+    <string name="sk_ui_group_toasts">Toasts and tooltips</string>
+    <string name="sk_ui_group_maintenance">Maintenance</string>
+    <string name="sk_ui_group_theme">Theme</string>
+    <string name="sk_ui_text_tertiary">Tertiary text</string>
+    <string name="sk_ui_text_hint">Hint text</string>
+    <string name="sk_ui_text_disabled">Disabled text</string>
+    <string name="sk_ui_text_secondary_disabled">Disabled secondary text</string>
+    <string name="sk_ui_heading">Headings</string>
+    <string name="sk_ui_note">Explanations and their left rule</string>
+    <string name="sk_ui_link">Links</string>
+    <string name="sk_ui_text_selection">Text selection</string>
+    <string name="sk_ui_icon">Icons</string>
+    <string name="sk_ui_icon_active">Active controls</string>
+    <string name="sk_ui_pill_frame">Button frame</string>
+    <string name="sk_ui_pill_text">Button label</string>
+    <string name="sk_ui_pill_ground">Button ground</string>
+    <string name="sk_ui_danger">Delete (buttons, menu rows, icons)</string>
+    <string name="sk_ui_dialog_ground">Ground</string>
+    <string name="sk_ui_dialog_frame">Frame</string>
+    <string name="sk_ui_dialog_title">Title</string>
+    <string name="sk_ui_dialog_text">Text</string>
+    <string name="sk_ui_switch_on">Switch, on</string>
+    <string name="sk_ui_mark_on">Mark, chosen</string>
+    <string name="sk_ui_mark_off">Mark, not chosen</string>
+    <string name="sk_ui_menu_ground">Ground</string>
+    <string name="sk_ui_menu_frame">Frame</string>
+    <string name="sk_ui_menu_label">Row label</string>
+    <string name="sk_ui_menu_row_frame">Row frame</string>
+    <string name="sk_ui_menu_divider">Group divider</string>
+    <string name="sk_ui_menu_icon_open">Icon: open, extract, load</string>
+    <string name="sk_ui_menu_icon_write">Icon: write, create, rename</string>
+    <string name="sk_ui_menu_icon_person">Icon: owner, person</string>
+    <string name="sk_ui_menu_icon_share">Icon: copy, share, export</string>
+    <string name="sk_ui_menu_icon_view">Icon: view, select, settings</string>
+    <string name="sk_ui_menu_icon_block">Icon: hide, stop, protect</string>
+    <string name="sk_ui_list_divider">Divider</string>
+    <string name="sk_ui_list_pressed">Pressed row</string>
+    <string name="sk_ui_list_selected">Selected row, ground</string>
+    <string name="sk_ui_list_selected_text">Selected row, text</string>
+    <string name="sk_ui_field_text">Text</string>
+    <string name="sk_ui_field_frame">Frame and underline</string>
+    <string name="sk_ui_status_bar">Status bar</string>
+    <string name="sk_ui_navigation_bar">Navigation bar</string>
+    <string name="sk_ui_bars_note">Until a bar is given a colour here it stays as the app draws it: see-through over the content.</string>
+    <string name="sk_ui_toast_ground">Ground</string>
+    <string name="sk_ui_toast_frame">Frame</string>
+    <string name="sk_ui_toast_text">Text</string>
+    <string name="sk_ui_reset_section_order">Reset section order</string>
+    <string name="sk_ui_reset_section_order_desc">Puts the sections of this page back in their original order.</string>
+    <string name="sk_ui_reset_all_colors">Reset all colours</string>
+    <string name="sk_ui_reset_all_colors_desc">Every colour on this page goes back to its default. Fonts and sizes stay.</string>
+    <string name="sk_ui_reset_all_colors_message">Reset every colour to its default?</string>
+    <string name="sk_ui_theme_enabled_desc">Black ground, yellow text, pills, outlined switches. Off shows the app as upstream draws it.</string>
+
+    <!-- 白い熊 fork: the progress dialog, for a copy, a move and the creation of an archive. -->
+    <string name="sk_progress_title_copy">Copying</string>
+    <string name="sk_progress_title_copy_done">Copied</string>
+    <string name="sk_progress_title_move">Moving</string>
+    <string name="sk_progress_title_move_done">Moved</string>
+    <string name="sk_progress_title_archive">Archiving</string>
+    <string name="sk_progress_title_archive_done">Archived</string>
+    <string name="sk_ui_file_badge">Icon badge (link, encrypted)</string>
+    <string name="sk_ui_grid_outline">Thumbnail outline</string>
+    <string name="sk_ui_notification_accent">Notification accent</string>
+    <string name="sk_extract_progress_total">Total</string>
+    <!-- 白い熊 fork: a pending pack, shown in the top bar like a pending paste. -->
+    <string name="sk_file_list_paste_archive_title_format">Packing %1$,d</string>
+    <string name="sk_file_list_paste_action_archive_here">Pack here</string>
 </resources>

@@ -105,7 +105,7 @@ class SkSwitch @JvmOverloads constructor(
         val top = paddingTop + (height - paddingTop - paddingBottom - trackHeight) / 2f
         val stroke = STROKE_DP * density
         var color = ColorUtils.blendARGB(
-            skColor(SkThemeSlot.SWITCH_OFF), skColor(SkThemeSlot.ACCENT), fraction
+            skColor(SkThemeSlot.SWITCH_OFF), skColor(SkThemeSlot.SWITCH_ON), fraction
         )
         if (!isEnabled) {
             color = ColorUtils.setAlphaComponent(color, 0x61)

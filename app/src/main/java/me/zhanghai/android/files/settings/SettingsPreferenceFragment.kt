@@ -19,6 +19,9 @@ class SettingsPreferenceFragment : PreferenceFragmentCompat() {
 
     override fun onCreatePreferencesFix(savedInstanceState: Bundle?, rootKey: String?) {
         addPreferencesFromResource(R.xml.settings)
+        // 白い熊 fork: an icon on every row, coloured by what the row does, and every row
+        // that opens something drawn as a pill.
+        me.zhanghai.android.files.skui.SkPreferenceIcons.apply(this)
 
         localePreference = preferenceScreen.findPreference(getString(R.string.pref_key_locale))!!
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {

@@ -158,6 +158,12 @@ class FileJobConflictDialogFragment : AppCompatDialogFragment() {
         iconImage.apply {
             isVisible = true
             setImageResource(file.mimeType.iconRes)
+            // 白い熊 fork: the file-type icon in the file-icon role, as in the list.
+            if (me.zhanghai.android.files.skui.SkUi.isSkThemeEnabled) {
+                imageTintList = android.content.res.ColorStateList.valueOf(
+                    me.zhanghai.android.files.skui.skColor(me.zhanghai.android.files.skui.SkThemeSlot.FILE_ICONS)
+                )
+            }
         }
         val attributes = file.attributes
         thumbnailImage.apply {
@@ -197,6 +203,12 @@ class FileJobConflictDialogFragment : AppCompatDialogFragment() {
             isVisible = hasBadge
             if (hasBadge) {
                 setImageResource(badgeIconRes!!)
+                // 白い熊 fork: the badge in its own role, not in upstream's grey.
+                if (me.zhanghai.android.files.skui.SkUi.isSkThemeEnabled) {
+                    imageTintList = android.content.res.ColorStateList.valueOf(
+                        me.zhanghai.android.files.skui.skColor(me.zhanghai.android.files.skui.SkThemeSlot.FILE_BADGE)
+                    )
+                }
             } else {
                 setImageDrawable(null)
             }

@@ -1,75 +1,76 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<!-- 白い熊 fork: the 白い熊 theme — black background, yellow text/icons/borders.
-     Applied as a theme overlay on every activity (see AppActivity) so that even
-     surfaces we don't style at runtime (dialogs, menus, preferences) follow the
-     look. The granular per-element styling on top of this lives in skui/. -->
+<!--
+  ~ 白い熊 fork: the 白い熊 theme, applied as an overlay on every activity (see AppActivity).
+  ~
+  ~ It holds no colour. Every colour attribute upstream's layouts and Material's widgets read
+  ~ is pointed at a role colour resource (@color/sk_role_…, sk_roles.xml), whose value comes
+  ~ from the role table at run time (skui/SkPalette.kt). Buttons, switches, selection marks and
+  ~ menu rows are drawn in code from their roles (skui/SkViewInflater.kt and friends); the
+  ~ styles below give them their shape only.
+  -->
 <resources>
 
-    <color name="sk_black">#FF000000</color>
-    <!-- Pure yellow, the default theme color of this fork (matches SkUi.PALETTE_YELLOW). -->
-    <color name="sk_yellow">#FFFFFF00</color>
-    <color name="sk_yellow_secondary">#B3FFFF00</color>
-    <color name="sk_yellow_tertiary">#80FFFF00</color>
-    <color name="sk_yellow_hint">#80FFFF00</color>
-    <color name="sk_yellow_divider">#33FFFF00</color>
-    <!-- The ripple inside a pill: the accent at 30 %. -->
-    <color name="sk_pill_ripple">#4DFFFF00</color>
-
     <style name="ThemeOverlay.Sk" parent="">
-        <item name="android:windowBackground">@color/sk_black</item>
-        <item name="android:colorBackground">@color/sk_black</item>
-        <item name="colorSurface">@color/sk_black</item>
-        <item name="colorOnSurface">@color/sk_yellow</item>
-        <item name="colorOnBackground">@color/sk_yellow</item>
-        <!-- The M3 surface-container roles too — dialogs and other elevated
-             surfaces read these instead of colorSurface under Material 3. -->
-        <item name="colorSurfaceContainerLowest">@color/sk_black</item>
-        <item name="colorSurfaceContainerLow">@color/sk_black</item>
-        <item name="colorSurfaceContainer">@color/sk_black</item>
-        <item name="colorSurfaceContainerHigh">@color/sk_black</item>
-        <item name="colorSurfaceContainerHighest">@color/sk_black</item>
-        <item name="colorSurfaceBright">@color/sk_black</item>
-        <item name="colorSurfaceDim">@color/sk_black</item>
-        <item name="colorSurfaceVariant">@color/sk_black</item>
-        <item name="colorOnSurfaceVariant">@color/sk_yellow_secondary</item>
-        <!-- Dialog list items (e.g. single-choice lists) follow the text color. -->
+        <item name="android:windowBackground">@color/sk_role_background</item>
+        <item name="android:colorBackground">@color/sk_role_background</item>
+        <item name="colorSurface">@color/sk_role_surface</item>
+        <item name="colorOnSurface">@color/sk_role_text</item>
+        <item name="colorOnBackground">@color/sk_role_text</item>
+        <!-- The M3 surface-container roles too: dialogs and other elevated surfaces read
+             these instead of colorSurface under Material 3. -->
+        <item name="colorSurfaceContainerLowest">@color/sk_role_surface</item>
+        <item name="colorSurfaceContainerLow">@color/sk_role_surface</item>
+        <item name="colorSurfaceContainer">@color/sk_role_surface</item>
+        <item name="colorSurfaceContainerHigh">@color/sk_role_surface</item>
+        <item name="colorSurfaceContainerHighest">@color/sk_role_surface</item>
+        <item name="colorSurfaceBright">@color/sk_role_surface</item>
+        <item name="colorSurfaceDim">@color/sk_role_surface</item>
+        <item name="colorSurfaceVariant">@color/sk_role_surface</item>
+        <item name="colorOnSurfaceVariant">@color/sk_role_text_secondary</item>
+        <item name="colorAppBarSurface">@color/sk_role_app_bar</item>
         <item name="textColorAlertDialogListItem">@color/sk_text_primary</item>
         <item name="android:textColorAlertDialogListItem">@color/sk_text_primary</item>
-        <!-- Force the accents to pure #FFFF00 everywhere (the stock theme color
-             would otherwise contribute material yellow #FFEB3B to ripples,
-             buttons, switches and dialogs). -->
-        <item name="colorPrimary">@color/sk_yellow</item>
-        <item name="colorPrimaryVariant">@color/sk_yellow</item>
-        <item name="colorSecondary">@color/sk_yellow</item>
-        <item name="colorSecondaryVariant">@color/sk_yellow</item>
-        <item name="colorAccent">@color/sk_yellow</item>
-        <item name="colorOnPrimary">@color/sk_black</item>
-        <item name="colorOnSecondary">@color/sk_black</item>
-        <item name="colorControlActivated">@color/sk_yellow</item>
+        <item name="colorPrimary">@color/sk_role_accent</item>
+        <item name="colorPrimaryVariant">@color/sk_role_accent</item>
+        <item name="colorSecondary">@color/sk_role_accent</item>
+        <item name="colorSecondaryVariant">@color/sk_role_accent</item>
+        <item name="colorAccent">@color/sk_role_accent</item>
+        <item name="colorOnPrimary">@color/sk_role_on_accent</item>
+        <item name="colorOnSecondary">@color/sk_role_on_accent</item>
+        <item name="colorPrimaryContainer">@color/sk_role_selected</item>
+        <item name="colorOnPrimaryContainer">@color/sk_role_on_selected</item>
+        <item name="colorSecondaryContainer">@color/sk_role_selected</item>
+        <item name="colorOnSecondaryContainer">@color/sk_role_on_selected</item>
+        <item name="colorError">@color/sk_role_danger</item>
+        <item name="colorControlNormal">@color/sk_role_icon</item>
+        <item name="colorControlActivated">@color/sk_role_icon_active</item>
+        <item name="colorControlHighlight">@color/sk_role_pressed</item>
         <item name="android:textColorPrimary">@color/sk_text_primary</item>
         <item name="android:textColorSecondary">@color/sk_text_secondary</item>
-        <item name="android:textColorTertiary">@color/sk_yellow_tertiary</item>
-        <item name="android:textColorHint">@color/sk_yellow_hint</item>
-        <item name="colorControlNormal">@color/sk_yellow</item>
+        <item name="android:textColorTertiary">@color/sk_role_text_tertiary</item>
+        <item name="android:textColorHint">@color/sk_role_text_hint</item>
+        <item name="android:textColorHighlight">@color/sk_role_text_selection</item>
+        <item name="android:textColorLink">@color/sk_role_link</item>
+        <item name="android:editTextColor">@color/sk_role_field_text</item>
+        <item name="editTextColor">@color/sk_role_field_text</item>
         <item name="android:listDivider">@drawable/sk_list_divider</item>
-        <item name="colorOutline">@color/sk_yellow</item>
-        <!-- No elevation overlay: in dark themes it tints elevated surfaces
-             (menus, dialogs) with colorOnSurface — i.e. see-through yellow. -->
+        <item name="colorOutline">@color/sk_role_outline</item>
+        <!-- No elevation overlay: in dark themes it tints elevated surfaces (menus, dialogs)
+             with colorOnSurface — see-through text colour. -->
         <item name="elevationOverlayEnabled">false</item>
-        <!-- Popup menus: solid black with a yellow border. -->
+        <!-- Popup menus: the menu ground inside the menu frame. Their rows are
+             skui/SkPillMenuItemView. -->
         <item name="popupMenuBackground">@drawable/sk_popup_background</item>
         <item name="popupMenuStyle">@style/Widget.Sk.PopupMenu</item>
         <item name="android:popupMenuStyle">@style/Widget.Sk.PopupMenu</item>
         <item name="listPopupWindowStyle">@style/Widget.Sk.ListPopupWindow</item>
         <item name="actionOverflowMenuStyle">@style/Widget.Sk.PopupMenu.Overflow</item>
-        <!-- AppCompat-built dialogs (e.g. preference dialogs) get the bordered
-             background via their window; Material dialogs get it from
-             SkMaterialAlertDialogBuilder. -->
+        <!-- AppCompat-built dialogs (preference dialogs) get the panel from their window;
+             Material dialogs get it from SkMaterialAlertDialogBuilder. -->
         <item name="alertDialogTheme">@style/ThemeOverlay.Sk.AlertDialog</item>
-        <!-- Every button is a pill, never filled and never bare text: the main
-             action of a block (the positive button) thick and bold, every
-             other one thin. -->
+        <!-- Every button is a pill: the shape here, the colours and the weight of the main
+             action in skui/SkViewInflater. -->
         <item name="materialButtonStyle">@style/Widget.Sk.Pill</item>
         <item name="materialButtonOutlinedStyle">@style/Widget.Sk.Pill</item>
         <item name="borderlessButtonStyle">@style/Widget.Sk.Pill</item>
@@ -77,27 +78,43 @@
         <item name="buttonBarPositiveButtonStyle">@style/Widget.Sk.Pill.Main</item>
         <item name="buttonBarNegativeButtonStyle">@style/Widget.Sk.Pill</item>
         <item name="buttonBarNeutralButtonStyle">@style/Widget.Sk.Pill</item>
+        <!-- The one place every inflated button, switch, check box and radio button passes
+             through. -->
+        <item name="viewInflaterClass">me.zhanghai.android.files.skui.SkViewInflater</item>
     </style>
 
     <style name="ThemeOverlay.Sk.AlertDialog" parent="@style/ThemeOverlay.MaterialComponents.Dialog.Alert">
         <item name="android:windowBackground">@drawable/sk_dialog_background</item>
+        <item name="colorOnSurface">@color/sk_role_dialog_title</item>
+        <item name="android:textColorPrimary">@color/sk_role_dialog_text</item>
+        <item name="android:textColorSecondary">@color/sk_role_dialog_text</item>
+        <item name="colorOnSurfaceVariant">@color/sk_role_dialog_text</item>
         <item name="buttonBarPositiveButtonStyle">@style/Widget.Sk.Pill.Main</item>
         <item name="buttonBarNegativeButtonStyle">@style/Widget.Sk.Pill</item>
         <item name="buttonBarNeutralButtonStyle">@style/Widget.Sk.Pill</item>
     </style>
 
-    <!-- Layered by SkMaterialAlertDialogBuilder over the Material dialog theme,
-         which would otherwise put its own bare-text buttons back. -->
+    <!-- Layered by SkMaterialAlertDialogBuilder over the Material dialog theme, which would
+         otherwise put its own bare-text buttons and its own text colours back. -->
     <style name="ThemeOverlay.Sk.MaterialAlertDialog" parent="">
+        <item name="colorOnSurface">@color/sk_role_dialog_title</item>
+        <item name="android:textColorPrimary">@color/sk_role_dialog_text</item>
+        <item name="android:textColorSecondary">@color/sk_role_dialog_text</item>
+        <item name="colorOnSurfaceVariant">@color/sk_role_dialog_text</item>
         <item name="buttonBarPositiveButtonStyle">@style/Widget.Sk.Pill.Main</item>
         <item name="buttonBarNegativeButtonStyle">@style/Widget.Sk.Pill</item>
         <item name="buttonBarNeutralButtonStyle">@style/Widget.Sk.Pill</item>
     </style>
 
-    <!-- The pill: fully round, an accent frame, the background showing through
-         (see skui/SkPill.kt for the same look on views built in code). -->
+    <!-- A dialog that deletes: its main button takes the danger role. -->
+    <style name="ThemeOverlay.Sk.MaterialAlertDialog.Destructive">
+        <item name="skDestructiveDialog">true</item>
+    </style>
+
+    <!-- The pill: fully round, a frame, the ground showing through. Shape only — frame,
+         label and ground are roles, applied by skui/SkViewInflater (see skui/SkPill.kt for
+         views built in code). -->
     <style name="Widget.Sk.Pill" parent="@style/Widget.MaterialComponents.Button.OutlinedButton">
-        <item name="android:textColor">@color/sk_pill_ink</item>
         <item name="android:textAllCaps">false</item>
         <item name="android:fontFamily">sans-serif</item>
         <item name="android:textStyle">normal</item>
@@ -106,12 +123,8 @@
         <item name="android:paddingLeft">18dp</item>
         <item name="android:paddingRight">18dp</item>
         <item name="android:layout_marginStart">8dp</item>
-        <item name="backgroundTint">@android:color/transparent</item>
-        <item name="strokeColor">@color/sk_pill_ink</item>
         <item name="strokeWidth">1.25dp</item>
         <item name="cornerRadius">100dp</item>
-        <item name="rippleColor">@color/sk_pill_ripple</item>
-        <item name="iconTint">@color/sk_pill_ink</item>
     </style>
 
     <style name="Widget.Sk.Pill.Main">

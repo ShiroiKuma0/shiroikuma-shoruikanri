@@ -12,7 +12,6 @@
     android:layout_marginStart="12dp"
     android:layout_marginEnd="12dp"
     android:layout_marginBottom="12dp"
-    android:background="@drawable/sk_dialog_background"
     android:orientation="vertical"
     android:paddingStart="16dp"
     android:paddingTop="8dp"
@@ -75,8 +74,7 @@
             android:background="?attr/selectableItemBackgroundBorderless"
             android:contentDescription="@string/sk_audio_player_play"
             android:scaleType="fitCenter"
-            android:src="@drawable/sk_play_icon_24dp"
-            android:tint="?attr/colorControlNormal" />
+            android:src="@drawable/sk_play_icon_24dp" />
 
         <Space
             android:layout_width="0dp"

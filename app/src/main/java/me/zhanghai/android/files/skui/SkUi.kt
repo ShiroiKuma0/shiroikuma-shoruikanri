@@ -15,6 +15,16 @@ object SkUi {
     const val PALETTE_BLACK = 0xFF000000.toInt()
     const val PALETTE_YELLOW = 0xFFFFFF00.toInt()
 
+    // Colours that carry a meaning, and the clear ground of a pill. Like the two primaries
+    // they are written here once, as the defaults of their roles (SkThemeSlot).
+    const val PALETTE_CLEAR = 0x00000000
+    const val PALETTE_RED = 0xFFFF0000.toInt()
+    const val PALETTE_ICON_GREEN = 0xFF00FF00.toInt()
+    const val PALETTE_ICON_BLUE = 0xFF4D94FF.toInt()
+    const val PALETTE_ICON_CYAN = 0xFF00FFFF.toInt()
+    const val PALETTE_ICON_ORANGE = 0xFFFF8000.toInt()
+    const val PALETTE_ICON_MAGENTA = 0xFFFF00FF.toInt()
+
     // A slot with this stored value follows its inherited default.
     const val UNSET = Int.MIN_VALUE
 
@@ -163,11 +173,46 @@ object SkUi {
     fun setColorOverride(key: String, color: Int) {
         prefs.edit().putInt(key, color).apply()
         touch()
+        SkPalette.changed()
     }
 
     fun clearColorOverride(key: String) {
         prefs.edit().remove(key).apply()
         touch()
+        SkPalette.changed()
+    }
+
+    /** Every colour back to its default. */
+    fun clearAllColorOverrides() {
+        val editor = prefs.edit()
+        for (slot in SkThemeSlot.entries) {
+            editor.remove(slot.key)
+        }
+        editor.apply()
+        touch()
+        SkPalette.changed()
+    }
+
+    // The UI page: the order of its sections and which of them are open (all folded on a
+    // fresh install). Kept in this file, so both travel in the export.
+    private const val KEY_UI_SECTION_ORDER = "sk_ui_section_order"
+    private const val KEY_UI_SECTIONS_OPEN = "sk_ui_sections_open"
+
+    var uiSectionOrder: List<String>
+        get() = prefs.getString(KEY_UI_SECTION_ORDER, "")!!.split(',').filter { it.isNotEmpty() }
+        set(value) {
+            prefs.edit().putString(KEY_UI_SECTION_ORDER, value.joinToString(",")).apply()
+        }
+
+    var uiSectionsOpen: Set<String>
+        get() = prefs.getString(KEY_UI_SECTIONS_OPEN, "")!!.split(',')
+            .filter { it.isNotEmpty() }.toSet()
+        set(value) {
+            prefs.edit().putString(KEY_UI_SECTIONS_OPEN, value.joinToString(",")).apply()
+        }
+
+    fun resetUiSectionOrder() {
+        prefs.edit().remove(KEY_UI_SECTION_ORDER).apply()
     }
 
     // Per-element fonts: family (filename, "" = default), weight (0 = default),

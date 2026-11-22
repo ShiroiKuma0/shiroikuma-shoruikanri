@@ -36,6 +36,12 @@ class StorageListAdapter(
         binding.root.foregroundCompat!!.mutate().setVisible(!holder.dragState.isActive, false)
         binding.root.setOnClickListener { listener.editStorage(storage) }
         binding.iconImage.setImageResource(storage.iconRes)
+        // 白い熊 fork: a storage opens something — its icon takes that role's colour.
+        if (me.zhanghai.android.files.skui.SkUi.isSkThemeEnabled) {
+            binding.iconImage.imageTintList = android.content.res.ColorStateList.valueOf(
+                me.zhanghai.android.files.skui.skColor(me.zhanghai.android.files.skui.SkIconRole.OPEN)
+            )
+        }
         binding.nameText.isActivated = storage.isVisible
         binding.nameText.text = storage.getName(binding.nameText.context)
         binding.descriptionText.text = storage.description

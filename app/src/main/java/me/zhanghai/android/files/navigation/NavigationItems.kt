@@ -93,6 +93,9 @@ private class PathStorageItem(
     override val id: Long
         get() = storage.id
 
+    override val skRole: me.zhanghai.android.files.skui.SkIconRole
+        get() = me.zhanghai.android.files.skui.SkIconRole.OPEN
+
     override val iconRes: Int
         @DrawableRes
         get() = storage.iconRes
@@ -119,6 +122,9 @@ private class IntentStorageItem(
 
     override val id: Long
         get() = storage.id
+
+    override val skRole: me.zhanghai.android.files.skui.SkIconRole
+        get() = me.zhanghai.android.files.skui.SkIconRole.OPEN
 
     override val iconRes: Int
         @DrawableRes
@@ -148,6 +154,9 @@ private class StorageVolumeItem(
 ) : PathItem(Paths.get(storageVolume.pathCompat)), NavigationRoot {
     override val id: Long
         get() = storageVolume.hashCode().toLong()
+
+    override val skRole: me.zhanghai.android.files.skui.SkIconRole
+        get() = me.zhanghai.android.files.skui.SkIconRole.OPEN
 
     override val iconRes: Int
         @DrawableRes
@@ -190,6 +199,9 @@ private fun getStorageSubtitle(linuxPath: String, context: Context): String? {
 private class AddStorageItem : NavigationItem() {
     override val id: Long = R.string.navigation_add_storage.toLong()
 
+    override val skRole: me.zhanghai.android.files.skui.SkIconRole
+        get() = me.zhanghai.android.files.skui.SkIconRole.WRITE
+
     @DrawableRes
     override val iconRes: Int = R.drawable.add_icon_white_24dp
 
@@ -217,6 +229,9 @@ private class StandardDirectoryItem(
 
     override val id: Long
         get() = standardDirectory.id
+
+    override val skRole: me.zhanghai.android.files.skui.SkIconRole
+        get() = me.zhanghai.android.files.skui.SkIconRole.OPEN
 
     override val iconRes: Int
         @DrawableRes
@@ -364,7 +379,8 @@ private val menuItems: List<NavigationItem>
     get() = listOf(
         IntentMenuItem(
             R.drawable.shared_directory_icon_white_24dp, R.string.navigation_ftp_server,
-            FtpServerActivity::class.createIntent()
+            FtpServerActivity::class.createIntent(),
+            me.zhanghai.android.files.skui.SkIconRole.SHARE
         ),
         IntentMenuItem(
             R.drawable.settings_icon_white_24dp, R.string.navigation_settings,
@@ -388,7 +404,10 @@ private abstract class MenuItem(
 private class IntentMenuItem(
     @DrawableRes iconRes: Int,
     @StringRes titleRes: Int,
-    private val intent: Intent
+    private val intent: Intent,
+    // 白い熊 fork.
+    override val skRole: me.zhanghai.android.files.skui.SkIconRole =
+        me.zhanghai.android.files.skui.SkIconRole.VIEW
 ) : MenuItem(iconRes, titleRes) {
     override val id: Long
         get() = intent.component.hashCode().toLong()
@@ -405,6 +424,9 @@ private class ExitAppItem : MenuItem(
 ) {
     override val id: Long
         get() = R.string.sk_navigation_exit_app.toLong()
+
+    override val skRole: me.zhanghai.android.files.skui.SkIconRole
+        get() = me.zhanghai.android.files.skui.SkIconRole.BLOCK
 
     override fun onClick(listener: Listener) {
         listener.exitApp()

@@ -56,14 +56,15 @@ fun skPillBackground(
 /** Turn a text view (or a Button) into a pill that hugs its label. */
 fun TextView.applySkPill(
     main: Boolean = false,
-    ink: Int = skColor(SkThemeSlot.ACCENT),
-    fill: Int = Color.TRANSPARENT
+    ink: Int = skColor(SkThemeSlot.PILL_TEXT),
+    fill: Int = skColor(SkThemeSlot.PILL_GROUND),
+    frame: Int = if (ink == skColor(SkThemeSlot.PILL_TEXT)) skColor(SkThemeSlot.PILL_FRAME) else ink
 ) {
     val density = resources.displayMetrics.density
     isAllCaps = false
     setTextColor(ink)
     typeface = Typeface.create(Typeface.SANS_SERIF, if (main) Typeface.BOLD else Typeface.NORMAL)
-    background = skPillBackground(density, ink, fill, main)
+    background = skPillBackground(density, frame, fill, main)
     stateListAnimator = null
     minWidth = 0
     minimumWidth = 0
@@ -73,3 +74,20 @@ fun TextView.applySkPill(
     val paddingV = (9 * density).toInt()
     setPadding(paddingH, paddingV, paddingH, paddingV)
 }
+
+/**
+ * The panel of a dialog, a sheet, a popup or a toast: a ground inside a 1 dp frame with round
+ * corners. Built in code so both colours are roles.
+ */
+fun skPanel(
+    density: Float,
+    ground: Int = skColor(SkThemeSlot.DIALOG_GROUND),
+    frame: Int = skColor(SkThemeSlot.DIALOG_FRAME),
+    radiusDp: Float = 12f
+): GradientDrawable =
+    GradientDrawable().apply {
+        shape = GradientDrawable.RECTANGLE
+        cornerRadius = radiusDp * density
+        setColor(ground)
+        setStroke(maxOf(1, Math.round(density)), frame)
+    }

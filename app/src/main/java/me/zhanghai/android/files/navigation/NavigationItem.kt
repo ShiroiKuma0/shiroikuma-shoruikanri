@@ -30,6 +30,10 @@ abstract class NavigationItem {
 
     open fun onLongClick(listener: Listener): Boolean = false
 
+    // 白い熊 fork: what the item does, which colours its icon (black-yellow theme).
+    open val skRole: me.zhanghai.android.files.skui.SkIconRole
+        get() = me.zhanghai.android.files.skui.SkIconRole.VIEW
+
     // 白い熊 fork: favorites (bookmarks) can be drag-rearranged in the drawer.
     open val isDraggable: Boolean
         get() = false

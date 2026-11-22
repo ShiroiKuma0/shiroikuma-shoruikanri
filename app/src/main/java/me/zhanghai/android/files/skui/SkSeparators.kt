@@ -21,7 +21,9 @@ class SkSeparatorEffective(val thicknessDp: Int, val color: Int)
 
 object SkSeparators {
     // Shaded pure yellow, matching the rest of the 白い熊 look.
-    const val DEFAULT_COLOR = 0x33FFFF00
+    // The default of a separator is the list-divider role.
+    val DEFAULT_COLOR: Int
+        get() = skColor(SkThemeSlot.LIST_DIVIDER)
 
     const val UNSET = -1
 

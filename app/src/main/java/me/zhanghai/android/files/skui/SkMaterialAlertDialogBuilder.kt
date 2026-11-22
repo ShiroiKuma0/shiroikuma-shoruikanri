@@ -7,18 +7,26 @@
 package me.zhanghai.android.files.skui
 
 import android.content.Context
-import androidx.appcompat.content.res.AppCompatResources
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import me.zhanghai.android.files.R
 
+/**
+ * @param destructive the dialog confirms a deletion: its main button is drawn in the danger
+ * role, still an unfilled pill.
+ */
 class SkMaterialAlertDialogBuilder @JvmOverloads constructor(
     context: Context,
-    overrideThemeResId: Int = 0
+    overrideThemeResId: Int = 0,
+    destructive: Boolean = false
 ) : MaterialAlertDialogBuilder(
     context,
     // The dialog buttons are pills: an overlay on top of the Material dialog theme.
     if (overrideThemeResId == 0 && SkUi.isSkThemeEnabled) {
-        R.style.ThemeOverlay_Sk_MaterialAlertDialog
+        if (destructive) {
+            R.style.ThemeOverlay_Sk_MaterialAlertDialog_Destructive
+        } else {
+            R.style.ThemeOverlay_Sk_MaterialAlertDialog
+        }
     } else {
         overrideThemeResId
     }
@@ -32,7 +40,7 @@ class SkMaterialAlertDialogBuilder @JvmOverloads constructor(
         setBackgroundInsetTop(verticalInset)
         setBackgroundInsetBottom(verticalInset)
         if (SkUi.isSkThemeEnabled) {
-            setBackground(AppCompatResources.getDrawable(context, R.drawable.sk_dialog_background))
+            setBackground(skPanel(context.resources.displayMetrics.density))
         }
     }
 

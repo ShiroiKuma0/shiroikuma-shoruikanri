@@ -44,7 +44,7 @@ class ConfirmDeleteFilesDialogFragment : AppCompatDialogFragment() {
             }
             getQuantityString(messageRes, files.size, files.size)
         }
-        return SkMaterialAlertDialogBuilder(requireContext(), theme)
+        return SkMaterialAlertDialogBuilder(requireContext(), theme, destructive = true)
             .setMessage(message)
             .setPositiveButton(android.R.string.ok) { _, _ -> listener.deleteFiles(files) }
             .setNegativeButton(android.R.string.cancel, null)
