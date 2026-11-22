@@ -10,13 +10,14 @@
 
 A fork of [Material Files](https://github.com/zhanghai/MaterialFiles) with **major additions**:
 in-app **gocryptfs** encrypted volumes (no FUSE, no root), **multi-directory tabs**, a full
-**black/yellow theme system**, **six listing views** with per-directory styling, an **image viewer that
+**black/yellow theme system**, **six listing views** with per-directory styling, a **progress box with speed and time left** for
+every extraction, copy, move and pack, an **image viewer that
 pinches out into a zoomable wall of the whole directory**, a **built-in audio mini-player**, a **custom open-with chooser**, **full settings export/import** that can be
 **backed up with its data onto a clean phone**, and deep **Termux / share** integration.
 
 Installs **side-by-side** with the official Material Files (app ID `shiroikuma.shoruikanri`).
 
-**📥 Latest release: [`1.7.5+009`](https://github.com/ShiroiKuma0/shiroikuma-shoruikanri/releases/latest)** — [all releases & APK downloads »](https://github.com/ShiroiKuma0/shiroikuma-shoruikanri/releases)
+**📥 Latest release: [`1.7.5+014`](https://github.com/ShiroiKuma0/shiroikuma-shoruikanri/releases/latest)** — [all releases & APK downloads »](https://github.com/ShiroiKuma0/shiroikuma-shoruikanri/releases)
 
 </div>
 
@@ -42,9 +43,22 @@ favorites. The whole tab set — paths and selection — **survives restarts, re
 
 A pure-**black** background with pure-**yellow** text, icons and borders, everywhere — lists,
 dialogs, menus, toasts, the image viewer, and the new-item button together with the framed dialog
-it opens. A dedicated **UI page** lets you retune it: per-element **colours** (picker with swatches +
-hex), **fonts** (import your own `.ttf`/`.otf`, set family/weight/size), icon size and spacing — all
-with live previews.
+it opens. Every button is an outlined **pill**, every switch an outlined pill with a dot, and every
+menu a column of full-width pills whose **icons are coloured by what the row does** — open green,
+write blue, share orange, delete red. A dedicated **UI page** lets you retune all of it: **83 colour
+roles**, one for every separate thing on screen (picker with swatches + hex), **fonts** (import your
+own `.ttf`/`.otf`, set family/weight/size), icon size and spacing — with live previews, folding
+sections and a chip index you can drag to reorder the page.
+
+## 📦 Extract, copy, move and pack — with a real progress box
+
+Every long file operation opens a **progress box** over the still-visible file list: a thick bar
+(two with several files — this file, and the total), sizes, **speed**, **time left** and elapsed
+time, with **Cancel** and **Hide** — hidden, the job lives on in its notification, and a tap brings
+the box back. The **name of the item being produced can be edited while the job runs** and is
+applied the moment it is complete. Archives are **extracted in a single pass** instead of being
+re-read for every entry, which makes many-file and solid RAR archives far quicker. **Packing works
+like copying:** select, tap the pack icon, walk to the target directory, tap **Pack here**.
 
 ## 🔭 Six listing views + per-directory styling
 

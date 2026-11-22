@@ -6,6 +6,82 @@ plus our build increment (e.g. `1.7.5+001`; the counter is zero-padded to three 
 `1.7.4+050` onwards, so builds sort in order). This fork installs side-by-side with upstream under
 the app ID `shiroikuma.shoruikanri`.
 
+## 1.7.5+014 — 2026-11-22
+
+### New since 1.7.5+009
+
+Built on upstream Material Files **1.7.5**. (Builds `+010` to `+013` were test builds of the same
+work and were not released.)
+
+#### 📦 File operations — a progress box, faster extraction, a pack mode
+
+- **A progress box for extraction, copy, move and packing.** A dialog over the file list — which
+  stays visible behind it, undimmed — with a thick progress bar, “done / total (percent)”, the
+  **speed**, the **time left**, the elapsed time, where the items come from and where they go.
+- **Two bars with several files:** one for the file being written, with its own sizes, and one for
+  the whole job; a single file keeps the one bar. The entry being written is shown as “3 / 12 —
+  name”.
+- **Cancel** stops the job. **Hide** closes the box and leaves the job to its notification; a tap
+  on the notification brings the box back. The notification also shows the speed and time left.
+- **Rename while it runs.** The name of the item being produced can be edited from the first
+  moment; it is applied as soon as the item is complete. If the job ends while the name is still
+  being edited, the box stays and **Done** applies it. It never renames over an existing item,
+  and never renames an item the job skipped or merged into an existing directory.
+- The box appears only when a job lasts longer than 0.4 s, and closes by itself when the job is
+  over.
+- **Extraction reads the archive once.** Until now the archive was opened and read from its start
+  again for every single entry, so a many-file archive — and above all a solid RAR or a `.tar.gz`
+  — was decompressed over and over. Files are now extracted in the order the archive stores them,
+  with the archive kept open in between.
+- **Packing works like cut and copy.** A **pack icon** sits on the selection bar beside Copy (no
+  longer in the ⋮ overflow). Tapping it puts the files in a waiting state — “Packing N” in the top
+  bar — while you walk to any directory; tapping the icon there (“Pack here”) asks for the
+  archive's name and format and writes it into that directory. A long press on the icon drops the
+  pending files. “Compress” in a single file's menu does the same.
+
+#### 🎨 UI & theming — the black-yellow theme, applied in full
+
+- **Every colour is a settable role of its own** — 83 roles instead of 38, each with a swatch row
+  in the section of the thing it colours: Text and icons, Buttons, Dialogs, Switches, Check boxes
+  and radio buttons, Menus, Lists, Text fields, System bars, Toasts and tooltips, File operation
+  progress, beside the existing Toolbar, Breadcrumbs, File list, Navigation drawer, Tabs, Bottom
+  bar, New-item button and Audio player. **Reset all colours** is under Maintenance.
+- **No colour is written into the theme any more.** The theme names roles, and the values 白い熊
+  sets reach every screen at run time (Android 11 and later; older systems show each role's
+  default). An activity built from older colours rebuilds itself when you return to it.
+- **Menus: every action is a full-width pill** with its icon inside at the left and a › when it
+  opens something. Icons are **coloured by what the row does** — open / extract green, write /
+  create blue, copy / share orange, view / select yellow, hide / protect magenta, delete red. A row
+  that deletes is red throughout; a disabled one is dimmed. Toggle rows are plain with the
+  outlined switch instead of a checkbox; single choices (sort key, view type) keep a radio mark.
+  Groups are separated by a clear line. Every menu item has an icon now.
+- **A menu no longer scrolls while the screen has room:** a long menu opened low on the screen is
+  shifted up instead.
+- The FTP server address has a pill menu on long press in place of the system context menu.
+- **Buttons everywhere** are drawn as pills from their roles, including in screens the fork never
+  touched. The confirm button of a **dialog that deletes is red**, and so is any Delete / Remove
+  button.
+- **Every switch in the app** is the outlined one, whatever screen it is on. Check boxes and radio
+  buttons stay selection marks, in their own two roles.
+- **Lists of actions in dialogs** (Add storage, Open as, a share target's actions) are full-width
+  icon pills instead of plain lines.
+- **Icons coloured by role** in the navigation drawer, on every row of Settings and FTP server,
+  and in the storage and standard-directory lists. On the two settings screens, every row that
+  opens something is a pill with a ›, its summary in the dim gold.
+- **白い熊 UI page, rebuilt:** every section **folds** (all folded at first) and remembers its
+  state; a **chip index** on top jumps to a section with a tap, and a long press drags a chip to
+  **reorder the sections**; every row has an icon sized by its label; explanations are dim gold
+  with a thin rule down the left edge; **Reset section order** is under Maintenance. Order and
+  fold state travel in the UI-theme export.
+- New roles for the small things: the link / encrypted **badge** on a file icon, the outline of a
+  grid thumbnail, the accent of the app's notifications, and the system bars (which stay
+  see-through until given a colour).
+
+#### 🐞 Fixes
+
+- The conflict and error dialogs of a file job no longer black out the screen behind them under
+  the 白い熊 theme.
+
 ## 1.7.5+009 — 2026-11-14
 
 ### New since 1.7.5+008
