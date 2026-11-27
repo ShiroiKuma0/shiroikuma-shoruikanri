@@ -6,6 +6,74 @@ plus our build increment (e.g. `1.7.5+001`; the counter is zero-padded to three 
 `1.7.4+050` onwards, so builds sort in order). This fork installs side-by-side with upstream under
 the app ID `shiroikuma.shoruikanri`.
 
+## 1.7.5+016 — 2026-11-27
+
+### New since 1.7.5+014
+
+Built on upstream Material Files **1.7.5**. (Build `+015` was the same work without the flag
+images and was not released.)
+
+#### 📂 Opening files — a redrawn “Open with”, and a default that stays
+
+- **“Open with” redrawn.** Every app is an outlined pill with the app's own icon. On a wide
+  screen the pills stand in two equal columns, on a narrow one in one. The remembered default
+  comes first, as a thick full-width pill marked “Default”.
+- **“Always use for this type” is a switch at the top**, where it is set before an app is
+  tapped; its explanation sits beneath it. It replaces the check box at the bottom of the list.
+- The title carries its icon, and the file type stands beneath it as a tag line of its own.
+- “Open as” is a full-width pill with an icon and a ›, set off by dividers.
+- **A plain tap no longer lands in the system's app chooser.** Where several apps can open a
+  type and the system has no single answer, the fork's own dialog opens instead.
+- **A default set in that dialog is kept by the app itself** and is used for every plain tap
+  until “Forget default” — or until the chosen app is uninstalled. Opening a file once with
+  another app, with the switch off, leaves the default alone.
+- Background: the system's own “always” choice is dropped by the system whenever the set of apps
+  that can open the type changes — after installing any app that handles it, for instance — which
+  made a default seem to vanish at random. A system default that exists is still honoured.
+
+#### 🌐 App language
+
+- **“App language” is the first section of the UI page**, and the first chip of its index: one
+  row, “Language: …”, that opens a picker.
+- **The picker:** 日本語 and English as two pills that never scroll; beneath them one framed box
+  that scrolls by itself, with “System default” first and the other languages sorted by their own
+  name. Every row shows a selection mark, the **flag**, the language in its own words, its country
+  and its tag. The current language is a thick pill. A choice applies at once.
+- **A short list instead of everything:** Japanese and English, then the 30 languages translated
+  to four fifths or more — one row per language (Portuguese is Portugal's; Chinese has a
+  simplified and a traditional row). Basque, at 52 %, is no longer offered; a language chosen
+  earlier stays in force. The picker in Settings and the system's per-app language screen show the
+  same list.
+- The chosen language is stored with the UI settings, travels in the export, and is put back in
+  force at every start — some systems forget an app's language when the app is updated from a
+  file. Below Android 13 it also reaches notifications and background work.
+- Flags are bundled images (Noto Color Emoji), not emoji text.
+
+#### 🎨 UI page and colours
+
+- **Section icons in seven colours, each with one meaning:** yellow for what the app is, green for
+  controls, light blue for words, heavy blue for the frame and its boxes, orange where the app
+  reaches out, red for warnings, rose for a brief flash. The seven are settable under
+  Foundation → “Section icons of this page”.
+- **Every chip of the index carries its section's icon**, in the same colour as the heading.
+- The default order of the sections changed so that no two neighbours share a colour. An order
+  you arranged yourself is kept.
+- **Menu icon defaults changed** for readability: heavy green `#00A550` (was pure green), heavy
+  blue `#0066FF`, light blue `#00B0FF` (was cyan) and rose `#FF3D7F` (was magenta). Colours you
+  set yourself are untouched.
+- The icon of a row stays beside the first line of a label that wraps.
+
+#### 🇯🇵 Japanese
+
+- The 39 fork strings that were still English in a Japanese app are translated: the automation
+  rows, the file operation progress box, the gocryptfs unlock dialog, path diagnostics and
+  “Exit app”. Every string this release adds has its Japanese as well.
+
+#### 📦 Packaging
+
+- `shiroikuma-shoruikanri_1.7.5+016_arm64-v8a.apk` — signed release, arm64-v8a, app ID
+  `shiroikuma.shoruikanri`, version code 400016.
+
 ## 1.7.5+014 — 2026-11-22
 
 ### New since 1.7.5+009
