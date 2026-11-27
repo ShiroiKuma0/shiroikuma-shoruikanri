@@ -117,6 +117,17 @@ Nothing open. (Dual-pane mode was dropped by 白い熊 on 2026-11-14.)
 
 ### Done
 
+- **Share dialog redrawn like the open-with dialog** (2026-11-27, shipped in `1.7.5+017`).
+  `skui/SkShareDialog.kt`: the title with the share icon, then every target — apps, Termux script
+  targets, "AutoShare command…", "Add Termux script…" — as an outlined pill with its own icon, in
+  a `GridLayoutManager` of two columns from 600 dp of screen width and one below that (the same
+  threshold as `SkOpenWithDialog`). A row that opens a further dialog or chooser sets
+  `Entry.opens` and shows the ›; a glyph icon is tinted through `Entry.iconTint`, an app's own
+  icon is not. All labels use `MENU_LABEL`. Drag-to-sort stays (sideways too in two columns; the
+  dragged pill wears the thick frame), and a long-press without moving opens the row menu. There
+  is no "always use" switch: sharing has no default. The pill is built in the adapter, not with
+  `SkOpenWithDialog.pill`, because the rows are recycled.
+
 - **App language, section-icon colours, open-with dialog and its default** (2026-11-27, shipped in
   `1.7.5+016`; `+015` is the same without the flags).
   - **App language** is the first section of the UI page: `skui/SkLanguage.kt`. The offered
