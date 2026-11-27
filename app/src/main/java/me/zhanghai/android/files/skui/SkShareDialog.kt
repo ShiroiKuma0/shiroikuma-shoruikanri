@@ -1,7 +1,9 @@
 /*
  * 白い熊 fork (skui): the custom share dialog, replacing the system share
- * sheet. Same format as the open-with dialog: black, yellow-bordered, all
- * share handlers with icons.
+ * sheet. Same format as the open-with dialog: the title with its icon, then
+ * every share target as an outlined pill with its own icon — in two columns
+ * where the screen is wide and in one where not. A row that opens a further
+ * dialog or chooser carries the › at its right.
  *
  * The rows are manually sortable: long-press one and drag it where it belongs —
  * the arrangement is remembered (SkShare.order) and used for every later share.
@@ -23,9 +25,11 @@ package me.zhanghai.android.files.skui
 import android.app.Activity
 import android.content.ComponentName
 import android.content.Intent
+import android.content.res.ColorStateList
 import android.graphics.drawable.Drawable
 import android.net.Uri
 import android.text.InputType
+import android.text.TextUtils
 import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
@@ -35,9 +39,9 @@ import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
-import androidx.core.graphics.ColorUtils
+import androidx.appcompat.content.res.AppCompatResources
+import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.ItemTouchHelper
-import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import me.zhanghai.android.files.R
 import me.zhanghai.android.files.util.showToast
@@ -57,7 +61,10 @@ class SkShareDialog(
     private val adapter = EntryAdapter()
     private var recyclerView: RecyclerView? = null
 
-    private fun dp(value: Int): Int = (value * density).toInt()
+    private fun dp(value: Int): Int = Math.round(value * density)
+
+    // Two columns of equal pills where the screen is wide, one column where it is not.
+    private val columns = if (activity.resources.configuration.screenWidthDp >= 600) 2 else 1
 
     private fun isInstalled(packageName: String): Boolean =
         try {
@@ -75,14 +82,14 @@ class SkShareDialog(
                 TextView(activity).apply {
                     text = activity.getString(R.string.sk_open_with_no_apps)
                     textSize = 15f
-                    setTextColor(skColor(SkThemeSlot.TEXT_SECONDARY))
+                    setTextColor(skColor(SkThemeSlot.NOTE))
                     setPadding(dp(24), dp(12), dp(24), dp(12))
                 }
             } else {
                 val list = RecyclerView(activity).apply {
-                    layoutManager = LinearLayoutManager(activity)
+                    layoutManager = GridLayoutManager(activity, columns)
                     adapter = this@SkShareDialog.adapter
-                    setPadding(0, dp(8), 0, dp(8))
+                    setPadding(dp(13), dp(4), dp(13), dp(4))
                     clipToPadding = false
                 }
                 ItemTouchHelper(DragCallback()).attachToRecyclerView(list)
@@ -91,7 +98,11 @@ class SkShareDialog(
             }
 
         dialog = SkMaterialAlertDialogBuilder(activity)
-            .setTitle(R.string.share)
+            .setCustomTitle(
+                skDialogTitle(
+                    activity, R.string.share, R.drawable.sk_share_icon_control_normal_24dp
+                )
+            )
             .setView(content)
             .setNegativeButton(android.R.string.cancel, null)
             .show()
@@ -105,7 +116,10 @@ class SkShareDialog(
         val key: String,
         val label: String,
         val icon: Drawable?,
-        val textColor: Int,
+        // The tint of a glyph icon; null for an app's own icon, which keeps its colours.
+        val iconTint: Int? = null,
+        // Whether the row opens a further dialog or chooser — it then shows the ›.
+        val opens: Boolean = false,
         val onClick: () -> Unit,
         // Row-specific entries of the long-press menu, after the move actions.
         val extraActions: List<Pair<String, () -> Unit>> = emptyList()
@@ -123,7 +137,6 @@ class SkShareDialog(
                     key = termuxKey(script),
                     label = script.label,
                     icon = termuxIcon,
-                    textColor = skColor(SkThemeSlot.ACCENT),
                     onClick = { runTermuxScript(script) },
                     extraActions = listOf(
                         activity.getString(R.string.sk_share_edit) to
@@ -136,8 +149,9 @@ class SkShareDialog(
             built += Entry(
                 key = KEY_TERMUX_ADD,
                 label = activity.getString(R.string.sk_termux_add),
-                icon = null,
-                textColor = skColor(SkThemeSlot.ACCENT),
+                icon = AppCompatResources.getDrawable(activity, R.drawable.add_icon_white_24dp),
+                iconTint = skColor(SkIconRole.WRITE),
+                opens = true,
                 onClick = { showTermuxScriptEditor(null) }
             )
         }
@@ -148,7 +162,7 @@ class SkShareDialog(
                 key = KEY_AUTOSHARE,
                 label = activity.getString(R.string.sk_share_autoshare_command),
                 icon = autoShareIcon,
-                textColor = skColor(SkThemeSlot.ACCENT),
+                opens = true,
                 onClick = { launchAutoShareCommandChooser() }
             )
         }
@@ -171,7 +185,6 @@ class SkShareDialog(
                 key = component.flattenToString(),
                 label = resolveInfo.loadLabel(packageManager).toString(),
                 icon = resolveInfo.loadIcon(packageManager),
-                textColor = skColor(SkThemeSlot.TEXT),
                 onClick = {
                     grantSharedUrisTo(component.packageName)
                     dialog?.dismiss()
@@ -394,39 +407,62 @@ class SkShareDialog(
     private class EntryHolder(
         itemView: View,
         val iconView: ImageView,
-        val labelView: TextView
+        val labelView: TextView,
+        val chevronView: ImageView
     ) : RecyclerView.ViewHolder(itemView)
+
+    // The pill of a row; thick while the row is being dragged.
+    private fun pillBackground(thick: Boolean): Drawable =
+        skPillBackground(
+            density, skColor(SkThemeSlot.MENU_ROW_FRAME), skColor(SkThemeSlot.PILL_GROUND), thick
+        )
 
     private inner class EntryAdapter : RecyclerView.Adapter<EntryHolder>() {
         override fun getItemCount(): Int = entries.size
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): EntryHolder {
+            val ink = skColor(SkThemeSlot.MENU_LABEL)
             val iconView = ImageView(activity).apply {
-                layoutParams = LinearLayout.LayoutParams(dp(32), dp(32))
+                layoutParams = LinearLayout.LayoutParams(dp(28), dp(28)).apply {
+                    marginEnd = dp(10)
+                }
             }
             val labelView = TextView(activity).apply {
+                layoutParams = LinearLayout.LayoutParams(
+                    0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f
+                )
                 textSize = 16f
-                setPaddingRelative(dp(16), 0, 0, 0)
+                setSingleLine()
+                ellipsize = TextUtils.TruncateAt.END
+                setTextColor(ink)
+            }
+            val chevronView = ImageView(activity).apply {
+                setImageDrawable(
+                    AppCompatResources.getDrawable(activity, R.drawable.sk_ic_chevron)
+                )
+                imageTintList = ColorStateList.valueOf(ink)
             }
             val row = LinearLayout(activity).apply {
                 layoutParams = RecyclerView.LayoutParams(
                     ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT
-                )
+                ).apply { setMargins(dp(3), dp(3), dp(3), dp(3)) }
                 orientation = LinearLayout.HORIZONTAL
                 gravity = Gravity.CENTER_VERTICAL
-                setPadding(dp(24), dp(10), dp(24), dp(10))
-                setBackgroundResource(android.R.drawable.list_selector_background)
+                setPadding(dp(12), dp(7), dp(14), dp(7))
+                background = pillBackground(false)
                 addView(iconView)
                 addView(labelView)
+                addView(chevronView)
             }
-            return EntryHolder(row, iconView, labelView)
+            return EntryHolder(row, iconView, labelView, chevronView)
         }
 
         override fun onBindViewHolder(holder: EntryHolder, position: Int) {
             val entry = entries[position]
             holder.iconView.setImageDrawable(entry.icon)
+            holder.iconView.imageTintList = entry.iconTint?.let { ColorStateList.valueOf(it) }
             holder.labelView.text = entry.label
-            holder.labelView.setTextColor(entry.textColor)
+            holder.chevronView.visibility = if (entry.opens) View.VISIBLE else View.GONE
             holder.itemView.setOnClickListener { entry.onClick() }
         }
     }
@@ -442,7 +478,11 @@ class SkShareDialog(
         override fun getMovementFlags(
             recyclerView: RecyclerView,
             viewHolder: RecyclerView.ViewHolder
-        ): Int = makeMovementFlags(ItemTouchHelper.UP or ItemTouchHelper.DOWN, 0)
+        ): Int = makeMovementFlags(
+            ItemTouchHelper.UP or ItemTouchHelper.DOWN or
+                if (columns > 1) ItemTouchHelper.START or ItemTouchHelper.END else 0,
+            0
+        )
 
         override fun onMove(
             recyclerView: RecyclerView,
@@ -468,16 +508,14 @@ class SkShareDialog(
             if (actionState == ItemTouchHelper.ACTION_STATE_DRAG && viewHolder != null) {
                 hasMoved = false
                 draggedEntry = entries.getOrNull(viewHolder.bindingAdapterPosition)
-                viewHolder.itemView.setBackgroundColor(
-                    ColorUtils.setAlphaComponent(skColor(SkThemeSlot.ACCENT), 0x40)
-                )
+                viewHolder.itemView.background = pillBackground(true)
             }
         }
 
         override fun clearView(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder) {
             super.clearView(recyclerView, viewHolder)
 
-            viewHolder.itemView.setBackgroundResource(android.R.drawable.list_selector_background)
+            viewHolder.itemView.background = pillBackground(false)
             val entry = draggedEntry ?: return
             draggedEntry = null
             if (hasMoved) {
