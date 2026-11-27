@@ -6,6 +6,32 @@ plus our build increment (e.g. `1.7.5+001`; the counter is zero-padded to three 
 `1.7.4+050` onwards, so builds sort in order). This fork installs side-by-side with upstream under
 the app ID `shiroikuma.shoruikanri`.
 
+## 1.7.5+017 — 2026-11-27
+
+### New since 1.7.5+016
+
+Built on upstream Material Files **1.7.5**.
+
+#### 📤 Sharing — the share dialog redrawn like “Open with”
+
+- **Every share target is an outlined pill with its own icon** — the apps, the Termux script
+  targets and the AutoShare entry alike. On a wide screen the pills stand in two equal columns, on
+  a narrow one in one.
+- The title carries the share icon.
+- **“Add Termux script…” has an icon** (a plus; it had none), and it and “AutoShare command…”
+  show a › at the right, because they open a further dialog or chooser.
+- All labels are drawn in the one menu label colour; a long label is cut with an ellipsis instead
+  of wrapping.
+- **Arranging by hand is kept and works across both columns:** long-press a pill and drag it up,
+  down or sideways; while it is dragged it wears the thick frame. A long-press released without
+  moving still opens the row menu (move to top or bottom, reset the order, edit or delete a
+  Termux target).
+
+#### 📦 Packaging
+
+- `shiroikuma-shoruikanri_1.7.5+017_arm64-v8a.apk` — signed release, arm64-v8a, app ID
+  `shiroikuma.shoruikanri`, version code 400017.
+
 ## 1.7.5+016 — 2026-11-27
 
 ### New since 1.7.5+014

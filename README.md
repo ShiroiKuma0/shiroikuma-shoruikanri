@@ -17,7 +17,7 @@ pinches out into a zoomable wall of the whole directory**, a **built-in audio mi
 
 Installs **side-by-side** with the official Material Files (app ID `shiroikuma.shoruikanri`).
 
-**📥 Latest release: [`1.7.5+016`](https://github.com/ShiroiKuma0/shiroikuma-shoruikanri/releases/latest)** — [all releases & APK downloads »](https://github.com/ShiroiKuma0/shiroikuma-shoruikanri/releases)
+**📥 Latest release: [`1.7.5+017`](https://github.com/ShiroiKuma0/shiroikuma-shoruikanri/releases/latest)** — [all releases & APK downloads »](https://github.com/ShiroiKuma0/shiroikuma-shoruikanri/releases)
 
 </div>
 
@@ -126,7 +126,8 @@ rather use another player, and the player's colours and fonts are tunable from t
 
 ## 📤 Share & Termux, your way
 
-A custom share dialog you arrange yourself: **long-press any row and drag it where you want it**,
+A custom share dialog you arrange yourself — every target an outlined pill with its own icon, in two
+columns on a wide screen: **long-press any pill and drag it where you want it**,
 and that order is remembered for every future share — the app you actually use is one tap away
 instead of buried alphabetically. Alongside the normal apps it carries an **AutoShare** command
 entry and **one-click Termux script targets** that run a script on the selected file’s real path. It
