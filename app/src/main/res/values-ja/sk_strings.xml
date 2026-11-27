@@ -169,12 +169,9 @@
     <string name="sk_separator_style_title">区切り線（このフォルダ・この表示）</string>
 
     <!-- Open with -->
-    <string name="sk_open_with_title_format">アプリで開く（%s）</string>
-    <string name="sk_open_with_set_default">%s では常にこのアプリを使用</string>
     <string name="sk_open_with_open_as">形式を指定して開く…</string>
     <string name="sk_open_with_clear_default">デフォルトを解除</string>
     <string name="sk_open_with_no_apps">この形式を開けるアプリがありません</string>
-    <string name="sk_open_with_default_suffix">"（デフォルト）"</string>
 
     <!-- Share dialog -->
     <string name="sk_share_autoshare_command">AutoShare コマンド…</string>
@@ -295,4 +292,54 @@
     <!-- 白い熊 fork: a pending pack, shown in the top bar like a pending paste. -->
     <string name="sk_file_list_paste_archive_title_format">%1$,d 件を圧縮</string>
     <string name="sk_file_list_paste_action_archive_here">ここに圧縮</string>
+
+    <!-- 白い熊 fork: added in 1.7.5+015 (App language, section icons, open-with dialog, owed Japanese). -->
+    <string name="sk_ui_group_language">アプリの言語</string>
+    <string name="sk_ui_language_row">言語: %s</string>
+    <string name="sk_ui_language_system">システムの既定</string>
+    <string name="sk_ui_group_section_icons">このページのセクションアイコン</string>
+    <string name="sk_ui_section_base">基本：アプリそのものと設定</string>
+    <string name="sk_ui_section_controls">操作するもの</string>
+    <string name="sk_ui_section_words">言葉：書くもの・読むもの</string>
+    <string name="sk_ui_section_frame">枠とその中の箱</string>
+    <string name="sk_ui_section_reach">アプリからの働きかけ：確認・提案・受け渡し</string>
+    <string name="sk_ui_section_warning">警告：リセットと消去</string>
+    <string name="sk_ui_section_flash">一瞬だけ表示されるもの</string>
+    <string name="sk_open_with_title">アプリで開く</string>
+    <string name="sk_open_with_type_qualifier">ファイル形式</string>
+    <string name="sk_open_with_always">この形式では常に使用</string>
+    <string name="sk_open_with_always_desc">オンにしてからアプリを選ぶと、デフォルトとして記憶します。</string>
+    <string name="sk_open_with_default_badge">デフォルト</string>
+    <string name="sk_automation_enabled">自動エクスポート</string>
+    <string name="sk_automation_enabled_desc">姉妹アプリがこのエクスポートを画面なしで実行し、このアプリのデータをバックアップ・復元できるようにします。</string>
+    <string name="sk_automation_require_token">認証トークンを使用しますか？</string>
+    <string name="sk_automation_require_token_desc">オフ：どの姉妹アプリでも自動処理を実行できます。オン：呼び出し側は下のトークンも提示する必要があります。どちらの場合も、データの受け渡しでは呼び出し側の身元と署名を確認します。</string>
+    <string name="sk_automation_token">自動処理トークン（タップでコピー）</string>
+    <string name="sk_automation_token_copied">自動処理トークンをコピーしました</string>
+    <string name="sk_automation_token_regenerate">再生成</string>
+    <string name="sk_automation_token_regenerate_message">古いトークンはすぐに使えなくなります。貼り付けたすべての控え（自由作業盤の保存復元の設定）を更新する必要があります。</string>
+    <string name="sk_automation_token_regenerated">新しいトークンです。貼り付けた控えを更新してください</string>
+    <string name="sk_notification_channel_automation_data_name">自動処理のデータ</string>
+    <string name="sk_notification_channel_automation_data_description">姉妹アプリがこのアプリのデータをバックアップまたは復元している間に表示されます。</string>
+    <string name="sk_automation_data_notification_exporting">アプリのデータを書き出しています\u2026</string>
+    <string name="sk_automation_data_notification_importing">アプリのデータを復元しています\u2026</string>
+    <string name="sk_ui_switch_off">スイッチ（オフ）</string>
+    <string name="sk_extract_progress_title">展開中</string>
+    <string name="sk_extract_progress_title_done">展開しました</string>
+    <string name="sk_extract_progress_hide">隠す</string>
+    <string name="sk_extract_progress_done">完了</string>
+    <string name="sk_extract_progress_name_hint">名前</string>
+    <string name="sk_extract_progress_name_invalid">この名前は使えません。</string>
+    <string name="sk_extract_progress_preparing">アーカイブを読み込んでいます…</string>
+    <string name="sk_extract_progress_source_format">%1$s から</string>
+    <string name="sk_extract_progress_target_format">%1$s へ</string>
+    <string name="sk_extract_progress_entry_format">%1$d / %2$d — %3$s</string>
+    <string name="sk_extract_progress_size_format">%1$s / %2$s (%3$d%%)</string>
+    <string name="sk_extract_progress_speed_format">%1$s/秒</string>
+    <string name="sk_extract_progress_eta_format">残り %1$s</string>
+    <string name="sk_extract_progress_average_format">平均 %1$s</string>
+    <string name="sk_extract_progress_elapsed_format">経過 %1$s</string>
+    <string name="sk_extract_progress_done_toast_format">%1$s：「%2$s」。</string>
+    <string name="sk_extract_progress_name_exists_format">名前を変更できませんでした：「%1$s」は既に存在します。</string>
+    <string name="sk_extract_progress_not_renamed">名前を変更していません：既存のディレクトリに統合されたか、スキップされました。</string>
 </resources>

@@ -1826,6 +1826,13 @@ class FileListFragment : Fragment(), BreadcrumbLayout.Listener, FileListAdapter.
                     extraPath = path
                     maybeAddImageViewerActivityExtras(this, path, mimeType)
                 }
+            // 白い熊 fork: where the system would ask which app to use, our own dialog asks
+            // instead. A default set there is kept in the fork's preferences; the system's
+            // "always" is dropped by the system whenever the set of candidate apps changes.
+            if (SkOpenWithDialog.wouldAskSystem(requireActivity(), intent)) {
+                SkOpenWithDialog(requireActivity(), path, mimeType)
+                return
+            }
             startActivitySafe(intent)
         }
     }

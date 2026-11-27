@@ -641,4 +641,13 @@
     <string name="about_author_name_title">張海</string>
     <string name="about_author_github_title">GitHub でフォロー</string>
     <string name="about_author_twitter_title">Twitter でフォロー</string>
+
+    <!-- 白い熊 fork: added in 1.7.5+015 (App language, section icons, open-with dialog, owed Japanese). -->
+    <string name="sk_breadcrumb_action_path_diagnostics">パスの診断</string>
+    <string name="sk_path_diagnostics_title">パスの診断</string>
+    <string name="sk_gocryptfs_unlock_title">暗号化ボリュームのロックを解除</string>
+    <string name="sk_gocryptfs_unlock_hint">パスワード</string>
+    <string name="sk_gocryptfs_unlock_action">ロック解除</string>
+    <string name="sk_gocryptfs_unlock_failed">ロックを解除できませんでした。パスワードが違うか、gocryptfs ボリュームではありません。</string>
+    <string name="sk_navigation_exit_app">アプリを終了</string>
 </resources>

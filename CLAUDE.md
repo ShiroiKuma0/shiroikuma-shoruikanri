@@ -117,6 +117,28 @@ Nothing open. (Dual-pane mode was dropped by 白い熊 on 2026-11-14.)
 
 ### Done
 
+- **App language, section-icon colours, open-with dialog and its default** (2026-11-27, shipped in
+  `1.7.5+016`; `+015` is the same without the flags).
+  - **App language** is the first section of the UI page: `skui/SkLanguage.kt`. The offered
+    languages are the hand-written `res/xml/sk_locales_config.xml` (`generateLocaleConfig` is
+    off; the manifest points at the file), so upstream's picker in Settings and the system's
+    screen show the same short list: Japanese, English, then every language upstream translates
+    to four fifths or more, one row per language. **Measure again after an upstream rebase**; a
+    new country needs its flag (`tools/sk_flags.py`, into `res/drawable-nodpi/`). The flags are
+    looked up by name, so `res/raw/sk_keep.xml` keeps them from the resource shrinker. The tag is
+    `app_language` in the `sk_ui` preferences, re-asserted at start (`initializeSkLanguage`);
+    upstream's `LocalePreference` writes the same value (one fork line there).
+  - **Section icons** take one of seven colours by what the section is (`SkThemeSlot.SECTION_*`);
+    heading and chip draw the same icon. The sections are built in their default order, in which
+    no two neighbours share a colour — keep that when adding a section.
+  - **Open-with**: `SkOpenWithDialog` — the "always use" switch on top, the default first as a
+    thick pill, apps in two columns from 600 dp of screen width. A plain tap never shows the
+    system chooser: `SkOpenWithDialog.wouldAskSystem` sends it to our dialog, because the
+    system's own "always" is dropped whenever the set of candidate apps changes (that, not our
+    dialog, lost 白い熊's mpv default for MKV).
+  - Every fork string has its Japanese; compare the key sets of `strings.xml` and
+    `sk_strings.xml` against `values-ja` before calling a build done.
+
 - **Black-yellow theme, applied fully** (2026-11-22, shipped in `1.7.5+014`), the **mixed way**
   (白い熊's decision: the fork follows upstream's releases, so upstream's layouts are not edited
   for colour). `ThemeOverlay.Sk` (`sk_theme.xml`) holds no colour: every colour attribute points at

@@ -19,11 +19,12 @@ object SkUi {
     // they are written here once, as the defaults of their roles (SkThemeSlot).
     const val PALETTE_CLEAR = 0x00000000
     const val PALETTE_RED = 0xFFFF0000.toInt()
-    const val PALETTE_ICON_GREEN = 0xFF00FF00.toInt()
-    const val PALETTE_ICON_BLUE = 0xFF4D94FF.toInt()
-    const val PALETTE_ICON_CYAN = 0xFF00FFFF.toInt()
+    // (The defaults of 2026-11-23: no pure green, no cyan, no magenta, blues far apart.)
+    const val PALETTE_ICON_GREEN = 0xFF00A550.toInt()
+    const val PALETTE_ICON_BLUE = 0xFF0066FF.toInt()
+    const val PALETTE_ICON_SKY = 0xFF00B0FF.toInt()
     const val PALETTE_ICON_ORANGE = 0xFFFF8000.toInt()
-    const val PALETTE_ICON_MAGENTA = 0xFFFF00FF.toInt()
+    const val PALETTE_ICON_ROSE = 0xFFFF3D7F.toInt()
 
     // A slot with this stored value follows its inherited default.
     const val UNSET = Int.MIN_VALUE
@@ -209,6 +210,16 @@ object SkUi {
             .filter { it.isNotEmpty() }.toSet()
         set(value) {
             prefs.edit().putString(KEY_UI_SECTIONS_OPEN, value.joinToString(",")).apply()
+        }
+
+    // The app's language as a BCP-47 tag, empty for the system's. Kept here beside the
+    // system's own per-app setting, which EMUI drops across a sideload update (SkLanguage).
+    private const val KEY_APP_LANGUAGE = "app_language"
+
+    var appLanguage: String
+        get() = prefs.getString(KEY_APP_LANGUAGE, "")!!
+        set(value) {
+            prefs.edit().putString(KEY_APP_LANGUAGE, value).apply()
         }
 
     fun resetUiSectionOrder() {

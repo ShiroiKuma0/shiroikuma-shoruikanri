@@ -98,6 +98,8 @@ class LocalePreference : ListPreference {
             } else {
                 LocaleListCompat.getEmptyLocaleList()
             }
+            // 白い熊 fork: this picker and the UI page's "App language" set one stored value.
+            me.zhanghai.android.files.skui.SkLanguage.store(value?.toLanguageTag() ?: "")
             setApplicationLocalesPre33(locales)
         }
 

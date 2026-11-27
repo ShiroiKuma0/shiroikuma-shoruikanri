@@ -63,7 +63,8 @@ class SkUiActivity : AppActivity() {
         val key: String,
         @StringRes val labelRes: Int,
         val icon: Int,
-        val role: SkIconRole,
+        // One of the seven section colours, by what kind of thing the section is.
+        val tone: SkThemeSlot,
         val build: () -> Unit
     )
 
@@ -131,16 +132,31 @@ class SkUiActivity : AppActivity() {
             key: String,
             @StringRes labelRes: Int,
             icon: Int,
-            role: SkIconRole,
+            tone: SkThemeSlot,
             build: () -> Unit
         ) {
-            sections += Section(key, labelRes, icon, role, build)
+            sections += Section(key, labelRes, icon, tone, build)
+        }
+        val base = SkThemeSlot.SECTION_BASE
+        val controls = SkThemeSlot.SECTION_CONTROLS
+        val words = SkThemeSlot.SECTION_WORDS
+        val frame = SkThemeSlot.SECTION_FRAME
+        val reach = SkThemeSlot.SECTION_REACH
+
+        // The sections are built in their default order, in which no two neighbours share a
+        // colour. App language is the first section, so its chip is the first chip.
+        section("language", R.string.sk_ui_group_language, R.drawable.sk_ic_globe, words) {
+            addActionRow(
+                getString(R.string.sk_ui_language_row, SkLanguage.currentName(this)), null, null,
+                rowL1Px, main = true, opens = true, icon = R.drawable.sk_ic_globe,
+                role = SkIconRole.PERSON
+            ) { SkLanguage.showPicker(this) }
         }
 
         // Export / Import — carry every setting between installs (the Kōjiki
         // flow); the explanation beneath is the latest export found in the
         // export directory, queried on every page open.
-        section("eximport", R.string.sk_eximport_title, R.drawable.sk_ic_swap, SkIconRole.SHARE) {
+        section("eximport", R.string.sk_eximport_title, R.drawable.sk_ic_swap, reach) {
             val (eximportStatus, eximportWarn) = eximportPageStatus()
             addActionRow(
                 getString(R.string.sk_eximport_open), eximportStatus,
@@ -170,7 +186,7 @@ class SkUiActivity : AppActivity() {
         }
 
             // Foundation — the colors everything else inherits from
-        section("foundation", R.string.sk_ui_group_foundation, R.drawable.sk_ic_palette, SkIconRole.VIEW) {
+        section("foundation", R.string.sk_ui_group_foundation, R.drawable.sk_ic_palette, base) {
             addSwitchRow(
                 R.string.sk_ui_theme_enabled, SkUi.isSkThemeEnabled, rowL1Px,
                 R.string.sk_ui_theme_enabled_desc
@@ -181,59 +197,65 @@ class SkUiActivity : AppActivity() {
             SkThemeSlot.entries.filter { it.group == SkThemeGroup.FOUNDATION }.forEach {
                 addColorRow(it, rowL1Px)
             }
+            addSubgroup(SkThemeGroup.SECTION_ICONS.labelRes)
+            SkThemeSlot.entries.filter { it.group == SkThemeGroup.SECTION_ICONS }.forEach {
+                addColorRow(it, rowL2Px)
+            }
         }
 
-        section("text", R.string.sk_ui_group_text, R.drawable.sk_ic_text, SkIconRole.WRITE) {
+        section("text", R.string.sk_ui_group_text, R.drawable.sk_ic_text, words) {
             addGroupRows(SkThemeGroup.TEXT)
         }
-        section("buttons", R.string.sk_ui_group_buttons, R.drawable.sk_ic_button, SkIconRole.VIEW) {
+
+        section("buttons", R.string.sk_ui_group_buttons, R.drawable.sk_ic_button, controls) {
             addGroupRows(SkThemeGroup.BUTTONS)
         }
-        section("dialogs", R.string.sk_ui_group_dialogs, R.drawable.sk_ic_window, SkIconRole.VIEW) {
+
+        section("dialogs", R.string.sk_ui_group_dialogs, R.drawable.sk_ic_window, reach) {
             addGroupRows(SkThemeGroup.DIALOGS)
         }
+
         section(
-            "switches", R.string.sk_ui_group_switches, R.drawable.sk_ic_toggle, SkIconRole.VIEW
+            "switches", R.string.sk_ui_group_switches, R.drawable.sk_ic_toggle, controls
         ) {
             addGroupRows(SkThemeGroup.SWITCHES)
         }
-        section("marks", R.string.sk_ui_group_marks, R.drawable.sk_ic_check_box, SkIconRole.VIEW) {
-            addGroupRows(SkThemeGroup.MARKS)
-        }
-        section("menus", R.string.sk_ui_group_menus, R.drawable.sk_ic_list, SkIconRole.VIEW) {
+
+        section("menus", R.string.sk_ui_group_menus, R.drawable.sk_ic_list, reach) {
             addGroupRows(SkThemeGroup.MENUS)
         }
-        section("lists", R.string.sk_ui_group_lists, R.drawable.sk_ic_list, SkIconRole.VIEW) {
+
+        section("marks", R.string.sk_ui_group_marks, R.drawable.sk_ic_check_box, controls) {
+            addGroupRows(SkThemeGroup.MARKS)
+        }
+
+        section("lists", R.string.sk_ui_group_lists, R.drawable.sk_ic_list, frame) {
             addGroupRows(SkThemeGroup.LISTS)
         }
-        section("fields", R.string.sk_ui_group_fields, R.drawable.sk_ic_field, SkIconRole.WRITE) {
+
+        section("fields", R.string.sk_ui_group_fields, R.drawable.sk_ic_field, words) {
             addGroupRows(SkThemeGroup.FIELDS)
         }
-        section("bars", R.string.sk_ui_group_bars, R.drawable.sk_ic_layers, SkIconRole.VIEW) {
+
+        section("bars", R.string.sk_ui_group_bars, R.drawable.sk_ic_layers, frame) {
             addNote(R.string.sk_ui_bars_note, rowL1Px)
             addGroupRows(SkThemeGroup.BARS)
         }
-        section("toasts", R.string.sk_ui_group_toasts, R.drawable.sk_ic_bell, SkIconRole.VIEW) {
+
+        section("toasts", R.string.sk_ui_group_toasts, R.drawable.sk_ic_bell, SkThemeSlot.SECTION_FLASH) {
             addGroupRows(SkThemeGroup.TOASTS)
         }
 
             // Toolbar
-        section("toolbar", R.string.sk_ui_group_toolbar, R.drawable.sk_ic_window, SkIconRole.VIEW) {
+        section("toolbar", R.string.sk_ui_group_toolbar, R.drawable.sk_ic_window, frame) {
             addColorRow(SkThemeSlot.TOOLBAR_BACKGROUND, rowL1Px)
             addTextRow(SkThemeSlot.TOOLBAR_TITLE, rowL1Px)
             addTextRow(SkThemeSlot.TOOLBAR_SUBTITLE, rowL1Px)
             addColorRow(SkThemeSlot.TOOLBAR_ICONS, rowL1Px)
         }
 
-            // Breadcrumbs
-        section("breadcrumbs", R.string.sk_ui_group_breadcrumbs, R.drawable.arrow_end_icon_white_24dp, SkIconRole.OPEN) {
-            addTextRow(SkThemeSlot.BREADCRUMB_SELECTED, rowL1Px)
-            addColorRow(SkThemeSlot.BREADCRUMB_UNSELECTED, rowL1Px)
-            addColorRow(SkThemeSlot.BREADCRUMB_ARROWS, rowL1Px)
-        }
-
             // File list
-        section("file_list", R.string.sk_ui_group_file_list, R.drawable.file_icon_white_24dp, SkIconRole.OPEN) {
+        section("file_list", R.string.sk_ui_group_file_list, R.drawable.file_icon_white_24dp, base) {
             val updateFileListPreview = addFileListPreview(rowL1Px)
             addSubgroup(R.string.sk_ui_subgroup_text)
             addTextRow(SkThemeSlot.FILE_NAME, rowL2Px)
@@ -342,43 +364,43 @@ class SkUiActivity : AppActivity() {
             }
         }
 
-            // Navigation drawer
-        section("drawer", R.string.sk_ui_group_drawer, R.drawable.menu_icon_control_normal_24dp, SkIconRole.VIEW) {
-            addColorRow(SkThemeSlot.DRAWER_BACKGROUND, rowL1Px)
-            addTextRow(SkThemeSlot.DRAWER_ITEM, rowL1Px)
-            addColorRow(SkThemeSlot.DRAWER_ICONS, rowL1Px)
-        }
-
-            // Tab bar
-        section("tabs", R.string.sk_ui_group_tabs, R.drawable.sk_ic_tab, SkIconRole.VIEW) {
-            addColorRow(SkThemeSlot.TAB_BACKGROUND, rowL1Px)
-            addTextRow(SkThemeSlot.TAB_SELECTED, rowL1Px)
-            addColorRow(SkThemeSlot.TAB_UNSELECTED, rowL1Px)
-            addColorRow(SkThemeSlot.TAB_BUTTONS, rowL1Px)
-        }
-
-            // Bottom bar
-        section("bottom_bar", R.string.sk_ui_group_bottom_bar, R.drawable.paste_icon_control_normal_24dp, SkIconRole.WRITE) {
-            addColorRow(SkThemeSlot.BOTTOM_BAR_BACKGROUND, rowL1Px)
-            addTextRow(SkThemeSlot.BOTTOM_BAR_TEXT, rowL1Px)
-            addColorRow(SkThemeSlot.BOTTOM_BAR_ICONS, rowL1Px)
-        }
-
-            // Speed dial
-        section("speed_dial", R.string.sk_ui_group_speed_dial, R.drawable.add_icon_white_24dp, SkIconRole.WRITE) {
-            addColorRow(SkThemeSlot.FAB_BACKGROUND, rowL1Px)
-            addColorRow(SkThemeSlot.FAB_ICON, rowL1Px)
+            // Breadcrumbs
+        section("breadcrumbs", R.string.sk_ui_group_breadcrumbs, R.drawable.arrow_end_icon_white_24dp, frame) {
+            addTextRow(SkThemeSlot.BREADCRUMB_SELECTED, rowL1Px)
+            addColorRow(SkThemeSlot.BREADCRUMB_UNSELECTED, rowL1Px)
+            addColorRow(SkThemeSlot.BREADCRUMB_ARROWS, rowL1Px)
         }
 
             // Audio mini-player
-        section("audio_player", R.string.sk_ui_group_audio_player, R.drawable.sk_ic_play, SkIconRole.OPEN) {
+        section("audio_player", R.string.sk_ui_group_audio_player, R.drawable.sk_ic_play, base) {
             addColorRow(SkThemeSlot.AUDIO_PLAYER_BACKGROUND, rowL1Px)
             addTextRow(SkThemeSlot.AUDIO_PLAYER_TITLE, rowL1Px)
             addTextRow(SkThemeSlot.AUDIO_PLAYER_TIME, rowL1Px)
             addColorRow(SkThemeSlot.AUDIO_PLAYER_CONTROLS, rowL1Px)
         }
 
-        section("extract_progress", R.string.sk_ui_group_extract_progress, R.drawable.extract_icon_control_normal_24dp, SkIconRole.OPEN) {
+            // Navigation drawer
+        section("drawer", R.string.sk_ui_group_drawer, R.drawable.menu_icon_control_normal_24dp, frame) {
+            addColorRow(SkThemeSlot.DRAWER_BACKGROUND, rowL1Px)
+            addTextRow(SkThemeSlot.DRAWER_ITEM, rowL1Px)
+            addColorRow(SkThemeSlot.DRAWER_ICONS, rowL1Px)
+        }
+
+            // Speed dial
+        section("speed_dial", R.string.sk_ui_group_speed_dial, R.drawable.add_icon_white_24dp, controls) {
+            addColorRow(SkThemeSlot.FAB_BACKGROUND, rowL1Px)
+            addColorRow(SkThemeSlot.FAB_ICON, rowL1Px)
+        }
+
+            // Tab bar
+        section("tabs", R.string.sk_ui_group_tabs, R.drawable.sk_ic_tab, frame) {
+            addColorRow(SkThemeSlot.TAB_BACKGROUND, rowL1Px)
+            addTextRow(SkThemeSlot.TAB_SELECTED, rowL1Px)
+            addColorRow(SkThemeSlot.TAB_UNSELECTED, rowL1Px)
+            addColorRow(SkThemeSlot.TAB_BUTTONS, rowL1Px)
+        }
+
+        section("extract_progress", R.string.sk_ui_group_extract_progress, R.drawable.extract_icon_control_normal_24dp, reach) {
             addColorRow(SkThemeSlot.EXTRACT_PROGRESS_BAR, rowL1Px)
             addColorRow(SkThemeSlot.EXTRACT_PROGRESS_TRACK, rowL1Px)
             addTextRow(SkThemeSlot.EXTRACT_PROGRESS_NAME, rowL1Px)
@@ -386,8 +408,15 @@ class SkUiActivity : AppActivity() {
             addTextRow(SkThemeSlot.EXTRACT_PROGRESS_SPEED, rowL1Px)
         }
 
+            // Bottom bar
+        section("bottom_bar", R.string.sk_ui_group_bottom_bar, R.drawable.paste_icon_control_normal_24dp, frame) {
+            addColorRow(SkThemeSlot.BOTTOM_BAR_BACKGROUND, rowL1Px)
+            addTextRow(SkThemeSlot.BOTTOM_BAR_TEXT, rowL1Px)
+            addColorRow(SkThemeSlot.BOTTOM_BAR_ICONS, rowL1Px)
+        }
+
             // Share → Termux
-        section("share", R.string.sk_ui_group_share, R.drawable.sk_share_icon_control_normal_24dp, SkIconRole.SHARE) {
+        section("share", R.string.sk_ui_group_share, R.drawable.sk_share_icon_control_normal_24dp, reach) {
             addSwitchRow(R.string.sk_ui_share_one_target, SkTermux.oneTargetMode, rowL1Px) {
                 SkTermux.oneTargetMode = it
             }
@@ -397,15 +426,16 @@ class SkUiActivity : AppActivity() {
         }
 
             // APK files: what a tap on an APK / XAPK / APKS / APKM does (SkApkRoute).
-        section("apk", R.string.sk_ui_group_apk, R.drawable.sk_ic_shield, SkIconRole.BLOCK) {
+        section("apk", R.string.sk_ui_group_apk, R.drawable.sk_ic_shield, base) {
             addValueRow(
                 R.string.sk_ui_apk_route, getString(SkApkRoute.mode.labelRes), rowL1Px
             ) { valueView -> showApkRouteDialog(valueView) }
 
         }
+
         section(
             "maintenance", R.string.sk_ui_group_maintenance, R.drawable.reset_icon_white_24dp,
-            SkIconRole.BLOCK
+            SkThemeSlot.SECTION_WARNING
         ) {
             addActionRow(
                 getString(R.string.sk_ui_reset_section_order),
@@ -435,8 +465,10 @@ class SkUiActivity : AppActivity() {
 
         // The stored order: stored keys first, as far as they still exist, then any section
         // added since at its built place.
+        // App language comes first also in an order stored before the section existed: nothing
+        // dragged it anywhere yet. An order that names it is left as it was dragged.
         val stored = SkUi.uiSectionOrder.filter { key -> sections.any { it.key == key } }
-            .distinct()
+            .distinct().let { if (it.isNotEmpty() && "language" !in it) listOf("language") + it else it }
         val ordered = stored.mapNotNull { key -> sections.find { it.key == key } } +
             sections.filter { it.key !in stored }
         addSectionIndex(ordered)
@@ -465,7 +497,9 @@ class SkUiActivity : AppActivity() {
     // it; a long press drags the chip, and the sections follow its new place.
     private fun addSectionIndex(ordered: List<Section>) {
         val index = SkSectionIndex.build(
-            this, ordered.map { SkSectionIndex.Item(it.key, getString(it.labelRes)) },
+            this, ordered.map {
+                SkSectionIndex.Item(it.key, getString(it.labelRes), it.icon, skColor(it.tone))
+            },
             skColor(SkThemeSlot.PILL_FRAME), skColor(SkThemeSlot.PILL_TEXT),
             onJump = { key ->
                 if (key !in SkUi.uiSectionsOpen) {
@@ -633,7 +667,9 @@ class SkUiActivity : AppActivity() {
             }
         )
         val headingBox = makeUnderlinedHeading(section.labelRes, 20f, 2.5f)
-        (headingBox.getChildAt(0) as TextView).let { applyRowIcon(it, section.icon, section.role) }
+        (headingBox.getChildAt(0) as TextView).let {
+            applyRowIcon(it, section.icon, skColor(section.tone))
+        }
         val header = LinearLayout(this).apply {
             orientation = LinearLayout.HORIZONTAL
             gravity = Gravity.CENTER_VERTICAL
@@ -677,17 +713,22 @@ class SkUiActivity : AppActivity() {
 
     // The icon of a row, at the start of its label: coloured by what the row does and as tall
     // as the label's text line (1.25 × its text size), never under 18 dp.
-    private fun applyRowIcon(label: TextView, iconRes: Int, role: SkIconRole) {
+    private fun applyRowIcon(label: TextView, iconRes: Int, role: SkIconRole) =
+        applyRowIcon(label, iconRes, skColor(role))
+
+    private fun applyRowIcon(label: TextView, iconRes: Int, color: Int) {
         if (iconRes == 0) {
             return
         }
         val size = maxOf(dp(18), Math.round(label.textSize * 1.25f))
         val icon = androidx.appcompat.content.res.AppCompatResources.getDrawable(this, iconRes)
             ?.mutate() ?: return
-        icon.setTint(skColor(role))
-        icon.setBounds(0, 0, size, size)
+        icon.setTint(color)
+        // Centred on the label's first line, also when the label wraps.
+        val placed = SkFirstLineIcon(icon, label)
+        placed.setBounds(0, 0, size, size)
         label.compoundDrawablePadding = dp(8)
-        label.setCompoundDrawablesRelative(icon, null, null, null)
+        label.setCompoundDrawablesRelative(placed, null, null, null)
     }
 
     // The 2 dp dim-gold rule down the left edge of a row that carries an explanation, 10 dp

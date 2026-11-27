@@ -16,6 +16,7 @@ import me.zhanghai.android.files.R
 
 enum class SkThemeGroup(@StringRes val labelRes: Int) {
     FOUNDATION(R.string.sk_ui_group_foundation),
+    SECTION_ICONS(R.string.sk_ui_group_section_icons),
     TEXT(R.string.sk_ui_group_text),
     BUTTONS(R.string.sk_ui_group_buttons),
     DIALOGS(R.string.sk_ui_group_dialogs),
@@ -50,6 +51,15 @@ enum class SkThemeSlot(
     ACCENT("sk_accent", SkThemeGroup.FOUNDATION, R.string.sk_ui_accent, isFoundation = true),
     TEXT("sk_text", SkThemeGroup.FOUNDATION, R.string.sk_ui_text, isFoundation = true),
     TEXT_SECONDARY("sk_text_secondary", SkThemeGroup.FOUNDATION, R.string.sk_ui_text_secondary, isFoundation = true),
+
+    // The icons of the UI page's sections and chips: seven colours, each with one meaning.
+    SECTION_BASE("sk_section_base", SkThemeGroup.SECTION_ICONS, R.string.sk_ui_section_base),
+    SECTION_CONTROLS("sk_section_controls", SkThemeGroup.SECTION_ICONS, R.string.sk_ui_section_controls),
+    SECTION_WORDS("sk_section_words", SkThemeGroup.SECTION_ICONS, R.string.sk_ui_section_words),
+    SECTION_FRAME("sk_section_frame", SkThemeGroup.SECTION_ICONS, R.string.sk_ui_section_frame),
+    SECTION_REACH("sk_section_reach", SkThemeGroup.SECTION_ICONS, R.string.sk_ui_section_reach),
+    SECTION_WARNING("sk_section_warning", SkThemeGroup.SECTION_ICONS, R.string.sk_ui_section_warning),
+    SECTION_FLASH("sk_section_flash", SkThemeGroup.SECTION_ICONS, R.string.sk_ui_section_flash),
 
     // Text — every kind of text that has no surface of its own
     TEXT_TERTIARY("sk_text_tertiary", SkThemeGroup.TEXT, R.string.sk_ui_text_tertiary),
@@ -222,6 +232,15 @@ private fun skDefault(slot: SkThemeSlot): Int = when (slot) {
     SkThemeSlot.TEXT -> SkUi.PALETTE_YELLOW
     SkThemeSlot.TEXT_SECONDARY -> skColor(SkThemeSlot.TEXT).withAlphaFraction(0.7f)
 
+    // Section icons of the UI page
+    SkThemeSlot.SECTION_BASE -> skColor(SkThemeSlot.ACCENT)
+    SkThemeSlot.SECTION_CONTROLS -> SkUi.PALETTE_ICON_GREEN
+    SkThemeSlot.SECTION_WORDS -> SkUi.PALETTE_ICON_SKY
+    SkThemeSlot.SECTION_FRAME -> SkUi.PALETTE_ICON_BLUE
+    SkThemeSlot.SECTION_REACH -> SkUi.PALETTE_ICON_ORANGE
+    SkThemeSlot.SECTION_WARNING -> SkUi.PALETTE_RED
+    SkThemeSlot.SECTION_FLASH -> SkUi.PALETTE_ICON_ROSE
+
     // Text
     SkThemeSlot.TEXT_TERTIARY -> skColor(SkThemeSlot.TEXT).withAlphaFraction(0.5f)
     SkThemeSlot.TEXT_HINT -> skColor(SkThemeSlot.TEXT).withAlphaFraction(0.5f)
@@ -263,10 +282,10 @@ private fun skDefault(slot: SkThemeSlot): Int = when (slot) {
     SkThemeSlot.MENU_DIVIDER -> skBlend(0.7f)
     SkThemeSlot.MENU_ICON_OPEN -> SkUi.PALETTE_ICON_GREEN
     SkThemeSlot.MENU_ICON_WRITE -> SkUi.PALETTE_ICON_BLUE
-    SkThemeSlot.MENU_ICON_PERSON -> SkUi.PALETTE_ICON_CYAN
+    SkThemeSlot.MENU_ICON_PERSON -> SkUi.PALETTE_ICON_SKY
     SkThemeSlot.MENU_ICON_SHARE -> SkUi.PALETTE_ICON_ORANGE
     SkThemeSlot.MENU_ICON_VIEW -> skColor(SkThemeSlot.ACCENT)
-    SkThemeSlot.MENU_ICON_BLOCK -> SkUi.PALETTE_ICON_MAGENTA
+    SkThemeSlot.MENU_ICON_BLOCK -> SkUi.PALETTE_ICON_ROSE
 
     // Lists
     SkThemeSlot.LIST_DIVIDER -> skColor(SkThemeSlot.ACCENT).withAlphaFraction(0.2f)

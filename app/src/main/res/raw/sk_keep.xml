@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!-- 白い熊 fork: the flags of the App language picker are looked up by name (SkLanguage), so the
+     resource shrinker cannot see that they are used. -->
+<resources xmlns:tools="http://schemas.android.com/tools"
+    tools:keep="@drawable/sk_flag_*" />

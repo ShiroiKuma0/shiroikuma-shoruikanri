@@ -19,6 +19,7 @@ import android.graphics.ColorFilter
 import android.graphics.Paint
 import android.graphics.PixelFormat
 import android.graphics.drawable.Drawable
+import android.graphics.drawable.DrawableWrapper
 import android.graphics.drawable.GradientDrawable
 import android.view.DragEvent
 import android.view.Gravity
@@ -26,10 +27,12 @@ import android.view.HapticFeedbackConstants
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import androidx.appcompat.content.res.AppCompatResources
 import kotlin.math.hypot
 
 object SkSectionIndex {
-    class Item(val key: String, val label: String)
+    /** A chip: its section's key and label, and the section's icon in the section's colour. */
+    class Item(val key: String, val label: String, val icon: Int, val iconColor: Int)
 
     private const val GAP_DP = 6f
     private const val LIFTED_ALPHA = 0.3f
@@ -46,7 +49,7 @@ object SkSectionIndex {
         val flow = Flow(context, (GAP_DP * density).toInt())
         flow.setPadding(0, (2 * density).toInt(), 0, (6 * density).toInt())
         for (item in items) {
-            val chip = chip(context, item.label, frame, text, density)
+            val chip = chip(context, item, frame, text, density)
             chip.tag = item.key
             chip.setOnClickListener { onJump(it.tag as String) }
             chip.setOnLongClickListener {
@@ -111,12 +114,20 @@ object SkSectionIndex {
         return best
     }
 
-    private fun chip(context: Context, label: String, frame: Int, ink: Int, density: Float) =
+    private fun chip(context: Context, item: Item, frame: Int, ink: Int, density: Float) =
         TextView(context).apply {
-            text = label
+            text = item.label
             setTextColor(ink)
             textSize = 12f
             setSingleLine()
+            // The same icon and colour as the section's heading, as tall as the chip's label.
+            AppCompatResources.getDrawable(context, item.icon)?.mutate()?.let { icon ->
+                val size = Math.round(textSize * 1.25f)
+                icon.setTint(item.iconColor)
+                icon.setBounds(0, 0, size, size)
+                compoundDrawablePadding = size / 2
+                setCompoundDrawablesRelative(icon, null, null, null)
+            }
             gravity = Gravity.CENTER
             setPadding(
                 (12 * density).toInt(), (5 * density).toInt(), (12 * density).toInt(),
@@ -174,6 +185,27 @@ object SkSectionIndex {
                 rowHeight = maxOf(rowHeight, child.measuredHeight)
             }
         }
+    }
+}
+
+/**
+ * The icon of a label, centred on the label's first line rather than on the whole text view: a
+ * label that wraps is tall, and an icon centred on all of it drifts away from its first words.
+ */
+class SkFirstLineIcon(icon: Drawable, private val label: TextView) : DrawableWrapper(icon) {
+    override fun draw(canvas: Canvas) {
+        val layout = label.layout
+        if (layout == null || layout.lineCount < 2) {
+            super.draw(canvas)
+            return
+        }
+        // A start drawable is centred in the space between the paddings.
+        val space = label.height - label.compoundPaddingTop - label.compoundPaddingBottom
+        val shift = (layout.getLineBottom(0) - layout.getLineTop(0) - space) / 2f
+        canvas.save()
+        canvas.translate(0f, shift)
+        super.draw(canvas)
+        canvas.restore()
     }
 }
 

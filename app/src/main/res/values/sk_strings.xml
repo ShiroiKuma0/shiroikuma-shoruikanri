@@ -187,12 +187,9 @@
     <string name="sk_separator_style_title">Separator (this directory, this view)</string>
 
     <!-- Open with -->
-    <string name="sk_open_with_title_format">Open with (%s)</string>
-    <string name="sk_open_with_set_default">Always use for %s</string>
     <string name="sk_open_with_open_as">Open as…</string>
     <string name="sk_open_with_clear_default">Forget default</string>
     <string name="sk_open_with_no_apps">No apps can open this type</string>
-    <string name="sk_open_with_default_suffix">" (default)"</string>
 
     <!-- Share dialog -->
     <string name="sk_share_autoshare_command">AutoShare command…</string>
@@ -340,4 +337,22 @@
     <!-- 白い熊 fork: a pending pack, shown in the top bar like a pending paste. -->
     <string name="sk_file_list_paste_archive_title_format">Packing %1$,d</string>
     <string name="sk_file_list_paste_action_archive_here">Pack here</string>
+
+    <!-- 白い熊 fork: added in 1.7.5+015 (App language, section icons, open-with dialog, owed Japanese). -->
+    <string name="sk_ui_group_language">App language</string>
+    <string name="sk_ui_language_row">Language: %s</string>
+    <string name="sk_ui_language_system">System default</string>
+    <string name="sk_ui_group_section_icons">Section icons of this page</string>
+    <string name="sk_ui_section_base">The base: what the app is, and its settings</string>
+    <string name="sk_ui_section_controls">Controls: what you operate</string>
+    <string name="sk_ui_section_words">Words, written and read</string>
+    <string name="sk_ui_section_frame">The frame and its boxes</string>
+    <string name="sk_ui_section_reach">The app reaches out: asks, offers, hands over</string>
+    <string name="sk_ui_section_warning">Warning: resets and wipes</string>
+    <string name="sk_ui_section_flash">A brief flash</string>
+    <string name="sk_open_with_title">Open with</string>
+    <string name="sk_open_with_type_qualifier">file type</string>
+    <string name="sk_open_with_always">Always use for this type</string>
+    <string name="sk_open_with_always_desc">Switch this on, then choose an app: it is remembered as the default.</string>
+    <string name="sk_open_with_default_badge">Default</string>
 </resources>

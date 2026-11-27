@@ -76,6 +76,7 @@
         android:fullBackupContent="true"
         android:icon="@mipmap/launcher_icon"
         android:label="@string/sk_launcher_name"
+        android:localeConfig="@xml/sk_locales_config"
         android:networkSecurityConfig="@xml/netework_security_config"
         android:requestLegacyExternalStorage="true"
         android:requestRawExternalStorageAccess="true"

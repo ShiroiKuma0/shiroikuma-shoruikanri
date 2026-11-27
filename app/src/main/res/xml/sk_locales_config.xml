@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!--
+  ~ 白い熊 fork: the languages the app offers — the short list of the black-yellow theme's "App
+  ~ language". Japanese and English first; then every language upstream translates to four
+  ~ fifths or more of its strings, one row per language (Portuguese is Portugal's; Chinese has
+  ~ two rows because the script differs). Basque (52 %) is not listed; its strings stay in the
+  ~ package. Measure again after an upstream rebase. A country joining the list needs its flag:
+  ~ tools/sk_flags.py.
+  -->
+<locale-config xmlns:android="http://schemas.android.com/apk/res/android">
+    <locale android:name="ja" />
+    <locale android:name="en-US" />
+    <locale android:name="ar" />
+    <locale android:name="bg" />
+    <locale android:name="ca" />
+    <locale android:name="cs" />
+    <locale android:name="da" />
+    <locale android:name="de" />
+    <locale android:name="el" />
+    <locale android:name="es" />
+    <locale android:name="fa" />
+    <locale android:name="fi" />
+    <locale android:name="fr" />
+    <locale android:name="gl" />
+    <locale android:name="he" />
+    <locale android:name="hu" />
+    <locale android:name="id" />
+    <locale android:name="is" />
+    <locale android:name="it" />
+    <locale android:name="ko" />
+    <locale android:name="lt" />
+    <locale android:name="nb" />
+    <locale android:name="nl" />
+    <locale android:name="pl" />
+    <locale android:name="pt-PT" />
+    <locale android:name="ro" />
+    <locale android:name="ru" />
+    <locale android:name="tr" />
+    <locale android:name="uk" />
+    <locale android:name="vi" />
+    <locale android:name="zh-CN" />
+    <locale android:name="zh-TW" />
+</locale-config>

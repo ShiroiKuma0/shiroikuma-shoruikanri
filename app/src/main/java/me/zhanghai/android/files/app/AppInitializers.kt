@@ -41,6 +41,7 @@ val appInitializers = listOf(
     ::initializeLiveDataObjects,
     ::initializeCustomTheme,
     ::initializeSkUi,
+    ::initializeSkLanguage,
     ::initializeSkShareShortcuts,
     ::initializeNightMode,
     ::createNotificationChannels
@@ -88,6 +89,12 @@ private fun initializeCustomTheme() {
 private fun initializeSkUi() {
     SkUi.migrateToPureYellow()
     me.zhanghai.android.files.skui.SkPalette.apply(application)
+}
+
+// 白い熊 fork: put the stored app language back in force where the system dropped it, before
+// anything reads a string off the application (the notification channels below).
+private fun initializeSkLanguage() {
+    me.zhanghai.android.files.skui.SkLanguage.reassert()
 }
 
 // 白い熊 fork: publish the per-script Termux Direct-Share targets (off the main

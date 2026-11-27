@@ -50,7 +50,8 @@ android {
         viewBinding true
     }
     androidResources {
-        generateLocaleConfig true
+        // 白い熊 fork: the declaration is the hand-written short list, res/xml/sk_locales_config.xml.
+        generateLocaleConfig false
     }
     compileOptions {
         coreLibraryDesugaringEnabled true
